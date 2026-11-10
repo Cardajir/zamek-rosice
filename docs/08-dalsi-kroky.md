@@ -27,7 +27,7 @@ Stav k 10. 11. 2026. Hotové kroky jsou odškrtnuté.
 - [x] **Kontakt:** kontakty, osoby a formulář. Endpoint `/api/contact` kontroluje vstup, má past na roboty a volitelně Turnstile.
 - [x] **Zámek v médiích, Partneři zámku, Povinné a statutární informace, Mapa stránek.**
 - [x] **CI:** kontrola typů, testy a build na pull requestech a na `main`.
-- [x] **Zkušební nasazení** na Cloudflare: https://zamek-rosice.balonhotel-site.workers.dev (`npm run deploy`). Mimo ostrou doménu posílá web `X-Robots-Tag: noindex`, takže se kopie nedostane do vyhledávačů.
+- [x] **Zkušební nasazení** na Cloudflare: https://zamek-rosice.steezy-dev.workers.dev (`npm run deploy`). Mimo ostrou doménu posílá web `X-Robots-Tag: noindex`, takže se kopie nedostane do vyhledávačů.
 
 ## Co ve skořápce a na úvodu chybí
 
