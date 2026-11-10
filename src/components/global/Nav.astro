@@ -1,8 +1,10 @@
 ---
 import Icon from "@/components/media/Icon.astro";
 import arrow from "@/assets/icons/arrow-full.svg";
+import arrowDown from "@/assets/icons/arrow-down.svg";
 import facebook from "@/assets/icons/facebook.svg";
 import instagram from "@/assets/icons/instagram.svg";
+import Logo from "@/assets/logo/zamek-rosice.svg";
 import { DEFAULT_LANG, LANG_NAMES, SITE_NAME, type Lang } from "@/consts.ts";
 import { routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
@@ -47,8 +49,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
   <header class:list={["nav_wrap", overlap && "overlap"]}>
     <div class="nav_inner">
       <a class="nav_logo" href={routePath("home", lang)} aria-label={SITE_NAME}>
-        <span>zámek</span>
-        <span>Rosice</span>
+        <Logo class="nav_logo_mark" />
       </a>
       <button
         class="nav_toggle"
@@ -73,7 +74,11 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                   aria-controls={`nav-panel-${index}`}
                 >
                   <span>{group.label}</span>
-                  <Icon class="nav_group_arrow" src={arrow} variant="small" />
+                  <Icon
+                    class="nav_group_arrow"
+                    src={arrowDown}
+                    variant="small"
+                  />
                 </button>
                 <div class="nav_panel" id={`nav-panel-${index}`}>
                   <ul class="nav_panel_list">
@@ -115,22 +120,37 @@ const socials = shell.socials.flatMap(({ network, url }) =>
               ))}
             </ul>
             {languages.length > 1 && (
-              <ul class="nav_langs" aria-label={t.languageSwitcher}>
-                {languages.map((item) => (
-                  <li>
-                    <a
-                      class="nav_lang"
-                      href={item.path}
-                      hreflang={item.lang}
-                      lang={item.lang}
-                      aria-label={LANG_NAMES[item.lang]}
-                      aria-current={item.lang === lang ? "true" : undefined}
-                    >
-                      {item.lang.toUpperCase()}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <div class="nav_lang">
+                <button
+                  class="nav_lang_button"
+                  type="button"
+                  aria-label={`${t.languageSwitcher}: ${LANG_NAMES[lang]}`}
+                  aria-expanded="false"
+                  aria-controls="nav-lang"
+                >
+                  <span aria-hidden="true">{lang.toUpperCase()}</span>
+                  <Icon
+                    class="nav_group_arrow"
+                    src={arrowDown}
+                    variant="small"
+                  />
+                </button>
+                <ul class="nav_lang_panel" id="nav-lang">
+                  {languages.map((item) => (
+                    <li>
+                      <a
+                        class="nav_lang_link"
+                        href={item.path}
+                        hreflang={item.lang}
+                        lang={item.lang}
+                        aria-current={item.lang === lang ? "true" : undefined}
+                      >
+                        {LANG_NAMES[item.lang]}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
             {socials.length > 0 && (
               <ul class="nav_socials">
@@ -174,6 +194,10 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       grid-template-rows: 1fr;
       visibility: visible;
     }
+    .nav_lang_panel {
+      position: static;
+      display: flex;
+    }
   </style>
 </noscript>
 
@@ -183,13 +207,15 @@ const socials = shell.socials.flatMap(({ network, url }) =>
 
   if (nav && toggle) {
     const groups = [
-      ...nav.querySelectorAll<HTMLButtonElement>(".nav_group_button"),
+      ...nav.querySelectorAll<HTMLButtonElement>(
+        ".nav_group_button, .nav_lang_button",
+      ),
     ];
-    const desktop = window.matchMedia("(width >= 80rem)");
+    const desktop = window.matchMedia("(width >= 85rem)");
 
     const setGroup = (button: HTMLButtonElement, open: boolean) => {
       button.setAttribute("aria-expanded", String(open));
-      button.closest(".nav_group")?.classList.toggle("open", open);
+      button.closest(".nav_group, .nav_lang")?.classList.toggle("open", open);
     };
 
     const closeGroups = (except?: HTMLButtonElement) => {
@@ -248,7 +274,9 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     nav.addEventListener("focusout", (event) => {
       const next = event.relatedTarget;
       if (!desktop.matches || !(next instanceof Node)) return;
-      const group = (event.target as HTMLElement).closest(".nav_group");
+      const group = (event.target as HTMLElement).closest(
+        ".nav_group, .nav_lang",
+      );
       if (group && !group.contains(next)) closeGroups();
     });
 
@@ -281,7 +309,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      gap: 0 var(--space-6);
+      gap: 0 clamp(1rem, 2vw, 2.5rem);
       min-height: var(--nav-height);
       border-bottom: var(--border-width) solid var(--text);
     }
@@ -289,17 +317,12 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     .nav_logo {
       grid-column: 2;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: var(--secondary-family);
-      font-weight: var(--secondary-medium);
-      font-size: var(--h4);
-      line-height: 0.8;
-      letter-spacing: var(--letter-spacing-tight);
-      text-decoration: none;
       transition: opacity var(--hover-duration) var(--hover-ease);
-      & > span:first-child {
-        padding-left: 1em;
+      & > .nav_logo_mark {
+        flex: none;
+        width: clamp(6.5rem, 8.49vw, 10.1875rem);
+        max-width: none;
+        height: auto;
       }
       @media (hover: hover) {
         &:hover {
@@ -411,10 +434,10 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     }
 
     .nav_group_arrow {
-      rotate: 90deg;
+      --_size: 1.0556em;
       transition: rotate var(--open-duration) var(--open-ease);
-      .nav_group.open & {
-        rotate: -90deg;
+      :is(.nav_group, .nav_lang).open & {
+        rotate: 180deg;
       }
     }
 
@@ -468,7 +491,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       flex-direction: column;
     }
 
-    .nav_langs,
     .nav_socials {
       display: flex;
       align-items: center;
@@ -477,12 +499,46 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     }
 
     .nav_lang {
-      font-size: var(--text-small);
-      font-weight: var(--primary-medium);
-      color: var(--muted-text);
+      position: relative;
+      padding-block: var(--space-5);
+      border-bottom: var(--border-width) solid var(--text);
+    }
+
+    .nav_lang_button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.66em;
+      min-height: 2.75rem;
+      color: inherit;
+      font-size: var(--text-main);
+      font-weight: var(--primary-semibold);
+      letter-spacing: var(--letter-spacing-snug);
+    }
+
+    .nav_lang_panel {
+      display: none;
+      flex-direction: column;
+      gap: var(--space-1);
+      padding-top: var(--space-2);
+      .nav_lang.open & {
+        display: flex;
+      }
+    }
+
+    .nav_lang_link {
+      display: block;
+      padding-block: var(--space-1);
+      font-size: var(--text-main);
       text-decoration: none;
+      text-underline-offset: 0.3em;
+      text-decoration-thickness: var(--border-width);
       &[aria-current="true"] {
-        color: var(--text);
+        text-decoration: underline;
+      }
+      @media (hover: hover) {
+        &:hover {
+          color: var(--link-text);
+        }
       }
     }
 
@@ -499,7 +555,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
     }
 
-    @media (width >= 80rem) {
+    @media (width >= 85rem) {
       .nav_toggle {
         display: none;
       }
@@ -520,11 +576,12 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         grid-row: 1;
         display: flex;
         align-items: center;
-        gap: var(--space-6);
+        gap: clamp(1rem, 2vw, 2.375rem);
       }
 
       .nav_group,
-      .nav_top > li {
+      .nav_top > li,
+      .nav_lang {
         border-bottom: 0;
       }
 
@@ -532,17 +589,22 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       .nav_top_link {
         width: auto;
         padding-block: var(--space-2);
-        gap: var(--space-2);
+        gap: 0.66em;
         font-family: var(--primary-family);
-        font-weight: var(--primary-medium);
-        font-size: var(--text-small);
-        letter-spacing: var(--letter-spacing-normal);
+        font-weight: var(--primary-semibold);
+        font-size: var(--text-main);
+        letter-spacing: var(--letter-spacing-snug);
         white-space: nowrap;
         transition: color var(--hover-duration) var(--hover-ease);
       }
 
-      .nav_groups:has(.nav_group.open) .nav_group:not(.open) .nav_group_button {
-        color: var(--muted-text);
+      .nav_inner:has(.nav_group.open) {
+        & .nav_group:not(.open) .nav_group_button,
+        & .nav_top_link,
+        & .nav_lang_button,
+        & .nav_social {
+          color: var(--muted-text);
+        }
       }
 
       .nav_group.open .nav_group_button {
@@ -608,7 +670,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
 
       .nav_panel_arrow {
         display: block;
-        --_size: 0.6em;
+        --_size: 0.9em;
       }
 
       .nav_aside {
@@ -617,19 +679,32 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         flex-direction: row;
         align-items: center;
         justify-content: end;
-        gap: var(--space-6);
+        gap: clamp(1rem, 6.2vw - 3.5rem, 3.625rem);
       }
 
       .nav_top {
         display: flex;
         align-items: center;
-        gap: var(--space-6);
+        gap: clamp(1rem, 6.2vw - 3.5rem, 3.625rem);
       }
 
-      .nav_langs,
       .nav_socials {
         padding-block: 0;
         gap: var(--space-3);
+      }
+
+      .nav_lang {
+        padding-block: 0;
+      }
+
+      .nav_lang_panel {
+        position: absolute;
+        top: calc(100% + var(--space-2));
+        inset-inline-end: calc(var(--space-4) * -1);
+        min-width: 10rem;
+        padding: var(--space-3) var(--space-4);
+        background-color: var(--background);
+        border: var(--border-width) solid var(--text);
       }
     }
   }

@@ -71,20 +71,20 @@ const {
       )}
     </div>
     <div class="card-event_content">
-      <p class="card-event_eyebrow text-style-small">{eyebrow}</p>
-      <Tag class="card-event_title text-style-h4">
+      <p class="card-event_eyebrow text-style-main">{eyebrow}</p>
+      <Tag class="card-event_title text-style-h3">
         <a class="card-event_title_link" href={href}>
           {heading}
         </a>
       </Tag>
-      {lead && <p class="card-event_lead text-style-small">{lead}</p>}
-      {text && <p class="card-event_text text-style-small">{text}</p>}
+      {lead && <p class="card-event_lead text-style-main">{lead}</p>}
+      {text && <p class="card-event_text text-style-main">{text}</p>}
     </div>
     <div class="card-event_aside">
       {date && (
         <time class="card-event_date" datetime={datetime}>
           <span class="card-event_year text-style-small">{year}</span>
-          <span class="text-style-h4">{date}</span>
+          <span class="text-style-h3">{date}</span>
         </time>
       )}
       <Button
@@ -112,7 +112,7 @@ const {
 
       @media (width >= 48rem) {
         grid-template-columns: 11rem 1fr auto;
-        gap: var(--space-6) var(--space-7);
+        gap: var(--space-6) var(--space-8);
         padding-inline: var(--space-6);
       }
     }
@@ -140,10 +140,12 @@ const {
     .card-event_eyebrow {
       margin: 0 0 var(--space-3);
       color: var(--muted-text);
+      font-weight: var(--primary-medium);
+      line-height: 1.2;
     }
 
     .card-event_title {
-      margin: 0 0 var(--space-5);
+      margin: 0 0 var(--space-6);
       text-wrap: balance;
     }
 
@@ -190,11 +192,14 @@ const {
     .card-event_date {
       display: flex;
       flex-direction: column;
+      gap: var(--space-3);
       white-space: nowrap;
     }
 
     .card-event_year {
       color: var(--muted-text);
+      font-weight: var(--primary-semibold);
+      letter-spacing: var(--letter-spacing-snug);
     }
 
     @media (hover: hover) {

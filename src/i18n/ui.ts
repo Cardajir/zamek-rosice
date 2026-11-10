@@ -19,7 +19,7 @@ const cs = {
   upcomingEvents: "Nadcházející události",
   pastEvents: "Archív již proběhlých akcí",
   allEvents: "všechny akce",
-  readMore: "číst více",
+  readMore: "čtěte více",
   tourLength: "Doba prohlídky",
   freeEntry: "volný vstup",
   news: "Aktuality",

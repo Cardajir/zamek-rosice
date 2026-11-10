@@ -202,7 +202,7 @@ const named = {
         --button-text-hover: var(--link-text-hover);
         --button-border-hover: var(--link-border);
 
-        gap: 0.6em;
+        gap: 0.54em;
         font-family: var(--secondary-family);
         font-size: var(--text-button);
         font-style: italic;
@@ -230,6 +230,9 @@ const named = {
             background-size: 100% var(--border-width);
           }
         }
+      }
+      &.link .button_mark {
+        --_size: 0.8333em;
       }
       &:is(.play, .close, .arrow) {
         gap: 0;

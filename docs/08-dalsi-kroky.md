@@ -26,18 +26,21 @@ Stav k 10. 11. 2026. Hotové kroky jsou odškrtnuté.
 - [x] **Fotogalerie:** úvod s výběrem z každého alba, každé album na vlastní adrese, prohlížeč fotografií (šipky, Esc, tažení prstem, návrat fokusu).
 - [x] **Kontakt:** kontakty, osoby a formulář. Endpoint `/api/contact` kontroluje vstup, má past na roboty a volitelně Turnstile.
 - [x] **Zámek v médiích, Partneři zámku, Povinné a statutární informace, Mapa stránek.**
+- [x] **Poznámky designera k přístupnosti** (sekce „Na co si dát pozor“ ve Figmě) prověřené na 34 stránkách: jeden `h1` na stránku a úrovně nadpisů bez přeskoků (texty z editoru se srovnávají při vykreslení, `src/utils/headings.ts`), žádný odkaz ani tlačítko bez názvu, žádný obrázek bez `alt`, kontrast textu nejméně 4,5 : 1, menu i prohlížeč fotek jdou ovládat klávesnicí s viditelným fokusem.
+- [x] **Podklady z Figmy:** logo, šipky odkazů a menu, ikony sítí a sedm ilustrací jsou vyexportované z návrhu (`src/assets/`). Ilustrace jsou na místech, kde je návrh má: úvod (nad nadpisem a nad citací), aktuality, fotogalerie, kontakty, kde nás najdete, vstupné, textové stránky.
+- [x] **Navbar podle návrhu:** písmo a rozestupy z Figmy, jazyk v rozbalovací nabídce. Plná lišta je od šířky 1360 px, pod ní menu pod tlačítkem.
+- [x] **Úvod podle návrhu:** alternativní litery Romie v hlavním nadpisu, řádky událostí a karty prohlídek ve velikostech a rozestupech z Figmy.
 - [x] **CI:** kontrola typů, testy a build na pull requestech a na `main`.
 - [x] **Zkušební nasazení** na Cloudflare: https://zamek-rosice.steezy-dev.workers.dev (`npm run deploy`). Mimo ostrou doménu posílá web `X-Robots-Tag: noindex`, takže se kopie nedostane do vyhledávačů.
 
 ## Co ve skořápce a na úvodu chybí
 
-Figma při stavbě neodpovídala na dotaz na detail návrhu (`get_design_context`), fungovaly jen rozměry, texty a snímky. Proto:
+Detail návrhu už z Figmy číst jde. Zbývá:
 
-- **Logo** je zatím sázené textem. Chybí SVG z Figmy (uzel `4077:1455`).
-- **Ornamenty** (ILUSTRACE_01, sedm variant) nejsou.
-- **Ikony Facebooku a Instagramu** jsou zástupné, ne exportované z návrhu.
+- **Promo bloky, hodnocení, citace a patička** na úvodu jsou postavené podle snímků; hodnotu po hodnotě proti Figmě ještě porovnané nejsou.
+- **Světlá ilustrace za hodnocením** je v návrhu jen na mobilu; na webu není.
+- **Ilustrace na textových stránkách:** návrh ji má u Návštěvního řádu, web ji dává na všechny textové stránky.
 - **Fotky pro úvod** (hero, promo bloky, výzva v patičce) v Sanity nejsou; starý web je neměl. Prohlídky, alba a aktuality fotky mají.
-- **Rozestupy** jsou z tokenů Lumos podle snímků, ne změřené hodnotu po hodnotě.
 - **Fotka v záhlaví podstránek** (Vstupné, Kde nás najdete, Fotogalerie, Kontakty) není: v Sanity pro ni zatím není pole ani fotka. Stránky začínají lištou a nadpisem.
 - **Šířka obsahu** tabulek je šířka webu, návrh má užší sloupec (1312 z 1920 px).
 - **Pozadí prohlížeče fotografií** je tmavě fialová z palety; návrh má neutrální tmavě šedou, která v proměnných není.
@@ -48,13 +51,16 @@ Figma při stavbě neodpovídala na dotaz na detail návrhu (`get_design_context
 
 1. **Fotky:** nahrát do Studia pro úvod a promo bloky, pro stránku Kde nás najdete a do alb Zámecký exteriér a Edukační centrum (prázdná alba se na webu neukazují). Doplnit alt u 40 fotek ze starého webu a rozdělit fotky mezi Žerotínský a Hausperský okruh.
 2. **Instagram:** odkaz do Nastavení webu (Facebook je převzatý ze starého webu).
-3. **Písmo Romie:** licence a soubory woff2 (otázka 14). Do té doby záložní patkové písmo.
+3. **Písmo Romie:** soubory jsou dodané a leží jen lokálně v `src/assets/fonts/` (git je ignoruje, repozitář je veřejný). Build na CI proto běží se záložním patkovým písmem; nasazení z počítače se soubory je má. Zbývá potvrdit webovou licenci pro `zamek-rosice.cz` (otázka 14).
 4. **Viditelnost repozitáře:** je veřejný; doporučení přepnout na soukromý.
 5. **Cloudflare:** Worker běží na zkušební adrese; zbývá doména, Turnstile a adresa Workeru v CORS projektu Sanity (jinak se Studio na nasazeném webu nepřihlásí). Secrets `SANITY_API_READ_TOKEN` a `PREVIEW_SECRET` nastavit i ve Workeru.
 6. **Odesílání formuláře:** dokud nejsou nastavené `RESEND_API_KEY` a `CONTACT_FROM`, formulář odpoví, že zprávu nejde odeslat. Potřeba je účet u e-mailové služby s ověřenou doménou a cílová adresa v Nastavení webu.
-7. **Obsah do Studia:** zřizovatel (Statutární údaje), poznámka k zahradě u období provozní doby, loga partnerů, data u zmínek v médiích.
-8. **Designer:** logo a ornamenty jako SVG, chybějící stránky a stavy, schválení barvy štítků `#777080`.
-9. **Zámek:** kdo dodá překlady, cílový e-mail formuláře. Ceny 190 / 140 Kč potvrzuje starý web.
+7. **Prohlášení o přístupnosti:** ve Studiu je nepublikovaný koncept podle zákona č. 99/2019 Sb. a vzoru EU (stav souladu, nepřístupný obsah, zpětná vazba, DIA). Hranaté závorky označují, co musí zámek doplnit: data, odpovědnou osobu, potvrzení stavu souladu. Zveřejněná stránka má pořád starý text s odkazem na zrušenou vyhlášku č. 64/2008 Sb.
+8. **PDF bez textové vrstvy:** „Rozpočet 2025“ je naskenovaný obrázek; ostatní zveřejněná PDF textovou vrstvu mají.
+9. **Zpráva o nápravě pro DIA** do datové schránky ve lhůtě z protokolu.
+10. **Obsah do Studia:** zřizovatel (Statutární údaje), poznámka k zahradě u období provozní doby, loga partnerů, data u zmínek v médiích.
+11. **Designer:** chybějící stránky a stavy, schválení barvy štítků `#777080`.
+12. **Zámek:** kdo dodá překlady, cílový e-mail formuláře. Ceny 190 / 140 Kč potvrzuje starý web.
 
 ## Další implementace
 

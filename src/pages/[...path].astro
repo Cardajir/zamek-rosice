@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
@@ -59,12 +60,18 @@ const alternates =
   </Section>
 
   <!-- Sections -->
-  {sections.map((section) => (
+  {sections.map((section, index) => (
     <Section
       render={section._type === "sectionRichText"}
       paddingTop="small"
       align="center"
     >
+      <Ornament
+        render={index === 0}
+        slot="background"
+        variant={1}
+        size="large"
+      />
       <PortableText value={section.body} />
     </Section>
   ))}

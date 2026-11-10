@@ -49,6 +49,7 @@ const romie = hasRomie
         name: "Romie",
         cssVariable: "--font-romie",
         provider: fontProviders.local(),
+        fallbacks: ["serif"],
         options: {
           variants: [
             { weight: 500, style: "normal", src: [ROMIE] },

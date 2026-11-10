@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
@@ -144,6 +145,11 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
         </Form>
       </Fragment>
     </ContentWrapper>
+  </Section>
+
+  <!-- Ornament -->
+  <Section paddingTop="none">
+    <Ornament variant={3} size="large" align="start" />
   </Section>
 
   {turnstileKey && (

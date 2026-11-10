@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
 import EventsMain from "@/components/content/EventsMain.astro";
@@ -44,6 +45,7 @@ const empty = featured.length + upcoming.length + archive.length === 0;
     paddingTop="small"
     paddingBottom="small"
   >
+    <Ornament slot="background" variant={3} size="large" />
     <EventsMain posts={featured} headingTag="h2" />
   </Section>
 

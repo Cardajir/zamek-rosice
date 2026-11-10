@@ -44,8 +44,10 @@ const {
 
 {render && heading && (
   <article class="card-tour_wrap">
-    <p class="card-tour_eyebrow text-style-small">{eyebrow}</p>
-    <Tag class="card-tour_title text-style-h4">{heading}</Tag>
+    <div class="card-tour_head">
+      <p class="card-tour_eyebrow text-style-main">{eyebrow}</p>
+      <Tag class="card-tour_title text-style-h4">{heading}</Tag>
+    </div>
     <div class="card-tour_visual">
       {image && (
         <SanityImg
@@ -83,15 +85,26 @@ const {
       height: 100%;
     }
 
+    /* Room for a label and a two-line title, so photographs in a row line up. */
+    .card-tour_head {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: calc(
+        var(--text-main) * 1.2 + var(--space-3) + var(--h4) * 2.1
+      );
+      margin-bottom: var(--space-5);
+    }
+
     .card-tour_eyebrow {
-      min-height: 1lh;
-      margin: 0 0 var(--space-2);
+      margin: 0 0 var(--space-3);
       color: var(--muted-text);
+      font-weight: var(--primary-medium);
+      line-height: 1.2;
     }
 
     .card-tour_title {
-      margin: 0 0 var(--space-5);
-      min-height: 2lh;
+      margin: 0;
       text-wrap: balance;
     }
 

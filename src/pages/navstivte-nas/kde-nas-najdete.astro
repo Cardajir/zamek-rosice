@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
@@ -61,6 +62,7 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
 
   <!-- Address and map -->
   <Section paddingTop="small" paddingBottom="small">
+    <Ornament slot="background" variant={7} size="large" />
     <ContentWrapper>
       <Paragraph variant="large">{address}</Paragraph>
       <Paragraph maxWidth={80}>{directions.intro}</Paragraph>

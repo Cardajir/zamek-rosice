@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
@@ -50,6 +51,7 @@ const selection = albums.flatMap((album) => album.images);
     gap="4"
     align="center"
   >
+    <Ornament variant={6} />
     <Eyebrow>{t.galleryIntro}</Eyebrow>
     <GalleryNavMain
       label={t.galleryAlbums}

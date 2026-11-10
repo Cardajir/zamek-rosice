@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
@@ -97,6 +98,7 @@ const hours = hoursTable(admission.periods, admission.subjects, {
     paddingBottom="small"
     gap="7"
   >
+    <Ornament slot="background" variant={2} size="large" />
     <Heading tag="h2" variant="h3">
       {t.admissionHeading}
     </Heading>
@@ -119,6 +121,7 @@ const hours = hoursTable(admission.periods, admission.subjects, {
 
   <!-- Opening hours -->
   <Section render={hours.length > 0} paddingTop="small" gap="7">
+    <Ornament slot="background" variant={4} size="large" />
     <Heading tag="h2" variant="h3">
       {t.openingHeading}
     </Heading>

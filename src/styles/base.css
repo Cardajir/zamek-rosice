@@ -255,7 +255,7 @@
   --background-3: var(--light-300);
   --background-skeleton: color-mix(in lab, currentcolor 10%, transparent);
   --text: var(--dark-900);
-  --text-2: color-mix(in lab, currentcolor 60%, transparent);
+  --text-2: color-mix(in lab, currentcolor 68%, transparent);
   --border: color-mix(in lab, var(--text) 20%, transparent);
   --heading-accent: color-mix(in srgb, var(--brand-500), black 20%);
 
@@ -550,6 +550,8 @@ h1,
   letter-spacing: var(--h1-letter-spacing);
   text-transform: var(--h1-text-transform);
   text-wrap: var(--h1-text-wrap);
+  /* The alternates the design sets on its main headings (Romie). */
+  font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
   --_margin-top: var(--h1-margin-top);
   --_margin-bottom: var(--h1-margin-bottom);
 }

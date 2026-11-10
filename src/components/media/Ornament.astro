@@ -1,0 +1,119 @@
+---
+import one from "@/assets/ornaments/ornament-1.svg";
+import two from "@/assets/ornaments/ornament-2.svg";
+import three from "@/assets/ornaments/ornament-3.svg";
+import four from "@/assets/ornaments/ornament-4.svg";
+import five from "@/assets/ornaments/ornament-5.svg";
+import six from "@/assets/ornaments/ornament-6.svg";
+import seven from "@/assets/ornaments/ornament-7.svg";
+
+type Base = {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /**
+   * Which engraving: 1 rose in leaves, 2 leaf garland, 3 horns of plenty,
+   * 4 hound, 5 rose, 6 triton, 7 putto.
+   */
+  variant: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  /** Class names for utilities. */
+  class?: string;
+};
+
+type Props = Base &
+  (
+    | {
+        /** Ornament style: a small mark in the text, or a pale backdrop. */
+        size?: "small";
+        align?: never;
+      }
+    | {
+        size: "large";
+        /** Side of the section the backdrop sits on. */
+        align?: "start" | "end";
+      }
+  );
+
+type AllProps = Base & { size?: "small" | "large"; align?: "start" | "end" };
+
+const {
+  render = true,
+  variant,
+  size = "small",
+  align = "end",
+  class: className,
+} = Astro.props as AllProps;
+
+/* The size each engraving has in the design, in pixels. */
+const ORNAMENTS = {
+  1: { image: one, width: 124, height: 72 },
+  2: { image: two, width: 169, height: 56 },
+  3: { image: three, width: 147, height: 92 },
+  4: { image: four, width: 135, height: 70 },
+  5: { image: five, width: 85, height: 86 },
+  6: { image: six, width: 122, height: 70 },
+  7: { image: seven, width: 136, height: 130 },
+} as const;
+
+const ornament = ORNAMENTS[variant];
+---
+
+{render && ornament && (
+  <div
+    class:list={[
+      "ornament_wrap",
+      size,
+      size === "large" && `align-${align}`,
+      className,
+    ]}
+    style={`--_width: ${ornament.width}`}
+    aria-hidden="true"
+  >
+    <img
+      class="ornament_image"
+      src={ornament.image.src}
+      width={ornament.width}
+      height={ornament.height}
+      alt=""
+      loading={size === "large" ? "lazy" : undefined}
+      decoding="async"
+    />
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    .ornament_wrap {
+      display: flex;
+      justify-content: var(--_alignment, center);
+      width: 100%;
+
+      & > .ornament_image {
+        flex: none;
+        width: calc(var(--_width) * 0.76 / 16 * 1rem);
+        max-width: 100%;
+        height: auto;
+        user-select: none;
+        @media (width >= 48rem) {
+          width: calc(var(--_width) / 16 * 1rem);
+        }
+      }
+
+      /* A pale backdrop: 4.2 times the mark, as it is drawn at 1920. */
+      &.large {
+        justify-content: flex-end;
+        align-items: flex-start;
+        padding-inline: var(--site-margin);
+        overflow: clip;
+
+        &.align-start {
+          justify-content: flex-start;
+        }
+
+        & > .ornament_image {
+          width: clamp(14rem, calc(var(--_width) * 0.21875vw), 60rem);
+          opacity: 0.08;
+        }
+      }
+    }
+  }
+</style>
