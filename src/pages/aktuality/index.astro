@@ -1,0 +1,74 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import EventsMain from "@/components/content/EventsMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { alternates } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getNews, shellFor } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const [shell, news] = await Promise.all([
+  shellFor(Astro.locals),
+  getNews(lang),
+]);
+
+const featured = news.featured ? [news.featured] : [];
+const pinned = new Set(featured.map((post) => post.slug));
+const upcoming = news.upcoming.filter((post) => !pinned.has(post.slug));
+const archive = news.archive.filter((post) => !pinned.has(post.slug));
+const empty = featured.length + upcoming.length + archive.length === 0;
+---
+
+<Layout title={t.news} alternates={alternates("news")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1">{t.news}</Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Pinned item -->
+  <Section
+    render={featured.length > 0}
+    paddingTop="small"
+    paddingBottom="small"
+  >
+    <Ornament slot="background" variant={3} size="large" />
+    <EventsMain posts={featured} headingTag="h2" />
+  </Section>
+
+  <!-- Upcoming events -->
+  <Section render={upcoming.length > 0} paddingTop="small" gap="5">
+    <Heading tag="h2" variant="h5">
+      {t.upcomingEvents}
+    </Heading>
+    <EventsMain posts={upcoming} />
+  </Section>
+
+  <!-- Archive -->
+  <Section render={archive.length > 0} gap="5">
+    <Heading tag="h2" variant="h5">
+      {t.pastEvents}
+    </Heading>
+    <EventsMain posts={archive} />
+  </Section>
+
+  <!-- Nothing in this language yet -->
+  <Section render={empty}>
+    <ContentWrapper centered>
+      <p>{t.notTranslated}</p>
+    </ContentWrapper>
+  </Section>
+</Layout>

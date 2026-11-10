@@ -1,6 +1,21 @@
 # Zámek Rosice – plán nového webu
 
-> **Plánovací zadání (planning brief) k revizi jinou AI před implementací.** Tento repozitář zatím neobsahuje žádný kód. Dokumenty popisují sitemapu, obsahový model Sanity, mapování Figmy na komponenty, design tokeny, jazyky, SEO, migraci a otevřené otázky. Cílem je, aby je jiná AI (nebo člověk) zkontrolovala, našla chyby, mezery a rizika a navrhla úpravy dřív, než se začne stavět.
+> **Stav k 10. 11. 2026:** plán prošel revizí ([docs/09-revize.md](docs/09-revize.md)) a projekt je založený. Rozhodnutí jsou v [docs/decisions.md](docs/decisions.md), co je hotové a co následuje, v [docs/08-dalsi-kroky.md](docs/08-dalsi-kroky.md).
+
+## Spuštění
+
+```bash
+npm install
+npm run dev
+```
+
+- `npm run check` – kontrola typů, `npm test` – testy provozní doby a tras, `npm run build` – build pro Cloudflare Worker.
+- Sanity: projekt `fhk95ye1`, dataset `production`. Zkopíruj `.env.example` do `.env` a doplň `PUBLIC_SANITY_PROJECT_ID=fhk95ye1`. Bez něj web běží bez CMS a Studio na `/studio` se nezapne.
+- Náhled konceptů ze Studia potřebuje `SANITY_API_READ_TOKEN` a `PREVIEW_SECRET` v `.dev.vars` (necommituje se).
+- Kontaktní formulář posílá na `/api/contact`. E-mail odejde, až budou nastavené `RESEND_API_KEY` a `CONTACT_FROM`; ochranu Turnstile zapínají `PUBLIC_TURNSTILE_SITE_KEY` a `TURNSTILE_SECRET_KEY`. Cílová adresa je v Sanity (Nastavení webu).
+- `npm run seed` – doplní do datasetu výchozí obsah, který v něm chybí; `npm run seed -- --replace` přepíše i to, co mezitím změnila migrace nebo editor.
+- `npm run migrate` – převede obsah starého webu zamek-rosice.cz do Sanity; `-- --dry` jen vypíše, co by udělal.
+- Pravidla pro stavbu stránek a komponent: [LUMOS.md](LUMOS.md), [AGENTS.md](AGENTS.md).
 
 Zdrojem je plán v podobě Page (canvas) *Zámek Rosice – plán nového webu (Astro, Lumos, Sanity, Cloudflare)*, exportovaný do Markdownu bez ztráty tabulek. Texty jsou česky.
 
@@ -10,14 +25,15 @@ Nový web pro **Správu zámku Rosice, příspěvkovou organizaci** (Žerotínov
 
 ## Stack
 
-- **Astro** 7 s adaptérem Cloudflare (output server, renderuje Cloudflare Worker)
-- **Lumos** pro Astro (komponenty Section, ContentWrapper, Heading…, pravidla v LUMOS.md; vlastní komponenty Content + typ + varianta; CSS jen v @layer components, rem místo px)
-- **Sanity** 6 (Studio na /studio, Presentation tool, náhled přes cookie a middleware)
+- **Astro** 7.4 s adaptérem Cloudflare (output server, renderuje Cloudflare Worker)
+- **Lumos for Astro** 1.0.3, čistá instalace přes `npm create lumos@latest` (pravidla v LUMOS.md; CSS jen v komponentě v `@layer components`, rem místo px)
+- **Sanity** 6.22 (Studio na /studio, Presentation tool, náhled přes cookie a middleware)
 - **Cloudflare** (Worker s assets, Images binding, DNS)
+- Přesné verze a důvod, proč TypeScript zůstává na 6: [docs/decisions.md](docs/decisions.md), rozhodnutí 3
 
 ## Reference a odkazy
 
-- Referenční repozitář (stejný stack a konvence): [Cardajir/balonhotel-site](https://github.com/Cardajir/balonhotel-site) (soukromý)
+- Referenční repozitář (jen vzor pro napojení Sanity, náhled a i18n; nic se z něj nekopíruje): [Cardajir/balonhotel-site](https://github.com/Cardajir/balonhotel-site) (soukromý)
 - Návrh ve Figmě: https://www.figma.com/design/c6VHN35SszCdkTpCRuWj8l/Z%C3%81MEK-ROSICE?node-id=4075-29
 - Stávající web: https://zamek-rosice.cz/ (WordPress, jen česky)
 
@@ -33,7 +49,10 @@ Nový web pro **Správu zámku Rosice, příspěvkovou organizaci** (Žerotínov
 | [docs/05-jazyky-a-seo.md](docs/05-jazyky-a-seo.md) | i18n (cs, en, de) a SEO |
 | [docs/06-migrace-obsahu.md](docs/06-migrace-obsahu.md) | Stávající web a mapování migrace obsahu |
 | [docs/07-otevrene-otazky.md](docs/07-otevrene-otazky.md) | Otevřené otázky |
-| [docs/08-dalsi-kroky.md](docs/08-dalsi-kroky.md) | Další kroky |
+| [docs/08-dalsi-kroky.md](docs/08-dalsi-kroky.md) | Co je hotové a další kroky |
+| [docs/09-revize.md](docs/09-revize.md) | Revize plánu: nalezené rozpory, řešení, změny ve Figmě |
+
+> Oddíly **Souhrn plánu** a **Konvence z balonhotel-site** níže jsou původní zadání z první verze. Kde se liší od [docs/decisions.md](docs/decisions.md), platí rozhodnutí.
 
 ## Na co se při revizi zaměřit
 

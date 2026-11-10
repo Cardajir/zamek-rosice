@@ -1,0 +1,132 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import PortableText from "@/components/utility/PortableText.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import {
+  DEFAULT_LANG,
+  LANGS,
+  LANG_LOCALES,
+  SITE_TIME_ZONE,
+  type Lang,
+} from "@/consts.ts";
+import { alternates, routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getPost, shellFor } from "@/sanity/queries.ts";
+import { sized } from "@/utils/image.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const post = await getPost(lang, Astro.params.slug ?? "");
+
+if (!post) return Astro.rewrite("/404/");
+
+const shell = await shellFor(Astro.locals);
+
+const isLang = (value: string): value is Lang =>
+  (LANGS as readonly string[]).includes(value);
+const slugs = Object.fromEntries(
+  post.translations
+    .filter((item) => isLang(item.lang))
+    .map((item) => [item.lang, item.slug]),
+);
+const versions = alternates("news", { ...slugs, [lang]: post.slug });
+
+const date = new Intl.DateTimeFormat(LANG_LOCALES[lang], {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: SITE_TIME_ZONE,
+});
+const isEvent = post.kind === "event";
+const when = [
+  post.eventStart && date.format(new Date(post.eventStart)),
+  post.eventEnd && date.format(new Date(post.eventEnd)),
+]
+  .filter(Boolean)
+  .join(" – ");
+const facts = isEvent
+  ? [
+      [t.eventWhen, [when, post.eventTimeNote].filter(Boolean).join(", ")],
+      [t.eventWhere, post.eventPlace],
+      [t.eventAdmission, post.eventPrice],
+    ].filter((fact): fact is [string, string] => Boolean(fact[1]))
+  : [];
+---
+
+<Layout
+  title={post.title}
+  description={post.perex}
+  type="article"
+  image={post.image && sized(post.image.url, 1200)}
+  alternates={versions}
+>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Eyebrow>
+        {isEvent ? t.event : t.news}
+        {post.eventStatus === "cancelled" && (
+          <Fragment> · {t.eventCancelled}</Fragment>
+        )}
+      </Eyebrow>
+      <Heading tag="h1" variant="h2" maxWidth={26}>
+        {post.title}
+      </Heading>
+      <Paragraph variant="large" maxWidth={60}>
+        {post.perex}
+      </Paragraph>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Event facts -->
+  <Section render={facts.length > 0} paddingTop="none" paddingBottom="small">
+    <ContentWrapper centered>
+      {facts.map(([label, value]) => (
+        <Paragraph>
+          <strong>{label}:</strong> {value}
+        </Paragraph>
+      ))}
+      <ButtonWrapper>
+        <Button
+          render={Boolean(post.eventTicketUrl)}
+          element="link"
+          href={post.eventTicketUrl}
+        >
+          {t.eventTickets}
+        </Button>
+      </ButtonWrapper>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Body -->
+  <Section paddingTop="small" align="center" gap="6">
+    {post.image && (
+      <SanityImg
+        image={post.image}
+        sizes="(width >= 48rem) 40rem, 100vw"
+        maxWidth={1400}
+        loading="eager"
+        class="max-width-small"
+      />
+    )}
+    <PortableText value={post.body} />
+    <ButtonWrapper>
+      <Button element="link" variant="link" href={routePath("news", lang)}>
+        {t.allNews}
+      </Button>
+    </ButtonWrapper>
+  </Section>
+</Layout>

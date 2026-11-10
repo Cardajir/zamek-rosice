@@ -1,0 +1,73 @@
+---
+import CardTour from "@/components/item/CardTour.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { TourCard } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Tours and exhibitions, in the order they are shown. */
+  tours: TourCard[];
+  /** Heading level of each item. */
+  headingTag?: "h2" | "h3" | "h4";
+}
+
+const { render = true, tours, headingTag = "h3" } = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const eyebrow = ({ duration, free }: TourCard) => {
+  if (free) return t.freeEntry;
+  if (!duration || duration.unlimited) return undefined;
+  const { min, max } = duration;
+  if (!min && !max) return undefined;
+  const span = min && max && min !== max ? `${min}–${max}` : (max ?? min);
+  return `${span} ${t.minutes}`;
+};
+---
+
+{render && tours.length > 0 && (
+  <ul class="tours_wrap">
+    {tours.map((tour) => (
+      <li>
+        <CardTour
+          eyebrow={eyebrow(tour)}
+          heading={tour.title}
+          headingTag={headingTag}
+          text={tour.perex}
+          href={routePath("tours", lang, tour.slug)}
+          buttonLabel={t.readMore}
+          image={tour.image?.url}
+          imageAlt={tour.image?.alt}
+          imageWidth={tour.image?.width}
+          imageHeight={tour.image?.height}
+        />
+      </li>
+    ))}
+  </ul>
+)}
+
+<style is:global>
+  @layer components {
+    .tours_wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-8) var(--site-gutter);
+      width: 100%;
+      padding-top: var(--space-8);
+      border-top: var(--border-width) solid var(--text);
+      @media (width >= 30rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (width >= 48rem) {
+        padding-inline: var(--space-6);
+      }
+      @media (width >= 64rem) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+  }
+</style>

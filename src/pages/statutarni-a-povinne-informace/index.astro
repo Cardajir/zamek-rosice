@@ -1,0 +1,132 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Button from "@/components/Button.astro";
+import InfoListMain from "@/components/content/InfoListMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
+import { alternates } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import {
+  getStatutory,
+  type DocumentCategory,
+  type FileDocument,
+} from "@/sanity/page-queries.ts";
+import { shellFor } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const [shell, statutory] = await Promise.all([
+  shellFor(Astro.locals),
+  getStatutory(lang),
+]);
+
+const details = [
+  { label: t.organisation, text: shell.organisation },
+  {
+    label: t.seat,
+    text: `${shell.street}, ${shell.postalCode} ${shell.locality}`,
+  },
+  { label: t.founder, text: statutory.founder },
+  { label: t.companyId, text: statutory.companyId },
+  { label: t.bankAccount, text: statutory.bankAccount },
+].filter((detail) => detail.text);
+
+const megabytes = new Intl.NumberFormat(LANG_LOCALES[lang], {
+  maximumFractionDigits: 1,
+});
+const fileNote = ({ extension, size }: FileDocument) =>
+  [
+    extension?.toUpperCase(),
+    size &&
+      (size >= 1_048_576
+        ? `${megabytes.format(size / 1_048_576)} MB`
+        : `${Math.max(1, Math.round(size / 1024))} kB`),
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+const CATEGORIES: { id: DocumentCategory; heading: string }[] = [
+  { id: "report", heading: t.documentsReport },
+  { id: "budget", heading: t.documentsBudget },
+  { id: "outlook", heading: t.documentsOutlook },
+  { id: "order", heading: t.documentsOrder },
+  { id: "other", heading: t.documentsOther },
+];
+const groups = CATEGORIES.map(({ id, heading }) => ({
+  heading,
+  documents: statutory.documents.filter(
+    (document) => (document.category ?? "other") === id,
+  ),
+})).filter((group) => group.documents.length > 0);
+---
+
+<Layout title={t.statutoryTitle} alternates={alternates("statutory")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1" maxWidth={16}>
+        {t.statutoryTitle}
+      </Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Organisation -->
+  <Section paddingTop="small" paddingBottom="small">
+    <InfoListMain
+      rows={details.map((detail) => ({
+        label: detail.label,
+        lines: [{ text: detail.text }],
+      }))}
+    />
+  </Section>
+
+  <!-- Further pages -->
+  <Section
+    render={statutory.pages.length > 0}
+    paddingTop="small"
+    paddingBottom="small"
+    gap="4"
+  >
+    <Heading tag="h2" variant="h3">
+      {t.relatedPages}
+    </Heading>
+    <ButtonWrapper>
+      {statutory.pages.map((page) => (
+        <Button element="link" variant="link" href={page.href}>
+          {page.label}
+        </Button>
+      ))}
+    </ButtonWrapper>
+  </Section>
+
+  <!-- Documents -->
+  <Section render={groups.length > 0} paddingTop="small" gap="7">
+    <Heading tag="h2" variant="h3">
+      {t.documents}
+    </Heading>
+    {groups.map((group) => (
+      <ContentWrapper>
+        <Heading tag="h3" variant="h6">
+          {group.heading}
+        </Heading>
+        <InfoListMain
+          rows={group.documents.map((document) => ({
+            label: document.title,
+            href: document.url,
+            lines: [{ text: fileNote(document) || "–" }],
+          }))}
+        />
+      </ContentWrapper>
+    ))}
+  </Section>
+</Layout>

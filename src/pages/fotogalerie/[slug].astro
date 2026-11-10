@@ -1,0 +1,73 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import GalleryMain from "@/components/content/GalleryMain.astro";
+import GalleryNavMain from "@/components/content/GalleryNavMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { alternates, routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getAlbum, getAlbums } from "@/sanity/page-queries.ts";
+import { shellFor } from "@/sanity/queries.ts";
+import { sized } from "@/utils/image.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const album = await getAlbum(lang, Astro.params.slug ?? "");
+
+if (!album || album.images.length === 0) return Astro.rewrite("/404/");
+
+const [shell, albums] = await Promise.all([
+  shellFor(Astro.locals),
+  getAlbums(lang),
+]);
+
+const cover = album.images[0];
+---
+
+<Layout
+  title={`${album.title} – ${t.galleryTitle}`}
+  image={cover && sized(cover.url, 1200)}
+  alternates={alternates("gallery", album.slugs)}
+>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Eyebrow>{t.galleryTitle}</Eyebrow>
+      <Heading tag="h1" variant="h2">
+        {album.title}
+      </Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Albums -->
+  <Section paddingTop="small" paddingBottom="small" gap="4" align="center">
+    <Ornament variant={6} />
+    <Eyebrow>{t.galleryIntro}</Eyebrow>
+    <GalleryNavMain
+      label={t.galleryAlbums}
+      items={[
+        { label: t.selectedPhotos, href: routePath("gallery", lang) },
+        ...albums.map((item) => ({
+          label: item.title,
+          href: routePath("gallery", lang, item.slug),
+          current: item.slug === album.slug,
+        })),
+      ]}
+    />
+  </Section>
+
+  <!-- Photographs -->
+  <Section paddingTop="small">
+    <GalleryMain photos={album.images} />
+  </Section>
+</Layout>

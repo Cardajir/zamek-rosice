@@ -1,0 +1,48 @@
+---
+import SanityImg from "@/components/media/SanityImg.astro";
+
+interface Props {
+  /** The image block as the query returns it. */
+  node: {
+    url?: string;
+    width?: number;
+    height?: number;
+    alt?: string;
+    caption?: string;
+    credit?: string;
+  };
+}
+
+const { node } = Astro.props;
+const url = node.url;
+const note = [node.caption, node.credit].filter(Boolean).join(" · ");
+---
+
+{url && (
+  <figure class="portable-image_wrap">
+    <SanityImg
+      image={{ ...node, url }}
+      sizes="(width >= 48rem) 46rem, 100vw"
+      maxWidth={1600}
+    />
+    {note && <figcaption class="text-style-small">{note}</figcaption>}
+  </figure>
+)}
+
+<style is:global>
+  @layer components {
+    .portable-image_wrap {
+      margin-block: var(--space-6);
+
+      & > .image {
+        width: 100%;
+        height: auto;
+      }
+
+      & > figcaption {
+        margin-top: var(--space-2);
+        color: var(--muted-text);
+      }
+    }
+  }
+</style>

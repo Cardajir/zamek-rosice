@@ -1,0 +1,145 @@
+---
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Line above the title: the tour's length or "free entry". */
+  eyebrow?: string;
+  /** Card title. */
+  heading: string;
+  /** Heading level. */
+  headingTag?: "h2" | "h3" | "h4";
+  /** Body text. */
+  text?: string;
+  /** Link destination. */
+  href: string;
+  /** Button label. */
+  buttonLabel: string;
+  /** Image source. */
+  image?: string;
+  /** Image alt text. Omit for decorative images. */
+  imageAlt?: string;
+  /** Image width. */
+  imageWidth?: number;
+  /** Image height. */
+  imageHeight?: number;
+}
+
+const {
+  render = true,
+  eyebrow,
+  heading,
+  headingTag: Tag = "h3",
+  text,
+  href,
+  buttonLabel,
+  image,
+  imageAlt,
+  imageWidth,
+  imageHeight,
+} = Astro.props;
+---
+
+{render && heading && (
+  <article class="card-tour_wrap">
+    <div class="card-tour_head">
+      <p class="card-tour_eyebrow text-style-main">{eyebrow}</p>
+      <Tag class="card-tour_title text-style-h4">{heading}</Tag>
+    </div>
+    <div class="card-tour_visual">
+      {image && (
+        <SanityImg
+          image={{
+            url: image,
+            alt: imageAlt,
+            width: imageWidth,
+            height: imageHeight,
+          }}
+          sizes="(width >= 64rem) 25vw, (width >= 30rem) 50vw, 100vw"
+          maxWidth={1200}
+        />
+      )}
+    </div>
+    {text && <p class="card-tour_text">{text}</p>}
+    <Button
+      class="card-tour_link"
+      element="link"
+      variant="link"
+      href={href}
+      aria-label={`${buttonLabel}: ${heading}`}
+    >
+      {buttonLabel}
+    </Button>
+  </article>
+)}
+
+<style is:global>
+  @layer components {
+    .card-tour_wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      height: 100%;
+    }
+
+    /* Room for a label and a two-line title, so photographs in a row line up. */
+    .card-tour_head {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: calc(
+        var(--text-main) * 1.2 + var(--space-3) + var(--h4) * 2.1
+      );
+      margin-bottom: var(--space-5);
+    }
+
+    .card-tour_eyebrow {
+      margin: 0 0 var(--space-3);
+      color: var(--muted-text);
+      font-weight: var(--primary-medium);
+      line-height: 1.2;
+    }
+
+    .card-tour_title {
+      margin: 0;
+      text-wrap: balance;
+    }
+
+    .card-tour_visual {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      margin-bottom: var(--space-6);
+      background-color: var(--background-2);
+      overflow: clip;
+
+      & > .image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: scale calc(var(--hover-duration) * 2) var(--hover-ease);
+      }
+    }
+
+    .card-tour_text {
+      margin: 0 0 var(--space-5);
+    }
+
+    .card-tour_wrap > .button_wrap {
+      margin-top: auto;
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+      }
+    }
+
+    @media (hover: hover) {
+      .card-tour_wrap:hover .card-tour_visual > .image {
+        scale: 1.04;
+      }
+    }
+  }
+</style>

@@ -1,0 +1,72 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import InfoListMain from "@/components/content/InfoListMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
+import { alternates } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getMedia, type MediaMention } from "@/sanity/page-queries.ts";
+import { shellFor } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const [shell, mentions] = await Promise.all([
+  shellFor(Astro.locals),
+  getMedia(),
+]);
+
+const kinds: Record<NonNullable<MediaMention["kind"]>, string> = {
+  video: t.mediaVideo,
+  article: t.mediaArticle,
+  podcast: t.mediaPodcast,
+  tv: t.mediaTv,
+};
+const fullDate = new Intl.DateTimeFormat(LANG_LOCALES[lang], {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/* What kind of piece it is, who published it and when; the address stands in when nothing is known. */
+const about = ({ kind, outlet, date, url }: MediaMention) =>
+  [
+    kind && kinds[kind],
+    outlet,
+    date && fullDate.format(new Date(`${date}T00:00:00Z`)),
+  ]
+    .filter(Boolean)
+    .join(" · ") || new URL(url).hostname.replace(/^www\./, "");
+---
+
+<Layout title={t.mediaTitle} alternates={alternates("media")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1" maxWidth={12}>
+        {t.mediaTitle}
+      </Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Mentions -->
+  <Section render={mentions.length > 0} paddingTop="small">
+    <InfoListMain
+      rows={mentions.map((mention) => ({
+        label: mention.title,
+        href: mention.url,
+        external: true,
+        lines: [{ text: about(mention) }],
+      }))}
+    />
+  </Section>
+</Layout>

@@ -1,0 +1,98 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Grid from "@/components/wrapper/Grid.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import PortableText from "@/components/utility/PortableText.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { alternates, routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getTour, shellFor } from "@/sanity/queries.ts";
+import { sized } from "@/utils/image.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const tour = await getTour(lang, Astro.params.slug ?? "");
+
+if (!tour) return Astro.rewrite("/404/");
+
+const shell = await shellFor(Astro.locals);
+
+const { min, max, unlimited } = tour.duration ?? {};
+const span = min && max && min !== max ? `${min}–${max}` : (max ?? min);
+const length = unlimited
+  ? `${t.tourLength}: ${t.unlimited}`
+  : span
+    ? `${t.tourLength}: ${span} ${t.minutes}`
+    : undefined;
+const eyebrow = [length, tour.free && t.freeEntry].filter(Boolean).join(" · ");
+---
+
+<Layout
+  title={tour.title}
+  description={tour.perex}
+  image={tour.image && sized(tour.image.url, 1200)}
+  alternates={alternates("tours", tour.slugs)}
+>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <Heading tag="h1" variant="h2" maxWidth={24}>
+        {tour.title}
+      </Heading>
+      <Paragraph variant="large" maxWidth={60}>
+        {tour.perex}
+      </Paragraph>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Description -->
+  <Section
+    render={Boolean(tour.body?.length)}
+    paddingTop="small"
+    align="center"
+  >
+    <PortableText value={tour.body} />
+  </Section>
+
+  <!-- Photographs -->
+  <Section render={tour.images.length > 0} paddingTop="small" gap="5">
+    <Heading tag="h2" variant="h5">
+      {t.photos}
+    </Heading>
+    <Grid xsmall={1} small={2} large={3}>
+      {tour.images.map((image) => (
+        <SanityImg
+          image={image}
+          sizes="(width >= 64rem) 33vw, (width >= 30rem) 50vw, 100vw"
+          maxWidth={1200}
+        />
+      ))}
+    </Grid>
+  </Section>
+
+  <!-- Onwards -->
+  <Section paddingTop="small">
+    <ButtonWrapper>
+      <Button element="link" variant="link" href={routePath("admission", lang)}>
+        {t.admissionLink}
+      </Button>
+      <Button element="link" variant="link" href={routePath("tours", lang)}>
+        {t.allTours}
+      </Button>
+    </ButtonWrapper>
+  </Section>
+</Layout>

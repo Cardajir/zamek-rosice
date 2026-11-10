@@ -1,0 +1,146 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import Ornament from "@/components/media/Ornament.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import InfoListMain from "@/components/content/InfoListMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
+import { alternates } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import {
+  getAdmission,
+  type PriceList,
+  type PriceRow,
+} from "@/sanity/page-queries.ts";
+import { shellFor } from "@/sanity/queries.ts";
+import { hoursTable } from "@/utils/hours.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const [shell, admission] = await Promise.all([
+  shellFor(Astro.locals),
+  getAdmission(lang),
+]);
+
+const money = new Intl.NumberFormat(LANG_LOCALES[lang], {
+  style: "currency",
+  currency: "CZK",
+  maximumFractionDigits: 0,
+});
+const price = (value: number, unit: PriceRow["unit"]) =>
+  unit === "czkPerHour"
+    ? `${money.format(value)} / ${t.perHour}`
+    : money.format(value);
+
+/* Two prices are the full and the reduced one, each on its own line. */
+const priceLines = ({ condition, prices, unit }: PriceRow) => {
+  if (prices.length < 2) {
+    return prices.map((value) => ({
+      text: condition,
+      value: price(value, unit),
+    }));
+  }
+  const parts = condition?.split(" / ") ?? [];
+  const names =
+    parts.length === prices.length ? parts : [t.priceFull, t.priceReduced];
+  return prices.map((value, index) => ({
+    text: names[index],
+    value: price(value, unit),
+  }));
+};
+
+/* A list of one row named like the list needs no heading above it. */
+const isOwnHeading = ({ title, rows }: PriceList) =>
+  rows.length === 1 && rows[0]?.label === title;
+
+const hours = hoursTable(admission.periods, admission.subjects, {
+  days: {
+    daily: t.daysDaily,
+    weekdays: t.daysWeekdays,
+    weekends: t.daysWeekends,
+    holidays: t.daysHolidays,
+    weekendsAndHolidays: t.daysWeekendsAndHolidays,
+  },
+  closed: t.closed,
+  lastEntry: t.lastEntry,
+  startsAt: t.startsAt,
+  startRules: {
+    oddHours: t.startsOddHours,
+    evenHours: t.startsEvenHours,
+    everyHour: t.startsEveryHour,
+  },
+});
+---
+
+<Layout title={t.admissionTitle} alternates={alternates("admission")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1" maxWidth={16}>
+        {t.admissionTitle}
+      </Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Admission -->
+  <Section
+    render={admission.lists.length > 0}
+    paddingTop="small"
+    paddingBottom="small"
+    gap="7"
+  >
+    <Ornament slot="background" variant={2} size="large" />
+    <Heading tag="h2" variant="h3">
+      {t.admissionHeading}
+    </Heading>
+    {admission.lists.map((list) => (
+      <ContentWrapper>
+        <Heading render={!isOwnHeading(list)} tag="h3" variant="h6">
+          {list.title}
+        </Heading>
+        <Paragraph maxWidth={110}>{list.intro}</Paragraph>
+        <InfoListMain
+          rows={list.rows.map((row) => ({
+            label: row.label,
+            lines: priceLines(row),
+          }))}
+        />
+        <Paragraph variant="small">{list.note}</Paragraph>
+      </ContentWrapper>
+    ))}
+  </Section>
+
+  <!-- Opening hours -->
+  <Section render={hours.length > 0} paddingTop="small" gap="7">
+    <Ornament slot="background" variant={4} size="large" />
+    <Heading tag="h2" variant="h3">
+      {t.openingHeading}
+    </Heading>
+    {hours.map((group) => (
+      <ContentWrapper>
+        <Heading tag="h3" variant="h6">
+          {group.names.join(", ")}
+        </Heading>
+        <Paragraph render={group.notes.length > 0} maxWidth={110}>
+          {group.notes.join(" ")}
+        </Paragraph>
+        <InfoListMain
+          rows={group.rows.map((row) => ({
+            label: row.label,
+            lines: row.lines.map((text) => ({ text })),
+          }))}
+        />
+      </ContentWrapper>
+    ))}
+    <Paragraph>{t.groupsByArrangement}</Paragraph>
+  </Section>
+</Layout>

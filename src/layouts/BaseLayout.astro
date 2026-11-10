@@ -1,0 +1,56 @@
+---
+import "@/styles/global.css";
+import BaseHead from "@/components/utility/BaseHead.astro";
+import SkipLink from "@/components/global/SkipLink.astro";
+import Nav from "@/components/global/Nav.astro";
+import Footer from "@/components/global/Footer.astro";
+import Reveal from "@/components/utility/Reveal.astro";
+import type { SeoProps } from "@/types.ts";
+import { DEFAULT_LANG, LANGS, LANG_LOCALES } from "@/consts.ts";
+import { routePath } from "@/i18n/routes.ts";
+import { shellFor } from "@/sanity/queries.ts";
+
+type Props = SeoProps & {
+  /** Theme for the whole page. `inherit` leaves the root defaults in place. */
+  theme?: "inherit" | "light" | "dark" | "brand";
+  /**
+   * Fix the nav over the page rather than letting it stick in flow, so the
+   * first section starts underneath it. Give that section
+   * `paddingTop="navoverlap"` to clear the bar.
+   */
+  overlap?: boolean;
+};
+
+const { theme = "inherit", overlap = false, ...seo } = Astro.props;
+
+const shell = await shellFor(Astro.locals);
+
+/* A page that exists in one language only still offers the others' home pages. */
+const languages = LANGS.map(
+  (lang) =>
+    seo.alternates?.find((item) => item.lang === lang) ?? {
+      lang,
+      path: routePath("home", lang),
+    },
+);
+---
+
+<!doctype html>
+<html
+  lang={LANG_LOCALES[Astro.locals.lang ?? DEFAULT_LANG]}
+  class:list={[theme !== "inherit" && `theme-${theme}`]}
+>
+  <head>
+    <BaseHead {...seo} />
+    <slot name="head" />
+  </head>
+  <body>
+    <SkipLink />
+    <Nav shell={shell} languages={languages} overlap={overlap} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer shell={shell} />
+    <Reveal />
+  </body>
+</html>

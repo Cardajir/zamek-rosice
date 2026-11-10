@@ -1,0 +1,344 @@
+---
+import Button from "@/components/Button.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Image } from "@/sanity/queries.ts";
+import { scaled, sized } from "@/utils/image.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Photographs, in the order they are shown. */
+  photos: Image[];
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, photos, class: className } = Astro.props;
+
+const t = ui(Astro.locals.lang ?? DEFAULT_LANG);
+
+const THUMB_WIDTHS = [480, 800, 1200];
+const FULL_WIDTHS = [800, 1200, 1600, 2400];
+
+const srcset = (photo: Image, widths: number[]) =>
+  widths
+    .filter((width, index) => index === 0 || width <= (photo.width || Infinity))
+    .map((width) => `${sized(photo.url, width)} ${width}w`)
+    .join(", ");
+
+const note = (photo: Image) =>
+  [photo.caption, photo.credit].filter(Boolean).join(" · ");
+
+const items = photos.map((photo, index) => ({
+  photo,
+  note: note(photo),
+  /* A photograph with no description is still a link that says what it does. */
+  name: photo.alt || photo.caption || `${t.enlargePhoto} ${index + 1}`,
+  size: scaled(photo, 1200),
+}));
+---
+
+{render && items.length > 0 && (
+  <div class:list={["gallery_wrap", className]}>
+    <ul class="gallery_list">
+      {items.map(({ photo, note, name, size }, index) => (
+        <li class="gallery_item">
+          <figure class="gallery_figure">
+            <a
+              class="gallery_link"
+              href={sized(photo.url, 2400)}
+              aria-label={`${t.enlargePhoto}: ${name}`}
+              data-gallery-open={index}
+              data-srcset={srcset(photo, FULL_WIDTHS)}
+              data-alt={photo.alt ?? photo.caption ?? ""}
+              data-note={note}
+            >
+              <img
+                class="gallery_thumb"
+                src={sized(photo.url, 800)}
+                srcset={srcset(photo, THUMB_WIDTHS)}
+                sizes={
+                  index === 0
+                    ? "100vw"
+                    : "(width >= 64rem) 33vw, (width >= 30rem) 50vw, 100vw"
+                }
+                width={size.width}
+                height={size.height}
+                alt={photo.alt ?? photo.caption ?? ""}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            </a>
+            {note && (
+              <figcaption class="gallery_note text-style-small">
+                {note}
+              </figcaption>
+            )}
+          </figure>
+        </li>
+      ))}
+    </ul>
+
+    <dialog class="gallery_viewer theme-dark" aria-label={t.photoViewer}>
+      <div class="gallery_close">
+        <Button
+          variant="close"
+          emphasis="secondary"
+          label={t.closeViewer}
+          data-gallery-close
+        />
+      </div>
+      <div class="gallery_step gallery_step-back">
+        <Button
+          variant="arrow"
+          emphasis="secondary"
+          direction="back"
+          label={t.previousPhoto}
+          data-gallery-step="-1"
+        />
+      </div>
+      <figure class="gallery_stage">
+        <img class="gallery_photo" alt="" sizes="100vw" decoding="async" />
+        <figcaption class="gallery_caption text-style-small">
+          <span class="gallery_count" aria-live="polite" />
+          <span class="gallery_text" />
+        </figcaption>
+      </figure>
+      <div class="gallery_step gallery_step-forward">
+        <Button
+          variant="arrow"
+          emphasis="secondary"
+          label={t.nextPhoto}
+          data-gallery-step="1"
+        />
+      </div>
+    </dialog>
+  </div>
+)}
+
+<script>
+  for (const gallery of document.querySelectorAll<HTMLElement>(
+    ".gallery_wrap",
+  )) {
+    const viewer = gallery.querySelector<HTMLDialogElement>(".gallery_viewer");
+    const photo = gallery.querySelector<HTMLImageElement>(".gallery_photo");
+    const count = gallery.querySelector<HTMLElement>(".gallery_count");
+    const text = gallery.querySelector<HTMLElement>(".gallery_text");
+    const links = [
+      ...gallery.querySelectorAll<HTMLAnchorElement>("[data-gallery-open]"),
+    ];
+    if (!viewer || !photo || !count || !text || links.length === 0) continue;
+
+    let current = 0;
+
+    const show = (index: number) => {
+      current = (index + links.length) % links.length;
+      const link = links[current];
+      if (!link) return;
+      photo.srcset = link.dataset.srcset ?? "";
+      photo.src = link.href;
+      photo.alt = link.dataset.alt ?? "";
+      count.textContent = `${current + 1}/${links.length}`;
+      text.textContent = link.dataset.note ?? "";
+    };
+
+    for (const [index, link] of links.entries()) {
+      link.addEventListener("click", (event) => {
+        /* A click meant for a new tab or window is left to the browser. */
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+          return;
+        }
+        event.preventDefault();
+        show(index);
+        viewer.showModal();
+      });
+    }
+
+    let fromBackdrop = false;
+    viewer.addEventListener("mousedown", (event) => {
+      fromBackdrop = event.target === viewer;
+    });
+
+    viewer.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const step = target.closest<HTMLElement>("[data-gallery-step]");
+      if (step) show(current + Number(step.dataset.galleryStep));
+      else if (target.closest("[data-gallery-close]")) viewer.close();
+      else if (fromBackdrop && target === viewer) viewer.close();
+      fromBackdrop = false;
+    });
+
+    viewer.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") show(current - 1);
+      else if (event.key === "ArrowRight") show(current + 1);
+    });
+
+    /* A swipe across the photograph turns the page. */
+    let startX: number | undefined;
+    photo.addEventListener("pointerdown", (event) => {
+      startX = event.pointerType === "touch" ? event.clientX : undefined;
+    });
+    photo.addEventListener("pointerup", (event) => {
+      if (startX === undefined) return;
+      const moved = event.clientX - startX;
+      startX = undefined;
+      if (Math.abs(moved) > 40) show(current + (moved < 0 ? 1 : -1));
+    });
+
+    /* Focus goes back to the photograph the visitor was last looking at. */
+    viewer.addEventListener("close", () => {
+      photo.removeAttribute("srcset");
+      photo.removeAttribute("src");
+      links[current]?.focus();
+    });
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    html:has(.gallery_viewer[open]) {
+      overflow: hidden;
+    }
+
+    .gallery_wrap {
+      width: 100%;
+    }
+
+    .gallery_list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6) var(--site-gutter);
+      @media (width >= 30rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (width >= 64rem) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .gallery_item:first-child {
+      grid-column: 1 / -1;
+    }
+
+    .gallery_figure {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin: 0;
+    }
+
+    .gallery_link {
+      display: block;
+      overflow: clip;
+      background-color: var(--background-2);
+    }
+
+    .gallery_thumb {
+      display: block;
+      width: 100%;
+      aspect-ratio: 13 / 12;
+      object-fit: cover;
+      transition: scale var(--hover-duration) var(--hover-ease);
+
+      .gallery_item:first-child & {
+        aspect-ratio: 3 / 2;
+        @media (width >= 48rem) {
+          aspect-ratio: 2 / 1;
+        }
+      }
+
+      @media (hover: hover) {
+        .gallery_link:hover & {
+          scale: 1.03;
+        }
+      }
+    }
+
+    .gallery_note {
+      text-align: end;
+    }
+
+    .gallery_viewer {
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      max-height: none;
+      margin: 0;
+      padding: var(--space-4);
+      border: 0;
+      background-color: var(--background);
+      color: var(--text);
+
+      &[open] {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: center;
+        gap: var(--space-3);
+        @media (width >= 48rem) {
+          grid-template-columns: auto minmax(0, 1fr) auto;
+        }
+      }
+
+      &::backdrop {
+        background-color: var(--background);
+      }
+    }
+
+    .gallery_close {
+      position: absolute;
+      inset: var(--space-4) var(--space-4) auto auto;
+      z-index: 1;
+    }
+
+    .gallery_step {
+      position: absolute;
+      inset-block-end: var(--space-4);
+      inset-inline-end: var(--space-4);
+      z-index: 1;
+
+      &.gallery_step-back {
+        inset-inline-end: calc(var(--space-4) + 3.5em);
+      }
+
+      @media (width >= 48rem) {
+        position: static;
+      }
+    }
+
+    .gallery_stage {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: var(--space-3);
+      height: 100%;
+      min-height: 0;
+      margin: 0;
+    }
+
+    .gallery_photo {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      object-fit: contain;
+      user-select: none;
+      touch-action: pan-y;
+    }
+
+    .gallery_caption {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-5);
+      min-height: 2lh;
+      padding-inline-end: 8em;
+      @media (width >= 48rem) {
+        padding-inline-end: 0;
+      }
+    }
+
+    .gallery_count {
+      flex: none;
+      font-weight: var(--primary-semibold);
+    }
+  }
+</style>

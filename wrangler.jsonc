@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "zamek-rosice",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-11-01",
+  // `node:async_hooks` carries the preview flag through a request, and the
+  // same flag has the Worker fill `process.env` from its secrets.
+  "compatibility_flags": ["nodejs_compat"],
+
+  // The built site: the Worker renders pages, Cloudflare serves the files.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+
+  // Add a `routes` entry to serve this on zamek-rosice.cz. Until then it is
+  // reachable at https://zamek-rosice.<account-subdomain>.workers.dev.
+  //
+  // Secrets, set with `wrangler secret put`:
+  //   SANITY_API_READ_TOKEN  read token for the Studio's preview
+  //   PREVIEW_SECRET         any long random string
+  //   RESEND_API_KEY         e-mail service key for the contact form
+  //   CONTACT_FROM           sender of those e-mails, on a verified domain
+  //   TURNSTILE_SECRET_KEY   secret of the form's Turnstile widget
+
+  "observability": {
+    "enabled": true
+  }
+}

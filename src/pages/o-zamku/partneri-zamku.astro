@@ -1,0 +1,56 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import InfoListMain from "@/components/content/InfoListMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { alternates } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getPartners, type Partner } from "@/sanity/page-queries.ts";
+import { shellFor } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const [shell, partners] = await Promise.all([
+  shellFor(Astro.locals),
+  getPartners(lang),
+]);
+
+const isWeb = (url?: string): url is string => /^https?:\/\//.test(url ?? "");
+const host = (url: string) => new URL(url).hostname.replace(/^www\./, "");
+
+/* What the partner does, and where it lives on the web. */
+const about = ({ description, url }: Partner) =>
+  [description, isWeb(url) && host(url)].filter(Boolean).join(" · ") || "–";
+---
+
+<Layout title={t.partnersTitle} alternates={alternates("partners")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1" maxWidth={12}>
+        {t.partnersTitle}
+      </Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Partners -->
+  <Section render={partners.length > 0} paddingTop="small">
+    <InfoListMain
+      rows={partners.map((partner) => ({
+        label: partner.name,
+        href: isWeb(partner.url) ? partner.url : undefined,
+        external: true,
+        lines: [{ text: about(partner) }],
+      }))}
+    />
+  </Section>
+</Layout>

@@ -1,0 +1,64 @@
+---
+import { DEFAULT_LANG } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Shell } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The castle's telephone numbers and e-mail address. */
+  shell: Pick<Shell, "phone" | "mobile" | "email">;
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, shell, class: className } = Astro.props;
+
+const t = ui(Astro.locals.lang ?? DEFAULT_LANG);
+const tel = (value: string) => `tel:${value.replace(/[^\d+]/g, "")}`;
+const shown = shell.mobile || shell.phone || shell.email;
+---
+
+{render && shown && (
+  <address class:list={["contact-lines_wrap", "text-style-h3", className]}>
+    {shell.mobile && (
+      <a class="contact-lines_link" href={tel(shell.mobile)}>
+        {t.mobileShort}: {shell.mobile}
+      </a>
+    )}
+    {shell.phone && (
+      <a class="contact-lines_link" href={tel(shell.phone)}>
+        {t.phoneShort}: {shell.phone}
+      </a>
+    )}
+    {shell.email && (
+      <a class="contact-lines_link" href={`mailto:${shell.email}`}>
+        {shell.email}
+      </a>
+    )}
+  </address>
+)}
+
+<style is:global>
+  @layer components {
+    .contact-lines_wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      font-style: normal;
+      line-height: var(--line-height-large);
+    }
+
+    .contact-lines_link {
+      text-decoration: none;
+      overflow-wrap: anywhere;
+      text-underline-offset: 0.15em;
+      text-decoration-thickness: var(--border-width);
+      @media (hover: hover) {
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+</style>

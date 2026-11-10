@@ -1,0 +1,67 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import PromoMain from "@/components/content/PromoMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { alternates, routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getTours, shellFor, type TourCard } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const [shell, tours] = await Promise.all([
+  shellFor(Astro.locals),
+  getTours(lang),
+]);
+
+const length = ({ duration, free }: TourCard) => {
+  if (duration?.unlimited) return `${t.tourLength}: ${t.unlimited}`;
+  const { min, max } = duration ?? {};
+  if (min || max) {
+    const span = min && max && min !== max ? `${min}–${max}` : (max ?? min);
+    return `${t.tourLength}: ${span} ${t.minutes}`;
+  }
+  return free ? t.freeEntry : undefined;
+};
+
+const title = t.toursHeading;
+---
+
+<Layout title={title} alternates={alternates("tours")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1" maxWidth={20}>
+        {title}
+      </Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Tours -->
+  <Section render={tours.length > 0} gap="large">
+    {tours.map((tour, index) => (
+      <PromoMain
+        promo={{
+          eyebrow: length(tour),
+          title: tour.title,
+          text: tour.perex,
+          images: tour.image ? [tour.image] : [],
+          link: {
+            label: t.readMore,
+            href: routePath("tours", lang, tour.slug),
+          },
+        }}
+        reverse={index % 2 === 1}
+      />
+    ))}
+  </Section>
+</Layout>

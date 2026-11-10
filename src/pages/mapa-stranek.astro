@@ -1,0 +1,74 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Grid from "@/components/wrapper/Grid.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Button from "@/components/Button.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { alternates, routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { shellFor, type NavLink } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const shell = await shellFor(Astro.locals);
+
+/* Everything the menu and the footer lead to, each address once. */
+const listed = new Set(
+  shell.groups.flatMap((group) => group.items).map((item) => item.href),
+);
+const others: NavLink[] = [];
+for (const link of [
+  { label: t.homePage, href: routePath("home", lang) },
+  ...shell.topLinks,
+  ...shell.footerColumns.flat(),
+]) {
+  if (link.external || listed.has(link.href)) continue;
+  listed.add(link.href);
+  others.push(link);
+}
+
+const sections = [
+  ...shell.groups,
+  { label: shell.organisation.split(", ")[0] ?? "", items: others },
+].filter((section) => section.label && section.items.length > 0);
+---
+
+<Layout title={t.siteMapTitle} alternates={alternates("siteMap")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1">{t.siteMapTitle}</Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Pages -->
+  <Section paddingTop="small">
+    <Grid xsmall={1} medium={2} class="gap-row-7">
+      {sections.map((section) => (
+        <ContentWrapper>
+          <Heading tag="h2" variant="h5">
+            {section.label}
+          </Heading>
+          {section.items.map((item) => (
+            <Button
+              element="link"
+              variant="link"
+              href={item.href}
+              class="margin-top-2"
+            >
+              {item.label}
+            </Button>
+          ))}
+        </ContentWrapper>
+      ))}
+    </Grid>
+  </Section>
+</Layout>

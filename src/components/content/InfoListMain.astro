@@ -1,0 +1,143 @@
+---
+interface Line {
+  /** What the line says: who a price is for, when a place is open. */
+  text?: string;
+  /** A figure set apart on the right: a price. */
+  value?: string;
+  /** Where the value leads, when it is a link. */
+  href?: string;
+}
+
+interface Row {
+  label: string;
+  /** Where the label leads, when it is a link. */
+  href?: string;
+  /** Whether the label's link leaves the site. */
+  external?: boolean;
+  lines: Line[];
+}
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Labelled rows, each with one line or several. */
+  rows: Row[];
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, rows, class: className } = Astro.props;
+
+const shown = rows.filter((row) => row.label && row.lines.length > 0);
+---
+
+{render && shown.length > 0 && (
+  <dl class:list={["info-list_wrap", className]}>
+    {shown.map((row) => (
+      <div class="info-list_row">
+        <dt class="info-list_label text-style-large">
+          {row.href ? (
+            <a
+              class="info-list_link"
+              href={row.href}
+              rel={row.external ? "noopener" : undefined}
+            >
+              {row.label}
+            </a>
+          ) : (
+            row.label
+          )}
+        </dt>
+        {row.lines.map((line) => (
+          <dd class="info-list_line">
+            <span class="info-list_text">{line.text}</span>
+            {line.value &&
+              (line.href ? (
+                <a
+                  class="info-list_value info-list_link text-style-large"
+                  href={line.href}
+                >
+                  {line.value}
+                </a>
+              ) : (
+                <span class="info-list_value text-style-large">
+                  {line.value}
+                </span>
+              ))}
+          </dd>
+        ))}
+      </div>
+    ))}
+  </dl>
+)}
+
+<style is:global>
+  @layer components {
+    .info-list_wrap {
+      width: 100%;
+      margin-block: var(--space-3) 0;
+      border-bottom: var(--border-width) solid var(--text);
+    }
+
+    .info-list_row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      column-gap: var(--site-gutter);
+      padding-block: var(--space-4);
+      border-top: var(--border-width) solid var(--text);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding-block: 0;
+      }
+    }
+
+    .info-list_label {
+      padding-bottom: var(--space-2);
+      font-weight: var(--primary-semibold);
+      @media (width >= 48rem) {
+        grid-row: 1 / span 99;
+        align-self: start;
+        padding-block: var(--space-4);
+      }
+    }
+
+    .info-list_line {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin: 0;
+      padding-block: var(--space-2);
+      @media (width >= 48rem) {
+        grid-column: 2;
+        padding-block: var(--space-4);
+      }
+
+      & + & {
+        border-top: var(--border-width) dotted var(--border);
+      }
+    }
+
+    .info-list_text {
+      max-width: 44ch;
+    }
+
+    .info-list_value {
+      flex: none;
+      font-weight: var(--primary-semibold);
+      white-space: nowrap;
+    }
+
+    .info-list_link {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-thickness: var(--border-width);
+      text-underline-offset: 0.2em;
+      @media (hover: hover) {
+        &:hover {
+          color: var(--link-text);
+        }
+      }
+    }
+  }
+</style>
