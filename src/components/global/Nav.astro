@@ -120,36 +120,48 @@ const socials = shell.socials.flatMap(({ network, url }) =>
               ))}
             </ul>
             {languages.length > 1 && (
-              <div class="nav_lang">
+              <div class="nav_group nav_lang">
                 <button
-                  class="nav_lang_button"
+                  class="nav_group_button"
                   type="button"
                   aria-label={`${t.languageSwitcher}: ${LANG_NAMES[lang]}`}
                   aria-expanded="false"
-                  aria-controls="nav-lang"
+                  aria-controls="nav-panel-lang"
                 >
-                  <span aria-hidden="true">{lang.toUpperCase()}</span>
+                  <span class="nav_lang_code" aria-hidden="true">
+                    {lang.toUpperCase()}
+                  </span>
+                  <span class="nav_lang_name" aria-hidden="true">
+                    {LANG_NAMES[lang]}
+                  </span>
                   <Icon
                     class="nav_group_arrow"
                     src={arrowDown}
                     variant="small"
                   />
                 </button>
-                <ul class="nav_lang_panel" id="nav-lang">
-                  {languages.map((item) => (
-                    <li>
-                      <a
-                        class="nav_lang_link"
-                        href={item.path}
-                        hreflang={item.lang}
-                        lang={item.lang}
-                        aria-current={item.lang === lang ? "true" : undefined}
-                      >
-                        {LANG_NAMES[item.lang]}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+                <div class="nav_panel" id="nav-panel-lang">
+                  <ul class="nav_panel_list">
+                    {languages.map((item) => (
+                      <li>
+                        <a
+                          class="nav_panel_link"
+                          href={item.path}
+                          hreflang={item.lang}
+                          lang={item.lang}
+                          aria-current={item.lang === lang ? "true" : undefined}
+                        >
+                          <Icon
+                            class="nav_panel_arrow"
+                            src={arrow}
+                            variant="small"
+                          />
+                          <span>{LANG_NAMES[item.lang]}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
             {socials.length > 0 && (
@@ -194,10 +206,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       grid-template-rows: 1fr;
       visibility: visible;
     }
-    .nav_lang_panel {
-      position: static;
-      display: flex;
-    }
   </style>
 </noscript>
 
@@ -207,15 +215,13 @@ const socials = shell.socials.flatMap(({ network, url }) =>
 
   if (nav && toggle) {
     const groups = [
-      ...nav.querySelectorAll<HTMLButtonElement>(
-        ".nav_group_button, .nav_lang_button",
-      ),
+      ...nav.querySelectorAll<HTMLButtonElement>(".nav_group_button"),
     ];
     const desktop = window.matchMedia("(width >= 85rem)");
 
     const setGroup = (button: HTMLButtonElement, open: boolean) => {
       button.setAttribute("aria-expanded", String(open));
-      button.closest(".nav_group, .nav_lang")?.classList.toggle("open", open);
+      button.closest(".nav_group")?.classList.toggle("open", open);
     };
 
     const closeGroups = (except?: HTMLButtonElement) => {
@@ -274,9 +280,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     nav.addEventListener("focusout", (event) => {
       const next = event.relatedTarget;
       if (!desktop.matches || !(next instanceof Node)) return;
-      const group = (event.target as HTMLElement).closest(
-        ".nav_group, .nav_lang",
-      );
+      const group = (event.target as HTMLElement).closest(".nav_group");
       if (group && !group.contains(next)) closeGroups();
     });
 
@@ -436,7 +440,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     .nav_group_arrow {
       --_size: 1.0556em;
       transition: rotate var(--open-duration) var(--open-ease);
-      :is(.nav_group, .nav_lang).open & {
+      .nav_group.open & {
         rotate: 180deg;
       }
     }
@@ -475,9 +479,11 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       display: block;
       font-size: var(--text-main);
       text-decoration: none;
-      text-underline-offset: 0.2em;
-      text-decoration-thickness: var(--border-width);
-      &[aria-current="page"] {
+      & > span {
+        text-underline-offset: 0.15em;
+        text-decoration-thickness: var(--border-width);
+      }
+      &[aria-current] > span {
         text-decoration: underline;
       }
     }
@@ -498,50 +504,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       padding-block: var(--space-5);
     }
 
-    .nav_lang {
-      position: relative;
-      padding-block: var(--space-5);
-      border-bottom: var(--border-width) solid var(--text);
-    }
-
-    .nav_lang_button {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.66em;
-      min-height: 2.75rem;
-      color: inherit;
-      font-size: var(--text-main);
-      font-weight: var(--primary-semibold);
-      letter-spacing: var(--letter-spacing-snug);
-    }
-
-    .nav_lang_panel {
-      display: none;
-      flex-direction: column;
-      gap: var(--space-1);
-      padding-top: var(--space-2);
-      .nav_lang.open & {
-        display: flex;
-      }
-    }
-
-    .nav_lang_link {
-      display: block;
-      padding-block: var(--space-1);
-      font-size: var(--text-main);
-      text-decoration: none;
-      text-underline-offset: 0.3em;
-      text-decoration-thickness: var(--border-width);
-      &[aria-current="true"] {
-        text-decoration: underline;
-      }
-      @media (hover: hover) {
-        &:hover {
-          color: var(--link-text);
-        }
-      }
-    }
-
     .nav_social {
       display: flex;
       align-items: center;
@@ -553,6 +515,11 @@ const socials = shell.socials.flatMap(({ network, url }) =>
           opacity: 0.6;
         }
       }
+    }
+
+    /* On the bar the language is its code; in the opened menu, its name. */
+    .nav_lang_code {
+      display: none;
     }
 
     @media (width >= 85rem) {
@@ -580,9 +547,16 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
 
       .nav_group,
-      .nav_top > li,
-      .nav_lang {
+      .nav_top > li {
         border-bottom: 0;
+      }
+
+      .nav_lang_code {
+        display: inline;
+      }
+
+      .nav_lang_name {
+        display: none;
       }
 
       .nav_group_button,
@@ -601,7 +575,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       .nav_inner:has(.nav_group.open) {
         & .nav_group:not(.open) .nav_group_button,
         & .nav_top_link,
-        & .nav_lang_button,
         & .nav_social {
           color: var(--muted-text);
         }
@@ -658,8 +631,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
             padding-left: var(--space-5);
             & > span {
               text-decoration: underline;
-              text-underline-offset: 0.15em;
-              text-decoration-thickness: var(--border-width);
             }
           }
         }
@@ -691,20 +662,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       .nav_socials {
         padding-block: 0;
         gap: var(--space-3);
-      }
-
-      .nav_lang {
-        padding-block: 0;
-      }
-
-      .nav_lang_panel {
-        position: absolute;
-        top: calc(100% + var(--space-2));
-        inset-inline-end: calc(var(--space-4) * -1);
-        min-width: 10rem;
-        padding: var(--space-3) var(--space-4);
-        background-color: var(--background);
-        border: var(--border-width) solid var(--text);
       }
     }
   }

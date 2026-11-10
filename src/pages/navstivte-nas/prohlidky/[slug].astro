@@ -63,7 +63,7 @@ const eyebrow = [length, tour.free && t.freeEntry].filter(Boolean).join(" · ");
   <Section
     render={Boolean(tour.body?.length)}
     paddingTop="small"
-    align="center"
+    containerClass="max-width-small"
   >
     <PortableText value={tour.body} />
   </Section>

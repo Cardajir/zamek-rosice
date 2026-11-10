@@ -93,6 +93,7 @@ const hours = hoursTable(admission.periods, admission.subjects, {
 
   <!-- Admission -->
   <Section
+    containerClass="max-width-small"
     render={admission.lists.length > 0}
     paddingTop="small"
     paddingBottom="small"
@@ -120,7 +121,12 @@ const hours = hoursTable(admission.periods, admission.subjects, {
   </Section>
 
   <!-- Opening hours -->
-  <Section render={hours.length > 0} paddingTop="small" gap="7">
+  <Section
+    containerClass="max-width-small"
+    render={hours.length > 0}
+    paddingTop="small"
+    gap="7"
+  >
     <Ornament slot="background" variant={4} size="large" />
     <Heading tag="h2" variant="h3">
       {t.openingHeading}

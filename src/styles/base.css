@@ -58,7 +58,7 @@
   --viewport-max: 1920;
 
   /* Max width */
-  --max-width-small: 70rem;
+  --max-width-small: 82rem;
   --max-width-main: calc(var(--viewport-max) / 16 * 1rem);
   --max-width-full: 100%;
 

@@ -81,7 +81,11 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
   </Section>
 
   <!-- Organisation -->
-  <Section paddingTop="small" paddingBottom="small">
+  <Section
+    containerClass="max-width-small"
+    paddingTop="small"
+    paddingBottom="small"
+  >
     <InfoListMain
       rows={details.map((detail) => ({
         label: detail.label,
@@ -92,6 +96,7 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
 
   <!-- Further pages -->
   <Section
+    containerClass="max-width-small"
     render={statutory.pages.length > 0}
     paddingTop="small"
     paddingBottom="small"
@@ -110,7 +115,12 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
   </Section>
 
   <!-- Documents -->
-  <Section render={groups.length > 0} paddingTop="small" gap="7">
+  <Section
+    containerClass="max-width-small"
+    render={groups.length > 0}
+    paddingTop="small"
+    gap="7"
+  >
     <Heading tag="h2" variant="h3">
       {t.documents}
     </Heading>

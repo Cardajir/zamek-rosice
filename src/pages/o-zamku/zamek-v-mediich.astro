@@ -59,7 +59,11 @@ const about = ({ kind, outlet, date, url }: MediaMention) =>
   </Section>
 
   <!-- Mentions -->
-  <Section render={mentions.length > 0} paddingTop="small">
+  <Section
+    containerClass="max-width-small"
+    render={mentions.length > 0}
+    paddingTop="small"
+  >
     <InfoListMain
       rows={mentions.map((mention) => ({
         label: mention.title,

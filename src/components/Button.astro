@@ -210,22 +210,23 @@ const named = {
         letter-spacing: var(--letter-spacing-snug);
         padding: 0.4em 0;
         border: 0;
-        border-bottom: var(--border-width) solid var(--button-border);
         border-radius: 0;
-        background-image: linear-gradient(
-          var(--link-border-hover),
-          var(--link-border-hover)
-        );
-        background-repeat: no-repeat;
-        background-origin: border-box;
-        background-position: 100% 100%;
-        background-size: 0 var(--border-width);
-        transition:
-          background-size calc(var(--hover-duration) * 2) var(--hover-ease),
-          color var(--hover-duration) var(--hover-ease),
-          border-color var(--hover-duration) var(--hover-ease);
+
+        /* The line that grows on hover runs under the words only, not the arrow. */
+        & > .button_text {
+          padding-bottom: 0.12em;
+          background-image: linear-gradient(
+            var(--link-border-hover),
+            var(--link-border-hover)
+          );
+          background-repeat: no-repeat;
+          background-position: 100% 100%;
+          background-size: 0 var(--border-width);
+          transition: background-size calc(var(--hover-duration) * 2)
+            var(--hover-ease);
+        }
         @media (hover: hover) {
-          &:hover:not(:disabled) {
+          &:hover:not(:disabled) > .button_text {
             background-position: 0 100%;
             background-size: 100% var(--border-width);
           }

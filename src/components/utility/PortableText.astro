@@ -10,7 +10,7 @@ interface Props {
   /** Portable Text blocks from Sanity. */
   value?: unknown[];
   /**
-   * Maximum line length in characters.
+   * Maximum line length in characters. Omit to fill the column.
    *
    * @min 1
    * @int
@@ -18,14 +18,63 @@ interface Props {
   maxWidth?: number;
 }
 
-const { render = true, value, maxWidth = 75 } = Astro.props;
+const { render = true, value, maxWidth } = Astro.props;
 
 const components = { type: { imageWithAlt: PortableImage } };
 const blocks = levelHeadings(value ?? []);
 ---
 
 {render && blocks.length > 0 && (
-  <RichText maxWidth={maxWidth}>
-    <Renderer value={blocks as never} components={components} />
-  </RichText>
+  <div class="portable-text_wrap">
+    <RichText variant="large" maxWidth={maxWidth}>
+      <Renderer value={blocks as never} components={components} />
+    </RichText>
+  </div>
 )}
+
+<style is:global>
+  @layer components {
+    /* Text an editor wrote: set left, in the sizes the design gives running text. */
+    .portable-text_wrap {
+      width: 100%;
+      text-align: start;
+
+      & h2 {
+        font-size: var(--h3);
+        line-height: var(--h3-line-height);
+        letter-spacing: var(--h3-letter-spacing);
+        --_margin-top: var(--space-8);
+        --_margin-bottom: var(--space-6);
+      }
+
+      & h3 {
+        font-size: var(--h5);
+        font-style: italic;
+        line-height: var(--h5-line-height);
+        letter-spacing: var(--h5-letter-spacing);
+        --_margin-top: var(--space-7);
+        --_margin-bottom: var(--space-5);
+      }
+
+      & h4 {
+        font-size: var(--h6);
+        line-height: var(--h6-line-height);
+        letter-spacing: var(--h6-letter-spacing);
+        --_margin-top: var(--space-6);
+        --_margin-bottom: var(--space-4);
+      }
+
+      & :is(ul, ol) {
+        padding-left: 1.5em;
+      }
+
+      & li + li {
+        margin-top: var(--space-4);
+      }
+
+      & li::marker {
+        color: currentcolor;
+      }
+    }
+  }
+</style>

@@ -61,7 +61,11 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   </Section>
 
   <!-- Address and map -->
-  <Section paddingTop="small" paddingBottom="small">
+  <Section
+    containerClass="max-width-small"
+    paddingTop="small"
+    paddingBottom="small"
+  >
     <Ornament slot="background" variant={7} size="large" />
     <ContentWrapper>
       <Paragraph variant="large">{address}</Paragraph>
@@ -81,7 +85,12 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   </Section>
 
   <!-- Ways of getting here -->
-  <Section render={ways.length > 0} paddingTop="small" gap="6">
+  <Section
+    containerClass="max-width-small"
+    render={ways.length > 0}
+    paddingTop="small"
+    gap="6"
+  >
     <Heading tag="h2" variant="h3">
       {t.howToGetHere}
     </Heading>
@@ -96,7 +105,11 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   </Section>
 
   <!-- Photograph -->
-  <Section render={Boolean(directions.image)} paddingTop="small">
+  <Section
+    containerClass="max-width-small"
+    render={Boolean(directions.image)}
+    paddingTop="small"
+  >
     <PortableImage node={directions.image ?? {}} />
   </Section>
 </Layout>

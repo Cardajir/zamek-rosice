@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Eyebrow from "@/components/typography/Eyebrow.astro";
@@ -139,9 +140,11 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
               data-appearance="interaction-only"
             />
           )}
-          <Button variant="link" type="submit">
-            {t.formSubmit}
-          </Button>
+          <ButtonWrapper marginTop="0" class="alignment-end">
+            <Button variant="link" type="submit">
+              {t.formSubmit}
+            </Button>
+          </ButtonWrapper>
         </Form>
       </Fragment>
     </ContentWrapper>

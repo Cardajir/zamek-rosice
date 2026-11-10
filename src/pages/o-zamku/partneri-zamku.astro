@@ -43,7 +43,11 @@ const about = ({ description, url }: Partner) =>
   </Section>
 
   <!-- Partners -->
-  <Section render={partners.length > 0} paddingTop="small">
+  <Section
+    containerClass="max-width-small"
+    render={partners.length > 0}
+    paddingTop="small"
+  >
     <InfoListMain
       rows={partners.map((partner) => ({
         label: partner.name,

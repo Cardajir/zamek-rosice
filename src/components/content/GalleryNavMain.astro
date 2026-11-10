@@ -19,7 +19,7 @@ const { render = true, label, items, class: className } = Astro.props;
       {items.map((item) => (
         <li>
           <a
-            class="gallery-nav_link text-style-h4"
+            class="gallery-nav_link text-style-h2"
             href={item.href}
             aria-current={item.current ? "page" : undefined}
           >
@@ -41,19 +41,22 @@ const { render = true, label, items, class: className } = Astro.props;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-2);
+      gap: var(--space-6);
       text-align: center;
     }
 
     .gallery-nav_link {
       color: inherit;
       text-decoration: none;
-      text-decoration-thickness: var(--border-width);
-      text-underline-offset: 0.2em;
+      font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
 
+      /* The album on screen: red, with the thin rule the typeface itself defines. */
       &[aria-current] {
         color: var(--link-text);
         text-decoration: underline;
+        text-decoration-thickness: from-font;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
       }
 
       @media (hover: hover) {
