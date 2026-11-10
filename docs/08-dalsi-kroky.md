@@ -41,7 +41,7 @@ Detail návrhu už z Figmy číst jde. Zbývá:
 - **Promo bloky, hodnocení, citace a patička** na úvodu jsou postavené podle snímků; hodnotu po hodnotě proti Figmě ještě porovnané nejsou.
 - **Světlá ilustrace za hodnocením** je v návrhu jen na mobilu; na webu není.
 - **Ilustrace na textových stránkách:** návrh ji má u Návštěvního řádu, web ji dává na všechny textové stránky.
-- **Fotky pro úvod** (hero, promo bloky, výzva v patičce) v Sanity nejsou; starý web je neměl. Prohlídky, alba a aktuality fotky mají.
+- **Fotky na úvodu** (hlavní, druhá nad hodnocením, šest v promo blocích, výzva v patičce) jsou z Figmy nahrané v Sanity. Výřez širokých fotek řídí bod zájmu, který jde ve Studiu posunout.
 - **Fotka v záhlaví podstránek** (Vstupné, Kde nás najdete, Fotogalerie, Kontakty) není: v Sanity pro ni zatím není pole ani fotka. Stránky začínají lištou a nadpisem.
 - **Šířka obsahu** tabulek je šířka webu, návrh má užší sloupec (1312 z 1920 px).
 - **Pozadí prohlížeče fotografií** je tmavě fialová z palety; návrh má neutrální tmavě šedou, která v proměnných není.
@@ -50,7 +50,7 @@ Detail návrhu už z Figmy číst jde. Zbývá:
 
 ## Co potřebuje člověka
 
-1. **Fotky:** nahrát do Studia pro úvod a promo bloky, pro stránku Kde nás najdete a do alb Zámecký exteriér a Edukační centrum (prázdná alba se na webu neukazují). Doplnit alt u 40 fotek ze starého webu a rozdělit fotky mezi Žerotínský a Hausperský okruh.
+1. **Fotky:** nahrát do Studia pro stránku Kde nás najdete a do alb Zámecký exteriér a Edukační centrum (prázdná alba se na webu neukazují). Doplnit alt u 40 fotek ze starého webu a rozdělit fotky mezi Žerotínský a Hausperský okruh.
 2. **Instagram:** odkaz do Nastavení webu (Facebook je převzatý ze starého webu).
 3. **Písmo Romie:** soubory jsou dodané a leží jen lokálně v `src/assets/fonts/` (git je ignoruje, repozitář je veřejný). Build na CI proto běží se záložním patkovým písmem; nasazení z počítače se soubory je má. Zbývá potvrdit webovou licenci pro `zamek-rosice.cz` (otázka 14).
 4. **Viditelnost repozitáře:** je veřejný; doporučení přepnout na soukromý.

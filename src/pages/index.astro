@@ -39,7 +39,12 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   <!-- Hero photograph and status bar -->
   <Section paddingTop="none" paddingBottom="small" gap="3">
     {home.heroImage && (
-      <SanityImg image={home.heroImage} loading="eager" fetchPriority="high" />
+      <SanityImg
+        image={home.heroImage}
+        ratio={7 / 3}
+        loading="eager"
+        fetchPriority="high"
+      />
     )}
     <StatusBarMain shell={shell} />
   </Section>
@@ -91,7 +96,8 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Heritage note, rating and status -->
-  <Section paddingTop="small" paddingBottom="small">
+  <Section paddingTop="small" paddingBottom="small" gap="3">
+    {home.secondImage && <SanityImg image={home.secondImage} ratio={7 / 3} />}
     <StatusBarMain shell={shell} note={home.heritageNote}>
       <RatingMain
         slot="center"

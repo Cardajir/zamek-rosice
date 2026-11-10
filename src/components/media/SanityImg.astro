@@ -6,7 +6,19 @@ interface Props extends Omit<HTMLAttributes<"img">, "src" | "alt"> {
   /** Set to `false` to omit the component. */
   render?: boolean;
   /** Photograph from Sanity: its address, size and alt text. */
-  image?: { url: string; width?: number; height?: number; alt?: string };
+  image?: {
+    url: string;
+    width?: number;
+    height?: number;
+    alt?: string;
+    focus?: { x?: number; y?: number } | null;
+  };
+  /**
+   * Width divided by height to crop the photograph to. Omit to keep its own shape.
+   *
+   * @min 0
+   */
+  ratio?: number;
   /** Responsive `sizes` value. */
   sizes?: string;
   /**
@@ -25,6 +37,7 @@ interface Props extends Omit<HTMLAttributes<"img">, "src" | "alt"> {
 const {
   render = true,
   image,
+  ratio,
   sizes = "100vw",
   maxWidth = 2400,
   loading = "lazy",
@@ -38,10 +51,15 @@ const STEPS = [480, 800, 1200, 1600, 2000, 2400];
 const limit = Math.min(maxWidth, image?.width ?? maxWidth);
 const widths = [...STEPS.filter((step) => step < limit), limit];
 const srcset = image
-  ? widths.map((width) => `${sized(image.url, width)} ${width}w`).join(", ")
+  ? widths
+      .map(
+        (width) => `${sized(image.url, width, ratio, image.focus)} ${width}w`,
+      )
+      .join(", ")
   : undefined;
-const height =
-  image?.width && image.height
+const height = ratio
+  ? Math.round(limit / ratio)
+  : image?.width && image.height
     ? Math.round((image.height / image.width) * limit)
     : undefined;
 ---
@@ -49,7 +67,7 @@ const height =
 {render && image?.url && (
   <img
     class:list={["image", className]}
-    src={sized(image.url, limit)}
+    src={sized(image.url, limit, ratio, image.focus)}
     srcset={srcset}
     sizes={sizes}
     width={image.width ? limit : undefined}

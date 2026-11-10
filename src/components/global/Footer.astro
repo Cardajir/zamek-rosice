@@ -39,7 +39,7 @@ const cta = shell.cta;
       <div class:list={["footer_cta", "theme-dark", cta.image && "has-image"]}>
         {cta.image && <SanityImg image={{ ...cta.image, alt: "" }} />}
         <div class="footer_cta_content">
-          <h2 class="footer_cta_title text-style-h2">{cta.title}</h2>
+          <h2 class="footer_cta_title text-style-h1">{cta.title}</h2>
           {cta.link && (
             <Button element="link" variant="link" href={cta.link.href}>
               {cta.link.label}

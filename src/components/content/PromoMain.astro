@@ -74,6 +74,7 @@ const images = promo.images.slice(0, 2);
       @media (width >= 64rem) {
         grid-template-columns: minmax(0, 31.5rem) minmax(0, 1fr);
         gap: var(--space-8);
+        padding-inline: var(--space-6);
 
         &.reverse {
           grid-template-columns: minmax(0, 1fr) minmax(0, 31.5rem);
@@ -113,7 +114,15 @@ const images = promo.images.slice(0, 2);
 
     .promo_visual {
       position: relative;
+      justify-self: end;
+      width: 100%;
+      max-width: 50.5rem;
       display: grid;
+
+      .promo_wrap.reverse & {
+        justify-self: start;
+      }
+
       grid-template-columns: repeat(12, 1fr);
       align-items: start;
 
@@ -126,13 +135,27 @@ const images = promo.images.slice(0, 2);
         object-fit: cover;
       }
 
+      /* A tall detail behind, the scene itself laid over it and out to the text's side. */
       &.pair > .image:first-child {
-        grid-column: 1 / 8;
+        width: 79%;
+        justify-self: end;
+        aspect-ratio: 2 / 3;
       }
 
       &.pair > .image:last-child {
-        grid-column: 5 / -1;
-        margin-top: 30%;
+        position: relative;
+        width: 87%;
+        justify-self: start;
+        margin-top: 23%;
+        aspect-ratio: 5 / 4;
+      }
+
+      .promo_wrap.reverse &.pair > .image:first-child {
+        justify-self: start;
+      }
+
+      .promo_wrap.reverse &.pair > .image:last-child {
+        justify-self: end;
       }
     }
   }

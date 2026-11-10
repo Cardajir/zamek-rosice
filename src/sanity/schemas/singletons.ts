@@ -239,6 +239,12 @@ export const homePage = defineType({
       title: "Fotka v záhlaví",
       type: "imageWithAlt",
     }),
+    defineField({
+      name: "secondImage",
+      title: "Druhá fotka",
+      type: "imageWithAlt",
+      description: "Přes celou šířku nad hodnocením návštěvníků.",
+    }),
     localized("heritageNote", "Poznámka pod druhou fotkou", "localizedString", {
       required: false,
       description: "Např. „Národní kulturní památka od roku 2022“.",

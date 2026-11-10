@@ -16,7 +16,8 @@ export const IMAGE = `{
   "height": asset->metadata.dimensions.height,
   "alt": ${text("alt")},
   "caption": ${text("caption")},
-  credit
+  credit,
+  "focus": hotspot{ x, y }
 }`;
 
 /*
@@ -65,6 +66,8 @@ export interface Image {
   alt?: string;
   caption?: string;
   credit?: string;
+  /** The point an editor marked as the photograph's subject, 0 to 1 from the top left. */
+  focus?: { x?: number; y?: number } | null;
 }
 
 export interface NavLink {
@@ -295,6 +298,8 @@ export interface Home {
   heading?: string;
   headingLink?: NavLink;
   heroImage?: Image;
+  /** The wide photograph above the visitors' rating. */
+  secondImage?: Image;
   heritageNote?: string;
   promos: Promo[];
   quote?: { text: string; author?: string; date?: string };
@@ -307,6 +312,7 @@ interface RawHome {
     heading?: string;
     headingLink?: RawLink;
     heroImage?: Image;
+    secondImage?: Image;
     heritageNote?: string;
     promos?: (Omit<Promo, "link" | "images"> & {
       images?: Image[];
@@ -324,6 +330,7 @@ const HOME = `{
     "heading": ${text("heading")},
     headingLink${LINK},
     "heroImage": heroImage${IMAGE},
+    "secondImage": secondImage${IMAGE},
     "heritageNote": ${text("heritageNote")},
     promos[]{
       "eyebrow": ${text("eyebrow")},
@@ -365,6 +372,7 @@ export async function getHome(lang: Lang): Promise<Home> {
     heading: home.heading,
     headingLink: resolveLink(home.headingLink, lang),
     heroImage: home.heroImage?.url ? home.heroImage : undefined,
+    secondImage: home.secondImage?.url ? home.secondImage : undefined,
     heritageNote: home.heritageNote,
     promos: (home.promos ?? []).map((promo) => ({
       ...promo,
