@@ -1,0 +1,146 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Grid from "@/components/wrapper/Grid.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import CardTour from "@/components/item/CardTour.astro";
+import EventsMain from "@/components/content/EventsMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import RatingMain from "@/components/content/RatingMain.astro";
+import PromoMain from "@/components/content/PromoMain.astro";
+import QuoteMain from "@/components/content/QuoteMain.astro";
+import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
+import { alternates, routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getHome, shellFor, type TourCard } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const locale = LANG_LOCALES[lang];
+
+const [shell, home] = await Promise.all([
+  shellFor(Astro.locals),
+  getHome(lang),
+]);
+
+const fullDate = new Intl.DateTimeFormat(locale, {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const tourEyebrow = ({ duration, free }: TourCard) => {
+  if (free) return t.freeEntry;
+  if (!duration || duration.unlimited) return undefined;
+  const { min, max } = duration;
+  if (!min && !max) return undefined;
+  const span = min && max && min !== max ? `${min}–${max}` : (max ?? min);
+  return `${span} ${t.minutes}`;
+};
+---
+
+<Layout alternates={alternates("home")}>
+  <!-- Hero photograph and status bar -->
+  <Section paddingTop="none" paddingBottom="small" gap="3">
+    {home.heroImage && (
+      <SanityImg image={home.heroImage} loading="eager" fetchPriority="high" />
+    )}
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Heading -->
+  <Section paddingTop="small">
+    <ContentWrapper centered>
+      <Heading tag="h1" maxWidth={22}>
+        {home.heading ?? t.siteTagline}
+      </Heading>
+      <ButtonWrapper>
+        <Button
+          render={Boolean(home.headingLink)}
+          element="link"
+          variant="link"
+          href={home.headingLink?.href}
+        >
+          {home.headingLink?.label}
+        </Button>
+      </ButtonWrapper>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Upcoming events -->
+  <Section render={home.posts.length > 0} gap="5">
+    <Heading tag="h2" variant="h5">
+      {t.upcomingEvents}
+    </Heading>
+    <EventsMain posts={home.posts} />
+    <ButtonWrapper>
+      <Button element="link" variant="link" href={routePath("news", lang)}>
+        {t.allEvents}
+      </Button>
+    </ButtonWrapper>
+  </Section>
+
+  <!-- Tours and permanent exhibitions -->
+  <Section render={home.tours.length > 0} gap="6">
+    <Heading tag="h2" variant="h5">
+      {t.toursHeading}
+    </Heading>
+    <Grid xsmall={1} small={2} large={4} class="gap-row-7">
+      {home.tours.map((tour) => (
+        <CardTour
+          eyebrow={tourEyebrow(tour)}
+          heading={tour.title}
+          text={tour.perex}
+          href={routePath("tours", lang, tour.slug)}
+          buttonLabel={t.readMore}
+          image={tour.image?.url}
+          imageAlt={tour.image?.alt}
+          imageWidth={tour.image?.width}
+          imageHeight={tour.image?.height}
+        />
+      ))}
+    </Grid>
+    <ButtonWrapper>
+      <Button element="link" variant="link" href={routePath("tours", lang)}>
+        {t.allTours}
+      </Button>
+    </ButtonWrapper>
+  </Section>
+
+  <!-- Heritage note, rating and status -->
+  <Section paddingTop="small" paddingBottom="small">
+    <StatusBarMain shell={shell} note={home.heritageNote}>
+      <RatingMain
+        slot="center"
+        value={shell.rating?.value}
+        label={shell.rating?.label}
+        source={shell.rating?.source}
+        href={shell.rating?.url}
+      />
+    </StatusBarMain>
+  </Section>
+
+  <!-- Weddings, the Šenk hall, school trips -->
+  <Section render={home.promos.length > 0} gap="large">
+    {home.promos.map((promo, index) => (
+      <PromoMain promo={promo} reverse={index % 2 === 1} />
+    ))}
+  </Section>
+
+  <!-- Visitor's quote -->
+  <Section render={Boolean(home.quote)}>
+    <QuoteMain
+      text={home.quote?.text}
+      author={home.quote?.author}
+      date={
+        home.quote?.date &&
+        fullDate.format(new Date(`${home.quote.date}T00:00:00Z`))
+      }
+    />
+  </Section>
+</Layout>

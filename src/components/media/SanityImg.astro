@@ -1,0 +1,63 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { sized } from "@/utils/image.ts";
+
+interface Props extends Omit<HTMLAttributes<"img">, "src" | "alt"> {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Photograph from Sanity: its address, size and alt text. */
+  image?: { url: string; width?: number; height?: number; alt?: string };
+  /** Responsive `sizes` value. */
+  sizes?: string;
+  /**
+   * Widest version offered.
+   *
+   * @min 1
+   * @int
+   */
+  maxWidth?: number;
+  /** Loading behavior. */
+  loading?: "lazy" | "eager";
+  /** Fetch priority. */
+  fetchPriority?: "auto" | "high" | "low";
+}
+
+const {
+  render = true,
+  image,
+  sizes = "100vw",
+  maxWidth = 2400,
+  loading = "lazy",
+  fetchPriority = "auto",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const STEPS = [480, 800, 1200, 1600, 2000, 2400];
+
+const limit = Math.min(maxWidth, image?.width ?? maxWidth);
+const widths = [...STEPS.filter((step) => step < limit), limit];
+const srcset = image
+  ? widths.map((width) => `${sized(image.url, width)} ${width}w`).join(", ")
+  : undefined;
+const height =
+  image?.width && image.height
+    ? Math.round((image.height / image.width) * limit)
+    : undefined;
+---
+
+{render && image?.url && (
+  <img
+    class:list={["image", className]}
+    src={sized(image.url, limit)}
+    srcset={srcset}
+    sizes={sizes}
+    width={image.width ? limit : undefined}
+    height={height}
+    alt={image.alt ?? ""}
+    loading={loading}
+    fetchpriority={fetchPriority === "auto" ? undefined : fetchPriority}
+    decoding="async"
+    {...rest}
+  />
+)}

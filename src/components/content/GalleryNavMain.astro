@@ -1,0 +1,66 @@
+---
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Accessible label. */
+  label: string;
+  /** Albums to choose from; the one being shown is marked `current`. */
+  items: { label: string; href: string; current?: boolean }[];
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, label, items, class: className } = Astro.props;
+---
+
+{render && items.length > 0 && (
+  <nav class:list={["gallery-nav_wrap", className]} aria-label={label}>
+    <ul class="gallery-nav_list">
+      {items.map((item) => (
+        <li>
+          <a
+            class="gallery-nav_link text-style-h4"
+            href={item.href}
+            aria-current={item.current ? "page" : undefined}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style is:global>
+  @layer components {
+    .gallery-nav_wrap {
+      width: 100%;
+    }
+
+    .gallery-nav_list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      text-align: center;
+    }
+
+    .gallery-nav_link {
+      color: inherit;
+      text-decoration: none;
+      text-decoration-thickness: var(--border-width);
+      text-underline-offset: 0.2em;
+
+      &[aria-current] {
+        color: var(--link-text);
+        text-decoration: underline;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          color: var(--link-text);
+        }
+      }
+    }
+  }
+</style>

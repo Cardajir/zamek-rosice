@@ -1,0 +1,78 @@
+---
+import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Rating out of five. */
+  value?: number;
+  /** Line under the number. */
+  label?: string;
+  /** Where the rating comes from. */
+  source?: string;
+  /** Link to the rating's source. */
+  href?: string;
+}
+
+const { render = true, value, label, source, href } = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const formatted =
+  value === undefined
+    ? undefined
+    : new Intl.NumberFormat(LANG_LOCALES[lang], {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }).format(value);
+---
+
+{render && formatted && (
+  <div class="rating_wrap">
+    <p class="rating_value text-style-h1">
+      <span aria-hidden="true">{formatted}</span>
+      <span class="sr-only">
+        {formatted} {ui(lang).ratingOutOf}
+      </span>
+    </p>
+    {label && <p class="rating_label text-style-large">{label}</p>}
+    {source &&
+      (href ? (
+        <a class="rating_source text-style-small" href={href} rel="noopener">
+          {source}
+        </a>
+      ) : (
+        <p class="rating_source text-style-small">{source}</p>
+      ))}
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    .rating_wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      text-align: center;
+    }
+
+    .rating_value {
+      margin: 0;
+    }
+
+    .rating_label {
+      margin: 0;
+      font-family: var(--secondary-family);
+      font-weight: var(--secondary-medium);
+    }
+
+    .rating_source {
+      margin: 0;
+      font-weight: var(--primary-semibold);
+      letter-spacing: var(--letter-spacing-wide);
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+  }
+</style>

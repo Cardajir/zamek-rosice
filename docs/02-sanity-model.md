@@ -1,52 +1,86 @@
 # 02 – Sanity model, vztahy a page builder
 
-## Obsahový model Sanity
+Revidováno 10. 11. 2026, viz [09-revize.md](09-revize.md). Schémata jsou v `src/sanity/schemas/`.
 
-### Singletony
+## Jak se překládá
 
-| Název | Typ ve Studiu | Hlavní pole | Reference | Použití na webu |
-| --- | --- | --- | --- | --- |
-| siteSettings | Nastavení webu | Název organizace (Správa zámku Rosice, p. o.), zřizovatel, adresa, GPS (geopoint), telefony, e-mail, IČ, bankovní spojení, sociální sítě, výchozí SEO (titulek, popis, OG obrázek) | – | Footer, Kontakt, JSON-LD, hlavička |
-| navigation | Navigace | Hlavní menu (štítek, odkaz, podmenu do 2 úrovní), sloupce patičky, právní odkazy, tlačítko v liště | page, tour, venue, gallery (odkaz = reference nebo externí URL) | Nav, dropdown, Footer |
-| homePage | Úvodní stránka | Hero (nadpis, podnadpis, foto nebo video, tlačítko), úvodní text, vybrané prohlídky, počet aktualit, SEO (stránka je v kódu, bez page builderu) | tour[], post[], gallery | Hero, Intro, Signpost, News |
-| visitInfo | Provoz a oznámení | Plovoucí oznámení (text, tón, platí od–do, odkaz), jak se k nám dostanete (auto, vlak, autobus, parkování), bezbariérovost, poznámka k nákupu vstupenek | page | Lišta oznámení, Kde nás najdete, Map |
+| Způsob | Typy | Slug |
+| --- | --- | --- |
+| **Dokument na jazyk** (pole `language`, plugin `@sanity/document-internationalization`) | `page`, `post` | vlastní v každém dokumentu |
+| **Jeden dokument, lokalizovaná pole** | `tour`, `venue`, `gallery`, `faq`, `ticketList`, `openingPeriod`, `person`, `partner`, `project`, `fileDocument`, singletony | `localizedSlug` (cs, en, de) tam, kde má typ vlastní stránku |
+| **Bez překladu** | `mediaMention` | – |
 
-### Dokumenty
+Reference na `page` a `post` míří vždy na český dokument; překlad se dohledá přes `translation.metadata`.
 
-| Název | Typ ve Studiu | Hlavní pole | Reference | Použití na webu |
-| --- | --- | --- | --- | --- |
-| page | Stránka | Titulek, slug (v každém jazyce vlastní), rodič (reference na page), perex, hlavní obrázek, sections[] (lehký page builder jen pro obecné textové stránky), SEO, language | page (rodič), sekce odkazují na ostatní typy | Obecné textové stránky v page builderu: Historie, Projekty, Pronájmy (Svatby, Šenk, Výstavy), Školní výlety, Návštěvní řád, právní texty a budoucí stránky |
-| tour | Prohlídka / expozice | Titulek, slug, druh (okruh, stálá výstava, venkovní, doplňkový), perex, text, délka v minutách, pravidlo začátku (např. Hausperský v lichou hodinu), zdarma ano/ne, obrázky, pořadí, SEO | ticketList, gallery, openingPeriod (zpětně) | Detail prohlídky, Programme/Card, Signpost |
-| ticketList | Ceník | Název, platí pro (reference), řádky (štítek, cena jako číslo, podmínka, druh: plné, snížené, rodinné, skupinové), poznámka | tour[], venue[] | Pricing |
-| openingPeriod | Provozní doba (období) | Štítek, platí pro (reference), od–do (datum), dny (denně, víkendy, svátky, pracovní dny), otevřeno od–do, poslední vstup, pravidlo začátků, zavřeno ano/ne, poznámka | tour[], venue[] | Hours, JSON-LD OpeningHoursSpecification |
-| venue | Prostor k pronájmu | Název, slug, využití (obřad, svatba, oslava, seminář, výstava), kapacita (číslo + text), popis, vybavení, sezónní omezení (Šenk ne listopad–duben), fotky, pořadí | ticketList, person (kontakt), gallery | Halls/CardHall, Svatby, Šenk, Výstavy |
-| post | Aktualita | Titulek, slug, datum, hlavní obrázek (alt), perex (max 300 znaků), tělo (blockContent), kategorie, zobrazit na úvodu, SEO | event (volitelně) | News/CardNews, detail aktuality |
-| event | Akce (nový typ, rozhodnutí) | Titulek, slug, datum od–do, čas jako text, místo, popis, obrázek, cena, odkaz na vstupenky, stav (konáno, zrušeno), SEO | venue | Program/CardProgram, JSON-LD Event |
-| gallery | Fotogalerie | Název, slug, obrázky[] (foto, alt, popisek, autor), výchozí autor (fotoarchiv Správy zámku, Aleš Palek) | tour, venue | Gallery |
-| document | Dokument ke stažení | Název, kategorie (závěrečná zpráva, rozpočet, výhled, objednávka a ceník, ostatní), rok, soubor, platí do | – | Statutární informace, Svatby (objednávka a ceník) |
-| project | Dotovaný projekt | Název, žadatel, reg. číslo, dotační program, výdaje celkem a způsobilé, míra podpory, klíčové aktivity[], loga | – | Povinná publicita projektů |
-| person | Kontaktní osoba | Jméno, funkce, telefon, e-mail, foto, pořadí | – | Contact/CardContact |
-| partner | Partner zámku | Název, popis činnosti, web, logo, pořadí | – | Logos |
-| mediaMention | Zámek v médiích | Název, médium, datum, URL, typ (video, článek, podcast, TV), případně YouTube embed | – | Seznam odkazů |
-| faq | Časté otázky (návrh) | Otázka, odpověď, kategorie, pořadí – převzít schéma z balonhotel-site | – | Faq (ve Figmě není, volitelné) |
+## Singletony
 
-### Objekty
+Každý je jeden dokument s pevným ID, texty v lokalizovaných polích.
 
-| Název | Typ ve Studiu | Hlavní pole | Reference | Použití na webu |
-| --- | --- | --- | --- | --- |
-| localizedString, localizedText | Lokalizovaný text | Objekt s poli cs, en, de (při publikaci povinné všechny tři) | – | Štítky a poznámky v ceníku a provozní době, funkce osob, popisy partnerů |
-| seo | SEO | metaTitle, metaDescription (max 160), ogImage, noindex, canonical (volitelně) | – | BaseHead |
-| imageWithAlt | Obrázek s popisem | asset (hotspot), alt, popisek, autor / licence | – | Img |
-| link, cta | Odkaz a tlačítko | Štítek, druh (interní reference, externí URL, soubor, tel:, mailto:), varianta tlačítka | page, tour, venue, post, document | Button |
-| blockContent | Formátovaný text | Převzít z balonhotel-site: odstavec, mezinadpis, citace, odrážky, obrázek, dvojice obrázků, výrazná citace. Doplnit: tabulka, odkaz na soubor, YouTube | – | PortableText, RichText |
+| Název | Typ ve Studiu | Hlavní pole | Použití na webu |
+| --- | --- | --- | --- |
+| `siteSettings` | Nastavení webu | Název organizace, zřizovatel, adresa, GPS, telefony, e-mail, e-mail pro formulář, IČ, bankovní spojení, sociální sítě, hodnocení (hodnota, zdroj, odkaz), výchozí SEO | Patička, Kontakt, JSON-LD |
+| `navigation` | Navigace | Tři skupiny hlavního menu (štítek + položky), odkazy v horní liště, tři sloupce patičky, právní odkazy | Nav, dropdown, patička |
+| `homePage` | Úvodní stránka | Nadpis (h1), odkaz pod nadpisem, hero fotka, vybrané prohlídky, promo bloky (nadpis, text, fotka, odkaz), citace (text, autor, datum), CTA, SEO | Úvod |
+| `visitInfo` | Provoz a oznámení | `notices[]` (text, tón, platí od–do, odkaz), doprava (auto, vlak, autobus), parkování, bezbariérovost, poznámka ke vstupenkám | Lišta oznámení, Kde nás najdete |
 
-Konvence převzaté z balonhotel-site: pole se jmenují anglicky, popisky ve Studiu česky, slug z titulku (max 96 znaků), obrázky s hotspot a polem alt, pole order pro ruční pořadí, ceny a kapacity v balonhotelu jako text. Pro Rosice navrhuji u cen číslo (kvůli JSON-LD a řazení) a text jen v poznámce.
+## Dokumenty
 
-Hybridní přístup (rozhodnuto): úvod, prohlídky, vstupné a provozní doba, kontakt, aktuality, akce a galerie jsou stránky v kódu, které čtou strukturované typy (homePage, tour, ticketList, openingPeriod, siteSettings, person, post, event, gallery). Typ page se sekcemi slouží jen pro obecné textové stránky; sekce se nikdy nepoužívají k sestavení klíčových stránek.
+| Název | Typ ve Studiu | Hlavní pole | Reference |
+| --- | --- | --- | --- |
+| `page` | Stránka | `language`, titulek, slug, perex, hlavní obrázek, `sections[]`, SEO | sekce odkazují na ostatní typy |
+| `post` | Aktualita / akce | `language`, `kind` (`news`, `event`), titulek, slug, datum zveřejnění, obrázek, perex (max 300), tělo, `featured`, pole akce (`eventStart`, `eventEnd`, `eventTimeNote`, `eventPlace`, `eventPrice`, `eventTicketUrl`, `eventStatus`), SEO | `venue` (místo akce, volitelně) |
+| `tour` | Prohlídka / expozice | Titulek, slug, druh (okruh, stálá výstava, venkovní), štítek nad nadpisem, perex, text, délka (min–max minut nebo „není omezená“), zdarma, obrázky, pořadí, zobrazit na úvodu, SEO | `gallery` |
+| `ticketList` | Ceník | Název, úvodní text, platí pro, řádky (štítek, podmínka, ceny[], jednotka), poznámka, pořadí, `showInStatusBar` | `tour[]`, `venue[]` |
+| `openingPeriod` | Provozní doba (období) | Štítek, `kind` (`regular`, `exception`), platí pro, od–do, dny, zavřeno, otevřeno od–do, poslední vstup, `startRule` + `startTimes[]`, poznámka, `priority` | `tour[]`, `venue[]` |
+| `venue` | Prostor k pronájmu | Název, slug, využití, kapacita (číslo + poznámka), popis, vybavení, měsíce mimo provoz, fotky, pořadí | `ticketList`, `person`, `gallery` |
+| `gallery` | Fotogalerie (album) | Název, slug, obrázky[] (foto, alt, popisek, autor), výchozí autor, pořadí | – |
+| `fileDocument` | Dokument ke stažení | Název, kategorie, rok, soubor (případně soubor pro en a de), platí do | – |
+| `project` | Dotovaný projekt | Název, žadatel, reg. číslo, dotační program, výdaje celkem a způsobilé, míra podpory, klíčové aktivity[], loga | – |
+| `person` | Kontaktní osoba | Jméno, funkce, telefon, e-mail, foto, pořadí | – |
+| `partner` | Partner zámku | Název, popis, web, logo, pořadí, zobrazit v patičce | – |
+| `mediaMention` | Zámek v médiích | Název, médium, datum, URL, typ (video, článek, podcast, TV) | – |
+| `faq` | Časté otázky | Otázka, odpověď, kategorie, pořadí | – |
 
-Jazyky (rozhodnuto): cs, en, de. Přeložitelné dokumenty (page, tour, venue, post, event, gallery, faq) mají pole language a překladová metadata; strukturovaná data (ceny, hodiny) jsou společná a texty v nich jsou lokalizované pole, aby se čísla a data nezadávala třikrát. Podrobnosti v sekci Jazyky.
+Typ se jmenuje `fileDocument`, ne `document`: název `document` je v Sanity vyhrazený.
 
-Studio: singletony jako položky Nastavení webu, Navigace, Úvodní stránka, Provoz a oznámení; pod čárou Stránky, Prohlídky, Ceníky, Provozní doba, Prostory, Aktuality, Akce, Fotogalerie, Dokumenty, Projekty, Lidé, Partneři, Média. Presentation tool dostane pro každý typ místa zobrazení (locations) jako v balonhotelu.
+## Objekty
+
+| Název | Hlavní pole | Poznámka |
+| --- | --- | --- |
+| `localizedString`, `localizedText` | `cs`, `en`, `de` | Při publikaci povinné všechny tři (varianta `optional` jen cs) |
+| `localizedSlug` | `cs`, `en`, `de` (slug) | Unikátní v rámci typu a jazyka |
+| `localizedBlockContent` | `cs`, `en`, `de` (blockContent) | Delší texty strukturovaných typů |
+| `seo` | metaTitle, metaDescription (max 160), ogImage, noindex | Lokalizovaná pole |
+| `imageWithAlt` | asset (hotspot), **alt (povinný)**, popisek, autor | Alt lokalizovaný |
+| `link` | Štítek, druh (interní reference, externí URL, soubor, tel, e-mail) | – |
+| `blockContent` | Odstavec, mezinadpis h2–h4, citace, odrážky, odkaz, obrázek | `h1` není k dispozici, patří titulku stránky |
+
+## Provozní doba
+
+`openingPeriod` popisuje jedno pravidlo. Vyhodnocuje je `src/utils/opening.ts`.
+
+| Pole | Hodnoty | Příklad |
+| --- | --- | --- |
+| `kind` | `regular`, `exception` | Velikonoce 3.–6. 4. = `exception` |
+| `dateFrom`, `dateTo` | datum | 1. 5.–31. 5. |
+| `days` | `daily`, `weekdays`, `weekends`, `holidays`, `weekendsAndHolidays` | duben: `weekendsAndHolidays` |
+| `closed` | ano/ne | zahrada leden–březen |
+| `opens`, `closes`, `lastEntry` | `HH:MM` | 10:00, 16:00, 15:00 |
+| `startRule` | `none`, `everyHour`, `oddHours`, `evenHours`, `listed` | Hausperský = `oddHours`, Žerotínský = `evenHours` |
+| `startTimes[]` | `HH:MM`, jen pro `listed` | Dětský okruh: 10:00, 12:00, 14:00 |
+| `priority` | číslo | rozhodne shodu |
+
+Přednost, když na jeden den sedí víc pravidel:
+
+1. `exception` před `regular`,
+2. kratší rozsah dat před delším,
+3. vyšší `priority`.
+
+Svátky se nezadávají: státní svátky ČR včetně Velkého pátku a Velikonočního pondělí počítá kód. Časové pásmo je `Europe/Prague`.
+
+## Ceník
+
+Řádek má pole `prices[]`, protože některé řádky mají dvě ceny (Kombinované vstupné 340 / 240 Kč). Cena je číslo; jednotka (`Kč`, `Kč / hod`) je zvlášť. Ceník s `showInStatusBar` dává liště první dvě ceny (plné / snížené).
 
 ## Vztahy mezi typy
 
@@ -55,59 +89,46 @@ flowchart LR
   home([homePage])
   nav([navigation])
   page[page]
+  post[post]
   tour[tour]
   venue[venue]
   price[ticketList]
   hours[openingPeriod]
   gal[gallery]
   person[person]
-  post[post]
-  event[event]
-  doc[document]
+  doc[fileDocument]
   home -- vybrané --> tour
-  home -- nejnovější --> post
   nav --> page
+  nav --> tour
   page -- sekce cards --> tour
   page -- sekce venues --> venue
   page -- sekce documents --> doc
-  tour -- cena --> price
-  venue -- cena --> price
+  price -- platí pro --> tour
+  price -- platí pro --> venue
   hours -- platí pro --> tour
   hours -. platí pro .-> venue
   tour --> gal
+  venue --> gal
   venue -- kontakt --> person
-  event -- místo --> venue
-  post -. o akci .-> event
+  post -. místo akce .-> venue
 ```
 
-## Sekce page builderu a komponenty
+## Sekce page builderu
 
-Sekce jsou pole sections[] jen na typu page (obecné textové stránky); klíčové stránky jsou v kódu a stejné komponenty používají přímo, bez sections[]. Sloupec Komponenta uvádí odpovídající komponentu z balonhotel-site (ta vznikla z jeho Figmy); mapování na komponenty z Figmy Rosic je v následující sekci.
+Sekce jsou pole `sections[]` jen na typu `page`. Klíčové stránky jsou v kódu a stejné komponenty používají přímo.
 
-| Sekce | Komponenta | Pole | Kde se použije |
-| --- | --- | --- | --- |
-| hero | ContentHeroMain | Nadpis, eyebrow, text, foto nebo video, tlačítko | Úvod, rozcestníky |
-| intro | ContentIntroMain | Text, tlačítko, monogram | Úvod, O zámku |
-| richText | ContentWrapper + RichText | blockContent | Historie, Návštěvní řád, právní texty |
-| signpost | ContentSignpostMain | Řádky: štítek, odkaz (reference), obrázek | Úvod, Navštivte nás, Akce a možnosti |
-| cards | ContentProgrammeMain, Card | Ruční výběr referencí nebo automaticky podle druhu (tour, venue) | Přehled prohlídek, prostory k pronájmu |
-| pricing | ContentPricingMain | Reference na ticketList[] | Vstupné, detail prohlídky, školní výlety |
-| hours | ContentHoursMain | Reference na openingPeriod nebo filtr podle prohlídky | Vstupné a otevírací doba, Kontakt |
-| gallery | ContentGalleryMain | Reference na gallery nebo vložené fotky | Detaily, Svatby, Šenk |
-| news | ContentNewsMain | Počet, kategorie | Úvod, Aktuality |
-| events | nová, vzor CardProgram | Počet, filtr budoucích akcí | Úvod, Akce (jen když bude typ event) |
-| venues | ContentHallsMain, CardHall | Reference na venue[], filtr podle využití | Svatby, Šenk, Výstavy |
-| contact | ContentContactMain, CardContact | Reference na person[], údaje ze siteSettings | Kontakt, Svatby, Školní výlety |
-| map | ContentMapMain | Souřadnice, odkaz na Mapy.cz, způsoby dopravy | Kde nás najdete, Kontakt |
-| timeline | ContentHistoryMain | Položky: rok, text, obrázek | Z historie |
-| documents | nová | Reference na document[], seskupení podle roku nebo kategorie | Statutární informace, Svatby |
-| partners | ContentLogosMain | Reference na partner[] | Partneři zámku, Úvod |
-| faq | ContentFaqMain, Accordion | Reference na faq[] | Návštěvní informace (volitelně) |
-| cta | ContentCtaMain | Eyebrow, nadpis, primární a sekundární tlačítko | Konec většiny stránek |
-| social | ContentInstagramMain | Zdroj (Facebook nebo Instagram), příspěvky ručně | Úvod (rozhodnout) |
-| notice | nová | Text, tón, platnost od–do | Lišta oznámení, detail prohlídky |
+| Sekce | Pole | Kde se použije |
+| --- | --- | --- |
+| `sectionRichText` | blockContent | Historie, Návštěvní řád, právní texty |
+| `sectionMedia` | Obrázek nebo dvojice, popisek | Všechny textové stránky |
+| `sectionPricing` | Reference na `ticketList[]` | Školní výlety, Svatby |
+| `sectionVenues` | Reference na `venue[]` | Svatby, Šenk, Výstavy |
+| `sectionGallery` | Reference na `gallery` | Svatby, Šenk |
+| `sectionDocuments` | Reference na `fileDocument[]` | Svatby, Statutární informace |
+| `sectionContact` | Reference na `person[]` | Svatby, Školní výlety |
+| `sectionCta` | Nadpis, odkaz, obrázek | Konec stránky |
 
-> **INFO: Rozhodnuto: hybrid** Klíčové stránky jsou v kódu jako v balonhotel-site, page builder je jen pro obecné textové stránky (historie, projekty, pronájmy a budoucí stránky). Úprava textu Svateb nebo Historie tak nevyžaduje nasazení, zatímco struktura úvodu, prohlídek, cen a hodin zůstává pod kontrolou kódu.
+První verze page builderu má jen tyto sekce. Další (`timeline`, `faq`, `partners`) přibudou, až je bude potřeba; do té doby se nedělají.
 
 ---
 

@@ -1,5 +1,41 @@
 # 06 – Stávající web a migrace obsahu
 
+## Stav migrace (10. 11. 2026)
+
+Obsah starého webu je v Sanity. Převod dělá skript `scripts/migrate-wp.ts` (`npm run migrate`), který čte veřejné WordPress API na `zamek-rosice.cz`. Lze ho spustit znovu: přepíše jen to, co sám vytvořil, a nahrané soubory znovu nenahrává (seznam je v `tmp/wp/`, mimo git). `npm run migrate -- --dry` jen vypíše, co by udělal.
+
+| Co | Kolik | Kam |
+| --- | --- | --- |
+| Textové stránky | 9 | `page` (Návštěvní řád, Svatby, Školní výlety, Výstavy, Šenk, Z historie, Povinná publicita, Přístupnost, Ochrana osobních údajů); text jako jedna sekce, fotky na svém místě v textu |
+| Popisy prohlídek | 7 | `tour.body` a `tour.images`; první fotka je ta z přehledu okruhů |
+| Fotogalerie | 9 alb, 126 fotek | `gallery.images` s popisky a autorem |
+| Aktuality | 9 z 11 | `post`; „Výstava betlémů“ a „Last minute“ jsou akce s datem z textu |
+| Partneři | 6 | `partner` |
+| Zámek v médiích | 8 | `mediaMention` |
+| Dokumenty ke stažení | 8 | `fileDocument` (7 povinně zveřejňovaných PDF, objednávka a ceník svateb) |
+| Statutární údaje | IČ, účet, Facebook | `siteSettings` |
+| Soubory | 176 | Sanity assets |
+
+Ceny a provozní doba na starém webu odpovídají tomu, co bylo v Sanity už z návrhu (190 / 140 Kč atd.). Jediná oprava: třetí řádek ceníku Krytu CO je „Skupinová sleva MŠ a ZŠ“.
+
+### Co migrace nepřevedla nebo převedla s výhradou
+
+- **Dva příspěvky bez textu:** „Meda a Jan Mládek – Život, exil, umění“ (2024) a uvítací příspěvek z roku 2020. Vynechány.
+- **Žerotínský a Hausperský okruh** měly na starém webu společnou stránku. Úvodní odstavec dostaly oba, vlastní odstavec každý svůj, **fotky mají oba stejné** (osm). Rozdělit ručně.
+- **40 fotek má jako alt jen název souboru** nebo obecný text. Seznam je v `tmp/wp/weak-alts.txt`. Doplnit ve Studiu.
+- **Část fotek je ve zmenšené verzi** (1024 px), protože originál není v knihovně médií starého webu.
+- **Album Zámecká zahrada** ze starého webu v návrhu není; je zachované jako desáté album. Alba Zámecký exteriér a Edukační centrum z návrhu jsou prázdná.
+- **Tabulky** v textech jsou převedené na odstavce („štítek: hodnota“), editor textu tabulky nemá.
+- **Povinná publicita projektů** je text na stránce, ne strukturovaný typ `project`.
+- **Kontaktní formulář, mapa stránek** se nepřevádějí, vzniknou nově.
+- **Vložené přehrávače** (SoundCloud) jsou převedené na odkaz.
+- Všechno je jen česky.
+
+### Přesměrování
+
+Staré adresy, které se změnily, jsou v `src/redirects.ts` (prohlídky, alba, Šenk, rozcestníky). Příspěvky `/rok/měsíc/slug/` vedou na `/aktuality/slug/` se stejným slugem.
+
+
 ## Stávající web: co obsahuje
 
 | Oblast | Co tam je | Poznámka k novému webu |

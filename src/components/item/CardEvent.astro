@@ -1,0 +1,226 @@
+---
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Line above the title: "Aktuality" or "Akce". */
+  eyebrow?: string;
+  /** Card title. */
+  heading: string;
+  /** Heading level. */
+  headingTag?: "h2" | "h3" | "h4";
+  /** Line in bold above the text, such as the admission. */
+  lead?: string;
+  /** Body text. */
+  text?: string;
+  /** Link destination. */
+  href: string;
+  /** Button label. */
+  buttonLabel: string;
+  /** Day and month of the event, as shown on the right. */
+  date?: string;
+  /** Year of the event. */
+  year?: string;
+  /** Machine-readable date for the `<time>` element. */
+  datetime?: string;
+  /** Image source. */
+  image?: string;
+  /** Image alt text. Omit for decorative images. */
+  imageAlt?: string;
+  /** Image width. */
+  imageWidth?: number;
+  /** Image height. */
+  imageHeight?: number;
+}
+
+const {
+  render = true,
+  eyebrow,
+  heading,
+  headingTag: Tag = "h3",
+  lead,
+  text,
+  href,
+  buttonLabel,
+  date,
+  year,
+  datetime,
+  image,
+  imageAlt,
+  imageWidth,
+  imageHeight,
+} = Astro.props;
+---
+
+{render && heading && (
+  <article class="card-event_wrap">
+    <div class="card-event_visual">
+      {image && (
+        <SanityImg
+          image={{
+            url: image,
+            alt: imageAlt,
+            width: imageWidth,
+            height: imageHeight,
+          }}
+          sizes="11rem"
+          maxWidth={1200}
+        />
+      )}
+    </div>
+    <div class="card-event_content">
+      <p class="card-event_eyebrow text-style-small">{eyebrow}</p>
+      <Tag class="card-event_title text-style-h4">
+        <a class="card-event_title_link" href={href}>
+          {heading}
+        </a>
+      </Tag>
+      {lead && <p class="card-event_lead text-style-small">{lead}</p>}
+      {text && <p class="card-event_text text-style-small">{text}</p>}
+    </div>
+    <div class="card-event_aside">
+      {date && (
+        <time class="card-event_date" datetime={datetime}>
+          <span class="card-event_year text-style-small">{year}</span>
+          <span class="text-style-h4">{date}</span>
+        </time>
+      )}
+      <Button
+        element="link"
+        variant="link"
+        href={href}
+        aria-hidden="true"
+        tabindex={-1}
+      >
+        {buttonLabel}
+      </Button>
+    </div>
+  </article>
+)}
+
+<style is:global>
+  @layer components {
+    .card-event_wrap {
+      position: relative;
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: var(--space-4) var(--space-5);
+      padding-block: var(--space-6);
+      border-top: var(--border-width) solid var(--text);
+
+      @media (width >= 48rem) {
+        grid-template-columns: 11rem 1fr auto;
+        gap: var(--space-6) var(--space-7);
+        padding-inline: var(--space-6);
+      }
+    }
+
+    .card-event_visual {
+      aspect-ratio: 177 / 223;
+      align-self: start;
+      background-color: var(--background-2);
+      overflow: clip;
+
+      & > .image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .card-event_content {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      max-width: 42rem;
+    }
+
+    .card-event_eyebrow {
+      margin: 0 0 var(--space-3);
+      color: var(--muted-text);
+    }
+
+    .card-event_title {
+      margin: 0 0 var(--space-5);
+      text-wrap: balance;
+    }
+
+    .card-event_title_link {
+      text-decoration: none;
+      text-underline-offset: 0.12em;
+      text-decoration-thickness: var(--border-width);
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+      }
+    }
+
+    .card-event_lead {
+      margin: 0 0 var(--space-3);
+      font-weight: var(--primary-bold);
+    }
+
+    .card-event_text {
+      margin: 0;
+    }
+
+    .card-event_aside {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      justify-content: space-between;
+      gap: var(--space-4);
+
+      @media (width >= 48rem) {
+        grid-column: 3;
+        align-items: end;
+        text-align: end;
+      }
+
+      & > .button_wrap {
+        opacity: 0;
+        transition: opacity var(--hover-duration) var(--hover-ease);
+      }
+    }
+
+    .card-event_date {
+      display: flex;
+      flex-direction: column;
+      white-space: nowrap;
+    }
+
+    .card-event_year {
+      color: var(--muted-text);
+    }
+
+    @media (hover: hover) {
+      .card-event_wrap:hover {
+        & .card-event_title_link {
+          text-decoration: underline;
+        }
+        & .card-event_aside > .button_wrap {
+          opacity: 1;
+        }
+      }
+    }
+
+    .card-event_wrap:focus-within {
+      & .card-event_title_link {
+        text-decoration: underline;
+      }
+      & .card-event_aside > .button_wrap {
+        opacity: 1;
+      }
+    }
+
+    @media (hover: none) {
+      .card-event_aside > .button_wrap {
+        opacity: 1;
+      }
+    }
+  }
+</style>

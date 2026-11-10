@@ -1,0 +1,75 @@
+---
+import CardEvent from "@/components/item/CardEvent.astro";
+import { DEFAULT_LANG, LANG_LOCALES, SITE_TIME_ZONE } from "@/consts.ts";
+import { routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Post } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** News items and events, in the order they are shown. */
+  posts: Post[];
+  /** Heading level of each item. */
+  headingTag?: "h2" | "h3" | "h4";
+}
+
+const { render = true, posts, headingTag = "h3" } = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const locale = LANG_LOCALES[lang];
+
+const dayMonth = new Intl.DateTimeFormat(locale, {
+  day: "numeric",
+  month: "long",
+  timeZone: SITE_TIME_ZONE,
+});
+const yearOnly = new Intl.DateTimeFormat(locale, {
+  year: "numeric",
+  timeZone: SITE_TIME_ZONE,
+});
+
+const when = (post: Post) => {
+  const value = post.kind === "event" ? post.eventStart : undefined;
+  if (!value) return {};
+  const date = new Date(value);
+  return {
+    date: dayMonth.format(date),
+    year: yearOnly.format(date),
+    datetime: value,
+  };
+};
+---
+
+{render && posts.length > 0 && (
+  <ul class="events_wrap">
+    {posts.map((post) => (
+      <li>
+        <CardEvent
+          eyebrow={post.kind === "event" ? t.event : t.news}
+          heading={post.title}
+          headingTag={headingTag}
+          lead={post.eventPrice}
+          text={post.perex}
+          href={routePath("news", lang, post.slug)}
+          buttonLabel={t.readMore}
+          image={post.image?.url}
+          imageAlt={post.image?.alt}
+          imageWidth={post.image?.width}
+          imageHeight={post.image?.height}
+          {...when(post)}
+        />
+      </li>
+    ))}
+  </ul>
+)}
+
+<style is:global>
+  @layer components {
+    .events_wrap {
+      width: 100%;
+      border-bottom: var(--border-width) solid var(--text);
+    }
+  }
+</style>

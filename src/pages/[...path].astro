@@ -1,0 +1,71 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import PortableText from "@/components/utility/PortableText.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG, LANGS, type Lang } from "@/consts.ts";
+import { matchPage, pagePath } from "@/i18n/pages.ts";
+import { stripLang } from "@/i18n/routes.ts";
+import { getPage, getPageSections, shellFor } from "@/sanity/queries.ts";
+
+/*
+ * Text pages from the page builder. Everything that is not a page in code
+ * lands here; an address with no page behind it is a 404.
+ */
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const match = matchPage(
+  stripLang(Astro.locals.pathname ?? Astro.url.pathname),
+  lang,
+);
+const page = match && (await getPage(lang, match.parent, match.slug));
+
+if (!match || !page) return Astro.rewrite("/404/");
+
+const [shell, sections] = await Promise.all([
+  shellFor(Astro.locals),
+  getPageSections(lang, match.parent, match.slug),
+]);
+
+const isLang = (value: string): value is Lang =>
+  (LANGS as readonly string[]).includes(value);
+const translations = page.translations.flatMap((item) =>
+  isLang(item.lang)
+    ? [{ lang: item.lang, path: pagePath(item.parent, item.slug, item.lang) }]
+    : [],
+);
+const alternates =
+  translations.length > 0
+    ? translations
+    : [{ lang, path: pagePath(page.parent, page.slug, lang) }];
+---
+
+<Layout title={page.title} description={page.perex} alternates={alternates}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1">{page.title}</Heading>
+      <Paragraph variant="large" maxWidth={60}>
+        {page.perex}
+      </Paragraph>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Sections -->
+  {sections.map((section) => (
+    <Section
+      render={section._type === "sectionRichText"}
+      paddingTop="small"
+      align="center"
+    >
+      <PortableText value={section.body} />
+    </Section>
+  ))}
+</Layout>

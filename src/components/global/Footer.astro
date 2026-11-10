@@ -1,0 +1,268 @@
+---
+import Button from "@/components/Button.astro";
+import ContactLinesMain from "@/components/content/ContactLinesMain.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import { DEFAULT_LANG, SITE_NAME } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Shell } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Contact details, link columns, partners and the closing call to action. */
+  shell: Pick<
+    Shell,
+    | "organisation"
+    | "phone"
+    | "mobile"
+    | "email"
+    | "footerColumns"
+    | "partners"
+    | "cta"
+  >;
+}
+
+const { render = true, shell } = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const year = new Date().getFullYear();
+
+/* "Správa zámku Rosice, příspěvková organizace": the name, then its legal form. */
+const [name, ...form] = shell.organisation.split(", ");
+const cta = shell.cta;
+---
+
+{render && (
+  <footer class="footer_wrap">
+    {cta && (
+      <div class:list={["footer_cta", "theme-dark", cta.image && "has-image"]}>
+        {cta.image && <SanityImg image={{ ...cta.image, alt: "" }} />}
+        <div class="footer_cta_content">
+          <h2 class="footer_cta_title text-style-h2">{cta.title}</h2>
+          {cta.link && (
+            <Button element="link" variant="link" href={cta.link.href}>
+              {cta.link.label}
+            </Button>
+          )}
+        </div>
+      </div>
+    )}
+    <div class="footer_inner">
+      <div class="footer_top">
+        <p class="footer_organisation text-style-small">
+          <strong>
+            {name}
+            {form.length > 0 && ","}
+          </strong>
+          {form.length > 0 && <span>{form.join(", ")}</span>}
+        </p>
+        <nav class="footer_nav" aria-label={t.footerNavigation}>
+          {shell.footerColumns.map((column) => (
+            <ul class="footer_links">
+              {column.map((item) => (
+                <li>
+                  <a class="footer_link" href={item.href}>
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </nav>
+      </div>
+      <div class="footer_middle">
+        <ContactLinesMain shell={shell} />
+        {shell.partners.length > 0 && (
+          <ul class="footer_partners">
+            {shell.partners.map((partner) => (
+              <li>
+                {partner.url ? (
+                  <a
+                    class="footer_partner"
+                    href={partner.url}
+                    aria-label={partner.name}
+                    rel="noopener"
+                  >
+                    {partner.logo ? (
+                      <img src={partner.logo} alt="" loading="lazy" />
+                    ) : (
+                      partner.name
+                    )}
+                  </a>
+                ) : partner.logo ? (
+                  <img src={partner.logo} alt={partner.name} loading="lazy" />
+                ) : (
+                  partner.name
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div class="footer_bottom text-style-small">
+        <p>
+          Copyright &copy; {year}, {SITE_NAME}. {t.allRightsReserved}
+        </p>
+        <p>Design by Jakub Maca, 2026</p>
+      </div>
+    </div>
+  </footer>
+)}
+
+<style is:global>
+  @layer components {
+    .footer_wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-inline: var(--site-margin);
+      padding-bottom: var(--space-5);
+    }
+
+    .footer_cta {
+      position: relative;
+      width: 100%;
+      max-width: var(--max-width-main);
+      display: grid;
+      place-items: center;
+      min-height: 22rem;
+      padding: var(--section-space-medium) var(--space-6);
+      background-color: var(--background);
+      color: var(--text);
+      overflow: clip;
+
+      &.has-image {
+        aspect-ratio: 1647 / 702;
+        min-height: 26rem;
+        max-height: 44rem;
+      }
+
+      & > .image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      &.has-image::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-color: color-mix(in lab, var(--dark-900) 35%, transparent);
+      }
+    }
+
+    .footer_cta_content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-6);
+      text-align: center;
+    }
+
+    .footer_cta_title {
+      max-width: 18ch;
+      text-transform: uppercase;
+      line-height: var(--line-height-small);
+    }
+
+    .footer_inner {
+      width: 100%;
+      max-width: var(--max-width-main);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+      padding-top: var(--space-7);
+      border-top: var(--border-width) solid var(--text);
+      margin-top: var(--space-3);
+    }
+
+    .footer_top,
+    .footer_middle {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-7);
+    }
+
+    .footer_organisation {
+      display: flex;
+      flex-direction: column;
+      & > span::first-letter {
+        text-transform: uppercase;
+      }
+    }
+
+    .footer_nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+      gap: var(--space-6) var(--space-7);
+    }
+
+    .footer_links {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      font-size: var(--text-small);
+    }
+
+    .footer_link {
+      text-decoration: none;
+      text-underline-offset: 0.3em;
+      text-decoration-thickness: var(--border-width);
+      @media (hover: hover) {
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .footer_partners {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-6) var(--space-8);
+      & img {
+        max-height: 3rem;
+        width: auto;
+      }
+    }
+
+    .footer_bottom {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-6);
+      padding-top: var(--space-4);
+      border-top: var(--border-width) solid var(--text);
+    }
+
+    @media (width >= 64rem) {
+      .footer_top,
+      .footer_middle {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: start;
+      }
+
+      .footer_middle {
+        align-items: end;
+      }
+
+      .footer_nav {
+        grid-template-columns: repeat(3, auto);
+        flex: 0 1 50%;
+        justify-content: space-between;
+      }
+
+      .footer_partners {
+        flex: 0 1 50%;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+      }
+    }
+  }
+</style>

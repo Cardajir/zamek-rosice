@@ -1,0 +1,139 @@
+---
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import type { Promo } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Eyebrow, title, text, photographs and link. */
+  promo: Promo;
+  /** Heading level. */
+  headingTag?: "h2" | "h3";
+  /** Put the text on the right and the photographs on the left. */
+  reverse?: boolean;
+}
+
+const {
+  render = true,
+  promo,
+  headingTag: Tag = "h2",
+  reverse = false,
+} = Astro.props;
+
+const images = promo.images.slice(0, 2);
+---
+
+{render && promo.title && (
+  <article
+    class:list={[
+      "promo_wrap",
+      reverse && "reverse",
+      images.length === 0 && "text-only",
+    ]}
+  >
+    <div class="promo_content">
+      {promo.eyebrow && (
+        <p class="promo_eyebrow text-style-small">{promo.eyebrow}</p>
+      )}
+      <Tag class="promo_title text-style-h3">{promo.title}</Tag>
+      {promo.text && <p class="promo_text">{promo.text}</p>}
+      {promo.link && (
+        <Button
+          element="link"
+          variant="link"
+          href={promo.link.href}
+          aria-label={`${promo.link.label}: ${promo.title}`}
+        >
+          {promo.link.label}
+        </Button>
+      )}
+    </div>
+    {images.length > 0 && (
+      <div class:list={["promo_visual", images.length > 1 && "pair"]}>
+        {images.map((image) => (
+          <SanityImg
+            image={image}
+            sizes="(width >= 64rem) 45vw, 100vw"
+            maxWidth={1600}
+          />
+        ))}
+      </div>
+    )}
+  </article>
+)}
+
+<style is:global>
+  @layer components {
+    .promo_wrap {
+      width: 100%;
+      display: grid;
+      gap: var(--space-7);
+      align-items: center;
+
+      @media (width >= 64rem) {
+        grid-template-columns: minmax(0, 31.5rem) minmax(0, 1fr);
+        gap: var(--space-8);
+
+        &.reverse {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 31.5rem);
+          & > .promo_content {
+            order: 2;
+          }
+        }
+
+        &.text-only {
+          grid-template-columns: minmax(0, 31.5rem);
+          &.reverse {
+            justify-content: end;
+          }
+        }
+      }
+    }
+
+    .promo_content {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+    }
+
+    .promo_eyebrow {
+      margin: 0 0 var(--space-3);
+      color: var(--muted-text);
+    }
+
+    .promo_title {
+      margin: 0 0 var(--space-6);
+      text-wrap: balance;
+    }
+
+    .promo_text {
+      margin: 0 0 var(--space-6);
+    }
+
+    .promo_visual {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      align-items: start;
+
+      & > .image {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 5;
+        object-fit: cover;
+      }
+
+      &.pair > .image:first-child {
+        grid-column: 1 / 8;
+      }
+
+      &.pair > .image:last-child {
+        grid-column: 5 / -1;
+        margin-top: 30%;
+      }
+    }
+  }
+</style>

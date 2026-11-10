@@ -1,0 +1,157 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import Section from "@/components/wrapper/Section.astro";
+import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Eyebrow from "@/components/typography/Eyebrow.astro";
+import Heading from "@/components/typography/Heading.astro";
+import Paragraph from "@/components/typography/Paragraph.astro";
+import Button from "@/components/Button.astro";
+import Form from "@/components/form/Form.astro";
+import Input from "@/components/form/Input.astro";
+import Textarea from "@/components/form/Textarea.astro";
+import Choice from "@/components/form/Choice.astro";
+import ContactLinesMain from "@/components/content/ContactLinesMain.astro";
+import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { alternates } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { getPeople } from "@/sanity/page-queries.ts";
+import { shellFor } from "@/sanity/queries.ts";
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const [shell, people] = await Promise.all([
+  shellFor(Astro.locals),
+  getPeople(lang),
+]);
+
+const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
+const tel = (value: string) => `tel:${value.replace(/[^\d+]/g, "")}`;
+
+/* Public by design: the widget needs it in the page. Empty means no challenge. */
+const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
+  string | undefined;
+---
+
+<Layout title={t.contactTitle} alternates={alternates("contact")}>
+  <!-- Status bar -->
+  <Section paddingTop="none" paddingBottom="small">
+    <StatusBarMain shell={shell} />
+  </Section>
+
+  <!-- Title -->
+  <Section paddingTop="small" paddingBottom="small">
+    <ContentWrapper centered>
+      <Heading tag="h1">{t.contactTitle}</Heading>
+    </ContentWrapper>
+  </Section>
+
+  <!-- Contacts and form -->
+  <Section paddingTop="small">
+    <ContentWrapper variant="columns" column1Class="align-self-start">
+      <ContactLinesMain shell={shell} />
+      <Paragraph>
+        {shell.organisation}
+        <br />
+        {address}
+      </Paragraph>
+      <Eyebrow render={people.length > 0} tag="h2" class="margin-top-6">
+        {t.contactPeople}
+      </Eyebrow>
+      {people.map((person) => (
+        <Paragraph>
+          {person.name}
+          {person.role && `, ${person.role}`}
+          {person.phone && (
+            <Fragment>
+              <br />
+              <a href={tel(person.phone)}>{person.phone}</a>
+            </Fragment>
+          )}
+          {person.email && (
+            <Fragment>
+              <br />
+              <a href={`mailto:${person.email}`}>{person.email}</a>
+            </Fragment>
+          )}
+        </Paragraph>
+      ))}
+
+      <Fragment slot="column2">
+        <Heading tag="h2" variant="h5">
+          {t.contactForm}
+        </Heading>
+        <Form
+          name="contact"
+          action="/api/contact"
+          successMessage={t.formSent}
+          errorMessage={t.formFailed}
+          class="margin-top-5"
+        >
+          <Input
+            variant="first-name"
+            label={t.formName}
+            name="name"
+            placeholder=""
+            maxlength={100}
+            required
+          />
+          <Input
+            variant="last-name"
+            label={t.formSurname}
+            name="surname"
+            placeholder=""
+            maxlength={100}
+          />
+          <Input
+            variant="email"
+            label={t.formEmail}
+            name="email"
+            placeholder=""
+            maxlength={200}
+            required
+          />
+          <Textarea
+            label={t.formMessage}
+            name="message"
+            maxlength={5000}
+            required
+          />
+          <div class="sr-only" aria-hidden="true">
+            <label>
+              Web
+              <input
+                type="text"
+                name="website"
+                tabindex="-1"
+                autocomplete="off"
+              />
+            </label>
+          </div>
+          <Choice label={t.formConsent} name="consent" required />
+          {turnstileKey && (
+            <div
+              class="cf-turnstile"
+              data-sitekey={turnstileKey}
+              data-language={lang}
+              data-appearance="interaction-only"
+            />
+          )}
+          <Button variant="link" type="submit">
+            {t.formSubmit}
+          </Button>
+        </Form>
+      </Fragment>
+    </ContentWrapper>
+  </Section>
+
+  {turnstileKey && (
+    <script
+      is:inline
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    />
+  )}
+</Layout>

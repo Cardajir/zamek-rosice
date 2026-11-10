@@ -1,0 +1,53 @@
+---
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The quotation, without quotation marks. */
+  text?: string;
+  /** Who said it. */
+  author?: string;
+  /** When, already formatted for display. */
+  date?: string;
+}
+
+const { render = true, text, author, date } = Astro.props;
+---
+
+{render && text && (
+  <figure class="quote_wrap">
+    <blockquote class="quote_text text-style-h3">
+      <p>“{text}”</p>
+    </blockquote>
+    {(author || date) && (
+      <figcaption class="quote_caption text-style-small">
+        {[author, date].filter(Boolean).join(", ")}
+      </figcaption>
+    )}
+  </figure>
+)}
+
+<style is:global>
+  @layer components {
+    .quote_wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-6);
+      max-width: 76.25rem;
+      margin-inline: auto;
+      text-align: center;
+    }
+
+    .quote_text {
+      margin: 0;
+      text-wrap: balance;
+      & > p {
+        margin: 0;
+      }
+    }
+
+    .quote_caption {
+      font-weight: var(--primary-semibold);
+    }
+  }
+</style>

@@ -1,0 +1,140 @@
+---
+import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Shell } from "@/sanity/queries.ts";
+import { slotContent } from "@/utils/slots.ts";
+import { openStatusText } from "@/utils/status.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Address, admission and opening hours. */
+  shell: Pick<
+    Shell,
+    "street" | "postalCode" | "locality" | "prices" | "opening"
+  >;
+  /** Text shown on the left in place of admission. */
+  note?: string;
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, shell, note, class: className } = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const status = openStatusText(shell.opening, lang);
+const price = new Intl.NumberFormat(LANG_LOCALES[lang], {
+  style: "currency",
+  currency: "CZK",
+  maximumFractionDigits: 0,
+});
+const prices = shell.prices.slice(0, 2).map((value) => price.format(value));
+const center = await slotContent(Astro.slots, "center");
+---
+
+{render && (
+  <div class:list={["status-bar_wrap", "text-style-small", className]}>
+    <p class="status-bar_item">
+      {note ? (
+        <span>{note}</span>
+      ) : (
+        prices.length > 0 && (
+          <Fragment>
+            <span>{t.admissionLabel}</span>
+            <span>{prices.join(" / ")}</span>
+          </Fragment>
+        )
+      )}
+    </p>
+    <div class="status-bar_center">
+      {center ? (
+        <Fragment set:html={center} />
+      ) : (
+        <p class="status-bar_address text-style-large">
+          <span>{shell.street},</span>
+          <span>
+            {shell.postalCode} {shell.locality}
+          </span>
+        </p>
+      )}
+    </div>
+    <p class="status-bar_item status-bar_status">
+      <span class:list={["status-bar_state", status.isOpen && "open"]}>
+        {status.label}
+      </span>
+      {status.detail && <span>{status.detail}</span>}
+    </p>
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    .status-bar_wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4) var(--space-6);
+      padding-top: var(--space-4);
+      border-top: var(--border-width) solid var(--text);
+      font-weight: var(--primary-semibold);
+      line-height: var(--line-height-large);
+
+      @media (width >= 48rem) {
+        grid-template-columns: 1fr auto 1fr;
+      }
+    }
+
+    .status-bar_item {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+    }
+
+    .status-bar_center {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+
+      @media (width >= 48rem) {
+        grid-column: 2;
+        grid-row: 1;
+      }
+    }
+
+    .status-bar_address {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      font-family: var(--secondary-family);
+      font-weight: var(--secondary-medium);
+      line-height: var(--line-height-medium);
+      letter-spacing: var(--letter-spacing-snug);
+    }
+
+    .status-bar_status {
+      align-items: end;
+      text-align: end;
+    }
+
+    .status-bar_state {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5em;
+      &::before {
+        content: "";
+        width: 0.7em;
+        height: 0.7em;
+        border-radius: var(--radius-round);
+        background-color: var(--muted-500);
+      }
+      &.open::before {
+        background-color: var(--status-open);
+      }
+    }
+  }
+</style>
