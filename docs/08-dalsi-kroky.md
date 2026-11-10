@@ -26,6 +26,8 @@ Stav k 10. 11. 2026. Hotové kroky jsou odškrtnuté.
 - [x] **Fotogalerie:** úvod s výběrem z každého alba, každé album na vlastní adrese, prohlížeč fotografií (šipky, Esc, tažení prstem, návrat fokusu).
 - [x] **Kontakt:** kontakty, osoby a formulář. Endpoint `/api/contact` kontroluje vstup, má past na roboty a volitelně Turnstile.
 - [x] **Zámek v médiích, Partneři zámku, Povinné a statutární informace, Mapa stránek.**
+- [x] **CI:** kontrola typů, testy a build na pull requestech a na `main`.
+- [x] **Zkušební nasazení** na Cloudflare: https://zamek-rosice.balonhotel-site.workers.dev (`npm run deploy`). Mimo ostrou doménu posílá web `X-Robots-Tag: noindex`, takže se kopie nedostane do vyhledávačů.
 
 ## Co ve skořápce a na úvodu chybí
 
@@ -48,7 +50,7 @@ Figma při stavbě neodpovídala na dotaz na detail návrhu (`get_design_context
 2. **Instagram:** odkaz do Nastavení webu (Facebook je převzatý ze starého webu).
 3. **Písmo Romie:** licence a soubory woff2 (otázka 14). Do té doby záložní patkové písmo.
 4. **Viditelnost repozitáře:** je veřejný; doporučení přepnout na soukromý.
-5. **Cloudflare:** účet, Worker, doména, Turnstile. Secrets `SANITY_API_READ_TOKEN` a `PREVIEW_SECRET` nastavit i ve Workeru.
+5. **Cloudflare:** Worker běží na zkušební adrese; zbývá doména, Turnstile a adresa Workeru v CORS projektu Sanity (jinak se Studio na nasazeném webu nepřihlásí). Secrets `SANITY_API_READ_TOKEN` a `PREVIEW_SECRET` nastavit i ve Workeru.
 6. **Odesílání formuláře:** dokud nejsou nastavené `RESEND_API_KEY` a `CONTACT_FROM`, formulář odpoví, že zprávu nejde odeslat. Potřeba je účet u e-mailové služby s ověřenou doménou a cílová adresa v Nastavení webu.
 7. **Obsah do Studia:** zřizovatel (Statutární údaje), poznámka k zahradě u období provozní doby, loga partnerů, data u zmínek v médiích.
 8. **Designer:** logo a ornamenty jako SVG, chybějící stránky a stavy, schválení barvy štítků `#777080`.

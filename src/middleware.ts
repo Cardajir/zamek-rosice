@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { langFromPath, rewriteTarget } from "@/i18n/routes.ts";
 import { redirectFor } from "@/redirects.ts";
+import { isLiveHost } from "@/utils/seo.ts";
 import {
   PREVIEW_COOKIE,
   previewToken,
@@ -58,6 +59,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const response = await runAsPreview(preview, () =>
     target ? next(target) : next(),
   );
+
+  /* A copy of the site on any other host is not for search engines. */
+  if (!isLiveHost(context.url.hostname)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
 
   const type = response.headers.get("Content-Type") ?? "";
   if (type.includes("text/html")) {
