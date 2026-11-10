@@ -1,0 +1,122 @@
+---
+/*
+ * Content below the first screen fades up into place as it is scrolled to;
+ * things that arrive together follow one another. Nothing is hidden without
+ * JavaScript, for a visitor who asked for less motion, or on paper.
+ */
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+}
+
+const { render = true } = Astro.props;
+---
+
+{render && <span class="reveal_wrap" hidden data-reveal-root />}
+
+<script>
+  const root = document.querySelector("[data-reveal-root]");
+  const main = document.querySelector("main");
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (root && main && !calm.matches && "IntersectionObserver" in window) {
+    /* Wrappers whose items come in one by one instead of as a block. */
+    const GROUPS = [
+      ".layout",
+      ".layout > div",
+      ".grid",
+      ".events_wrap",
+      ".tours_wrap",
+      ".gallery_list",
+      ".gallery-nav_list",
+      ".info-list_wrap",
+      ".promo_wrap",
+    ].join(", ");
+    const STEP = 80;
+    const MOST = 6;
+
+    const targets: HTMLElement[] = [];
+    const collect = (element: Element) => {
+      if (element.matches(GROUPS)) {
+        for (const child of element.children) collect(child);
+      } else if (element instanceof HTMLElement && !element.hidden) {
+        targets.push(element);
+      }
+    };
+    for (const container of main.querySelectorAll(".section > .container")) {
+      for (const child of container.children) collect(child);
+    }
+
+    const settle = (element: HTMLElement) => {
+      element.removeAttribute("data-reveal");
+      element.style.removeProperty("transition-delay");
+    };
+
+    const show = (element: HTMLElement, delay: number) => {
+      if (element.dataset.reveal !== "out") return;
+      element.style.transitionDelay = `${delay}ms`;
+      element.dataset.reveal = "in";
+      /* Once in place the element is left exactly as its own styles have it. */
+      window.setTimeout(() => settle(element), delay + 1000);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries
+          .filter((entry) => entry.isIntersecting)
+          .sort(
+            (a, b) =>
+              a.boundingClientRect.top - b.boundingClientRect.top ||
+              a.boundingClientRect.left - b.boundingClientRect.left,
+          )
+          .forEach((entry, index) => {
+            observer.unobserve(entry.target);
+            show(entry.target as HTMLElement, Math.min(index, MOST) * STEP);
+          });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.01 },
+    );
+
+    /* What is already on screen stays put: no flash, and the page's first paint is not held back. */
+    const fold = window.innerHeight;
+    for (const target of targets) {
+      if (target.getBoundingClientRect().top < fold) continue;
+      target.dataset.reveal = "out";
+      observer.observe(target);
+    }
+
+    /* Keyboard focus never lands on something still invisible. */
+    main.addEventListener("focusin", (event) => {
+      const hidden = (event.target as Element).closest<HTMLElement>(
+        '[data-reveal="out"]',
+      );
+      if (!hidden) return;
+      observer.unobserve(hidden);
+      show(hidden, 0);
+    });
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    /* Hidden at once, while still off screen; only the way in is animated. */
+    [data-reveal="out"] {
+      opacity: 0;
+      translate: 0 1.5rem;
+    }
+
+    [data-reveal="in"] {
+      --_reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+      transition:
+        opacity 700ms var(--_reveal-ease),
+        translate 900ms var(--_reveal-ease);
+    }
+
+    @media print {
+      [data-reveal] {
+        opacity: 1;
+        translate: none;
+      }
+    }
+  }
+</style>

@@ -30,6 +30,7 @@ Stav k 10. 11. 2026. Hotové kroky jsou odškrtnuté.
 - [x] **Podklady z Figmy:** logo, šipky odkazů a menu, ikony sítí a sedm ilustrací jsou vyexportované z návrhu (`src/assets/`). Ilustrace jsou na místech, kde je návrh má: úvod (nad nadpisem a nad citací), aktuality, fotogalerie, kontakty, kde nás najdete, vstupné, textové stránky.
 - [x] **Navbar podle návrhu:** písmo a rozestupy z Figmy, jazyk v rozbalovací nabídce. Plná lišta je od šířky 1360 px, pod ní menu pod tlačítkem.
 - [x] **Úvod podle návrhu:** alternativní litery Romie v hlavním nadpisu, řádky událostí a karty prohlídek ve velikostech a rozestupech z Figmy.
+- [x] **Animace při rolování** (`src/components/utility/Reveal.astro`): obsah pod prvním zobrazením se při příjezdu do okna zvedne a rozsvítí, prvky v řadě jdou po sobě. Bez JavaScriptu, při omezeném pohybu v systému a při tisku se nic neskrývá.
 - [x] **CI:** kontrola typů, testy a build na pull requestech a na `main`.
 - [x] **Zkušební nasazení** na Cloudflare: https://zamek-rosice.steezy-dev.workers.dev (`npm run deploy`). Mimo ostrou doménu posílá web `X-Robots-Tag: noindex`, takže se kopie nedostane do vyhledávačů.
 

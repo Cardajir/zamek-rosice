@@ -4,6 +4,7 @@ import BaseHead from "@/components/utility/BaseHead.astro";
 import SkipLink from "@/components/global/SkipLink.astro";
 import Nav from "@/components/global/Nav.astro";
 import Footer from "@/components/global/Footer.astro";
+import Reveal from "@/components/utility/Reveal.astro";
 import type { SeoProps } from "@/types.ts";
 import { DEFAULT_LANG, LANGS, LANG_LOCALES } from "@/consts.ts";
 import { routePath } from "@/i18n/routes.ts";
@@ -50,5 +51,6 @@ const languages = LANGS.map(
       <slot />
     </main>
     <Footer shell={shell} />
+    <Reveal />
   </body>
 </html>
