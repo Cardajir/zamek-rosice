@@ -32,6 +32,8 @@ Stav k 10. 11. 2026. Hotové kroky jsou odškrtnuté.
 - [x] **Úvod podle návrhu:** alternativní litery Romie v hlavním nadpisu, řádky událostí a karty prohlídek ve velikostech a rozestupech z Figmy.
 - [x] **Animace při rolování** (`src/components/utility/Reveal.astro`): obsah pod prvním zobrazením se při příjezdu do okna zvedne a rozsvítí, prvky v řadě jdou po sobě. Bez JavaScriptu, při omezeném pohybu v systému a při tisku se nic neskrývá.
 - [x] **Stav otevřeno / zavřeno:** zelená tečka při otevřeno, červená při zavřeno. Ve Studiu (Provoz a oznámení) je pole **Mimořádně zavřeno**: den nebo rozsah dnů a důvod. Má přednost před všemi obdobími provozní doby; lišta ukáže „Dnes mimořádně zavřeno“ a stránka Vstupné vypíše nadcházející zavření.
+- [x] **Studio ve stylu webu** (`src/sanity/studio.ts`): fialová a červená z webu, písmo Manrope, ikona a podtitul pracovní plochy, ikony u položek obsahu. Motiv používá `buildLegacyTheme`, které Sanity označuje za zastaralé; při přechodu na další hlavní verzi bude potřeba přepsat.
+- [x] **Paralax:** hlavní a druhá fotka na úvodu a fotka ve výzvě v patičce se při rolování posouvají o 2,5 % své výšky; v promo blocích jede přední fotka o 1 rem rychleji než detail za ní. Bez skriptu, přes rolovací časovou osu v CSS; kde ji prohlížeč neumí nebo je v systému omezený pohyb, fotky stojí.
 - [x] **CI:** kontrola typů, testy a build na pull requestech a na `main`.
 - [x] **Zkušební nasazení** na Cloudflare: https://zamek-rosice.steezy-dev.workers.dev (`npm run deploy`). Mimo ostrou doménu posílá web `X-Robots-Tag: noindex`, takže se kopie nedostane do vyhledávačů.
 

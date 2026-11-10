@@ -1,0 +1,60 @@
+---
+import { slotContent } from "@/utils/slots.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, class: className } = Astro.props;
+
+const content = await slotContent(Astro.slots);
+---
+
+{render && content && (
+  <div class:list={["parallax_wrap", className]}>
+    <Fragment set:html={content} />
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    /*
+     * The photograph drifts a little slower than the page as it passes
+     * through the window. Driven by the scroll position itself, so it costs
+     * no script; a browser without that, or a visitor who asked for less
+     * motion, sees the photograph still.
+     */
+    .parallax_wrap {
+      width: 100%;
+      overflow: clip;
+      view-timeline: --parallax block;
+
+      & > img {
+        display: block;
+        width: 100%;
+        height: auto;
+
+        @supports (animation-timeline: view()) {
+          @media (prefers-reduced-motion: no-preference) {
+            scale: 1.06;
+            animation: parallax-drift linear both;
+            animation-timeline: --parallax;
+            animation-range: cover;
+          }
+        }
+      }
+    }
+
+    @keyframes parallax-drift {
+      from {
+        translate: 0 -2.5%;
+      }
+      to {
+        translate: 0 2.5%;
+      }
+    }
+  }
+</style>

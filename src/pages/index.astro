@@ -7,6 +7,7 @@ import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Button from "@/components/Button.astro";
 import SanityImg from "@/components/media/SanityImg.astro";
+import Parallax from "@/components/media/Parallax.astro";
 import EventsMain from "@/components/content/EventsMain.astro";
 import ToursMain from "@/components/content/ToursMain.astro";
 import StatusBarMain from "@/components/content/StatusBarMain.astro";
@@ -39,12 +40,14 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   <!-- Hero photograph and status bar -->
   <Section paddingTop="none" paddingBottom="small" gap="3">
     {home.heroImage && (
-      <SanityImg
-        image={home.heroImage}
-        ratio={7 / 3}
-        loading="eager"
-        fetchPriority="high"
-      />
+      <Parallax>
+        <SanityImg
+          image={home.heroImage}
+          ratio={7 / 3}
+          loading="eager"
+          fetchPriority="high"
+        />
+      </Parallax>
     )}
     <StatusBarMain shell={shell} />
   </Section>
@@ -97,7 +100,11 @@ const fullDate = new Intl.DateTimeFormat(locale, {
 
   <!-- Heritage note, rating and status -->
   <Section paddingTop="small" paddingBottom="small" gap="3">
-    {home.secondImage && <SanityImg image={home.secondImage} ratio={7 / 3} />}
+    {home.secondImage && (
+      <Parallax>
+        <SanityImg image={home.secondImage} ratio={7 / 3} />
+      </Parallax>
+    )}
     <StatusBarMain shell={shell} note={home.heritageNote}>
       <RatingMain
         slot="center"

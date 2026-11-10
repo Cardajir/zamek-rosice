@@ -114,6 +114,7 @@ const images = promo.images.slice(0, 2);
 
     .promo_visual {
       position: relative;
+      view-timeline: --promo block;
       justify-self: end;
       width: 100%;
       max-width: 50.5rem;
@@ -148,6 +149,15 @@ const images = promo.images.slice(0, 2);
         justify-self: start;
         margin-top: 23%;
         aspect-ratio: 5 / 4;
+
+        /* The scene in front slides a touch faster than the detail behind it. */
+        @supports (animation-timeline: view()) {
+          @media (prefers-reduced-motion: no-preference) {
+            animation: promo-drift linear both;
+            animation-timeline: --promo;
+            animation-range: cover;
+          }
+        }
       }
 
       .promo_wrap.reverse &.pair > .image:first-child {
@@ -156,6 +166,15 @@ const images = promo.images.slice(0, 2);
 
       .promo_wrap.reverse &.pair > .image:last-child {
         justify-self: end;
+      }
+    }
+
+    @keyframes promo-drift {
+      from {
+        translate: 0 1rem;
+      }
+      to {
+        translate: 0 -1rem;
       }
     }
   }
