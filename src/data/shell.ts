@@ -46,7 +46,9 @@ const GROUP_ROUTES: Exclude<RouteId, "siteMap">[][] = [
  * The shell as it stands with no CMS at all: the pages that live in code,
  * the organisation's contact details and the published 2026 admission.
  */
-export function fallbackShell(lang: Lang): Omit<Shell, "opening" | "partners"> {
+export function fallbackShell(
+  lang: Lang,
+): Omit<Shell, "opening" | "closures" | "partners"> {
   const link = (id: Exclude<RouteId, "siteMap">): NavLink => ({
     label: ROUTE_LABELS[id][lang],
     href: routePath(id, lang),

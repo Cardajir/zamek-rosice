@@ -309,6 +309,47 @@ export const visitInfo = defineType({
   type: "document",
   fields: [
     defineField({
+      name: "closures",
+      title: "Mimořádně zavřeno",
+      type: "array",
+      description:
+        "Den nebo dny, kdy je zámek zavřený mimo běžnou provozní dobu: porucha, soukromá akce. Má přednost před vším ostatním. Web v ty dny ukáže „Dnes mimořádně zavřeno“ a datum příštího otevření.",
+      of: [
+        defineArrayMember({
+          name: "closure",
+          title: "Zavření",
+          type: "object",
+          fields: [
+            defineField({
+              name: "from",
+              title: "Od",
+              type: "date",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "to",
+              title: "Do",
+              type: "date",
+              description: "Prázdné znamená jeden den.",
+              validation: (rule) => rule.min(rule.valueOfField("from")),
+            }),
+            localized("reason", "Důvod", "localizedString", {
+              required: false,
+              description:
+                "Ukáže se u data na stránce Vstupné a provozní doba. Např. „soukromá akce“.",
+            }),
+          ],
+          preview: {
+            select: { from: "from", to: "to", reason: "reason.cs" },
+            prepare: ({ from, to, reason }) => ({
+              title: to && to !== from ? `${from} – ${to}` : from,
+              subtitle: reason,
+            }),
+          },
+        }),
+      ],
+    }),
+    defineField({
       name: "notices",
       title: "Oznámení",
       type: "array",

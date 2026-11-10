@@ -3,7 +3,7 @@ import { OPENING_2026 } from "@/data/opening-2026.ts";
 import { fallbackShell } from "@/data/shell.ts";
 import { pagePath } from "@/i18n/pages.ts";
 import { routePath, type RouteId, ROUTES } from "@/i18n/routes.ts";
-import type { OpeningPeriod } from "@/utils/opening.ts";
+import type { Closure, OpeningPeriod } from "@/utils/opening.ts";
 import { query } from "./client.ts";
 
 /* ------------------------------------------------------------ fragments -- */
@@ -118,6 +118,8 @@ export interface Shell {
   /** Full and reduced admission, for the status bar. */
   prices: number[];
   opening: OpeningPeriod[];
+  /** Days the castle is shut whatever the opening hours say. */
+  closures: Closure[];
   cta?: { title: string; image?: Image; link?: NavLink };
 }
 
@@ -186,6 +188,7 @@ interface RawShell {
   partners?: Shell["partners"];
   prices?: (number | null)[] | null;
   opening?: RawPeriod[];
+  closures?: Closure[] | null;
   cta?: { title?: string; image?: Image; link?: RawLink } | null;
 }
 
@@ -209,6 +212,9 @@ const SHELL = `{
     kind, dateFrom, dateTo, days, closed, opens, closes, lastEntry,
     startRule, startTimes, priority,
     "subjects": appliesTo[]->subject
+  },
+  "closures": *[_id == "visitInfo"][0].closures[defined(from)]{
+    from, to, "reason": ${text("reason")}
   },
   "cta": *[_id == "homePage"][0].cta{
     "title": ${text("title")},
@@ -264,6 +270,11 @@ export async function getShell(lang: Lang): Promise<Shell> {
     partners: raw.partners ?? [],
     prices: prices.length > 0 ? prices : fallback.prices,
     opening: opening.length > 0 ? opening : OPENING_2026,
+    closures: (raw.closures ?? []).map(({ from, to, reason }) => ({
+      from,
+      ...(to ? { to } : {}),
+      ...(reason ? { reason } : {}),
+    })),
     cta: raw.cta?.title
       ? {
           title: raw.cta.title,

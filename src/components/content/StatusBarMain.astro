@@ -11,7 +11,7 @@ interface Props {
   /** Address, admission and opening hours. */
   shell: Pick<
     Shell,
-    "street" | "postalCode" | "locality" | "prices" | "opening"
+    "street" | "postalCode" | "locality" | "prices" | "opening" | "closures"
   >;
   /** Text shown on the left in place of admission. */
   note?: string;
@@ -24,7 +24,7 @@ const { render = true, shell, note, class: className } = Astro.props;
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 
-const status = openStatusText(shell.opening, lang);
+const status = openStatusText(shell.opening, lang, new Date(), shell.closures);
 const price = new Intl.NumberFormat(LANG_LOCALES[lang], {
   style: "currency",
   currency: "CZK",

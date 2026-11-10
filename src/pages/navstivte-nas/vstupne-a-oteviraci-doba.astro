@@ -17,6 +17,7 @@ import {
 } from "@/sanity/page-queries.ts";
 import { shellFor } from "@/sanity/queries.ts";
 import { hoursTable } from "@/utils/hours.ts";
+import { pragueNow } from "@/utils/opening.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -56,6 +57,24 @@ const priceLines = ({ condition, prices, unit }: PriceRow) => {
 /* A list of one row named like the list needs no heading above it. */
 const isOwnHeading = ({ title, rows }: PriceList) =>
   rows.length === 1 && rows[0]?.label === title;
+
+/* Closures still to come, or under way: the day or the span, then why. */
+const today = pragueNow(new Date()).day;
+const dayMonthYear = new Intl.DateTimeFormat(LANG_LOCALES[lang], {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const day = (value: string) =>
+  dayMonthYear.format(new Date(`${value}T00:00:00Z`));
+const closures = shell.closures
+  .filter(({ from, to }) => (to || from) >= today)
+  .sort((a, b) => a.from.localeCompare(b.from))
+  .map(({ from, to, reason }) => ({
+    label: to && to !== from ? `${day(from)} – ${day(to)}` : day(from),
+    lines: [{ text: reason ?? t.closed }],
+  }));
 
 const hours = hoursTable(admission.periods, admission.subjects, {
   days: {
@@ -131,6 +150,12 @@ const hours = hoursTable(admission.periods, admission.subjects, {
     <Heading tag="h2" variant="h3">
       {t.openingHeading}
     </Heading>
+    <ContentWrapper render={closures.length > 0}>
+      <Heading tag="h3" variant="h6">
+        {t.closuresHeading}
+      </Heading>
+      <InfoListMain rows={closures} />
+    </ContentWrapper>
     {hours.map((group) => (
       <ContentWrapper>
         <Heading tag="h3" variant="h6">

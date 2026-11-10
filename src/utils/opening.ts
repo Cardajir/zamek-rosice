@@ -34,6 +34,25 @@ export interface OpeningPeriod {
   priority?: number;
 }
 
+/**
+ * Days the whole castle stays shut whatever the season's rules say: a
+ * breakdown, a private event. `to` is left out for a single day.
+ */
+export interface Closure {
+  from: string;
+  to?: string;
+  reason?: string;
+}
+
+/** Whether a calendar day falls inside one of the closures. */
+export const isClosure = (
+  closures: Closure[] | undefined,
+  day: string,
+): boolean =>
+  (closures ?? []).some(
+    ({ from, to }) => Boolean(from) && day >= from && day <= (to || from),
+  );
+
 const TIME_ZONE = "Europe/Prague";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -196,13 +215,17 @@ export interface DayHours {
 
 /**
  * The hours of a day across several subjects: from the earliest opening to
- * the latest closing. `undefined` when everything is closed that day.
+ * the latest closing. `undefined` when everything is closed that day, which
+ * a closure makes it whatever the rules say.
  */
 export function hoursOn(
   periods: OpeningPeriod[],
   subjects: string[],
   day: string,
+  closures?: Closure[],
 ): DayHours | undefined {
+  if (isClosure(closures, day)) return undefined;
+
   const open = subjects
     .map((subject) => periodFor(periods, subject, day))
     .filter((period): period is OpeningPeriod =>
@@ -238,6 +261,8 @@ export interface OpenStatus {
   today?: DayHours;
   /** The next day it opens after today, looking up to a year ahead. */
   next?: { day: string; hours: DayHours };
+  /** Today is shut by a closure rather than by the season's rules. */
+  special?: boolean;
 }
 
 /** Whether the castle is open at an instant, and when it next opens. */
@@ -245,20 +270,27 @@ export function statusAt(
   periods: OpeningPeriod[],
   subjects: string[],
   at: Date,
+  closures?: Closure[],
 ): OpenStatus {
   const { day, minutes } = pragueNow(at);
-  const today = hoursOn(periods, subjects, day);
+  const today = hoursOn(periods, subjects, day, closures);
 
   const nextOpening = () => {
     for (let ahead = 1; ahead <= 366; ahead++) {
       const candidate = shift(day, ahead);
-      const hours = hoursOn(periods, subjects, candidate);
+      const hours = hoursOn(periods, subjects, candidate, closures);
       if (hours) return { day: candidate, hours };
     }
     return undefined;
   };
 
-  if (!today) return { state: "closed", next: nextOpening() };
+  if (!today) {
+    return {
+      state: "closed",
+      next: nextOpening(),
+      special: isClosure(closures, day) || undefined,
+    };
+  }
   if (minutes < toMinutes(today.opens)) return { state: "opensLater", today };
   if (minutes < toMinutes(today.closes)) return { state: "open", today };
   return { state: "closedForToday", today, next: nextOpening() };

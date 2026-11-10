@@ -31,6 +31,7 @@ Stav k 10. 11. 2026. Hotové kroky jsou odškrtnuté.
 - [x] **Navbar podle návrhu:** písmo a rozestupy z Figmy, jazyk v rozbalovací nabídce. Plná lišta je od šířky 1360 px, pod ní menu pod tlačítkem.
 - [x] **Úvod podle návrhu:** alternativní litery Romie v hlavním nadpisu, řádky událostí a karty prohlídek ve velikostech a rozestupech z Figmy.
 - [x] **Animace při rolování** (`src/components/utility/Reveal.astro`): obsah pod prvním zobrazením se při příjezdu do okna zvedne a rozsvítí, prvky v řadě jdou po sobě. Bez JavaScriptu, při omezeném pohybu v systému a při tisku se nic neskrývá.
+- [x] **Stav otevřeno / zavřeno:** zelená tečka při otevřeno, červená při zavřeno. Ve Studiu (Provoz a oznámení) je pole **Mimořádně zavřeno**: den nebo rozsah dnů a důvod. Má přednost před všemi obdobími provozní doby; lišta ukáže „Dnes mimořádně zavřeno“ a stránka Vstupné vypíše nadcházející zavření.
 - [x] **CI:** kontrola typů, testy a build na pull requestech a na `main`.
 - [x] **Zkušební nasazení** na Cloudflare: https://zamek-rosice.steezy-dev.workers.dev (`npm run deploy`). Mimo ostrou doménu posílá web `X-Robots-Tag: noindex`, takže se kopie nedostane do vyhledávačů.
 

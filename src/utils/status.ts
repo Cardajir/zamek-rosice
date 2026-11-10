@@ -1,7 +1,7 @@
 import { LANG_LOCALES, type Lang } from "../consts.ts";
 import { STATUS_SUBJECTS } from "../data/opening-2026.ts";
 import { ui } from "../i18n/ui.ts";
-import { statusAt, type OpeningPeriod } from "./opening.ts";
+import { statusAt, type Closure, type OpeningPeriod } from "./opening.ts";
 
 export interface OpenStatusText {
   /** Whether the castle opens today and has not closed yet. */
@@ -17,9 +17,10 @@ export function openStatusText(
   periods: OpeningPeriod[],
   lang: Lang,
   at: Date = new Date(),
+  closures?: Closure[],
 ): OpenStatusText {
   const t = ui(lang);
-  const status = statusAt(periods, STATUS_SUBJECTS, at);
+  const status = statusAt(periods, STATUS_SUBJECTS, at, closures);
 
   const time = (value: string) => value.replace(/^0/, "");
   const range = (hours: { opens: string; closes: string }) =>
@@ -32,12 +33,14 @@ export function openStatusText(
     }).format(new Date(`${value}T00:00:00Z`));
 
   const isOpen = status.state === "open" || status.state === "opensLater";
-  const label = {
-    open: t.openToday,
-    opensLater: t.openToday,
-    closedForToday: t.closedForToday,
-    closed: t.closedToday,
-  }[status.state];
+  const label = status.special
+    ? t.closedSpecially
+    : {
+        open: t.openToday,
+        opensLater: t.openToday,
+        closedForToday: t.closedForToday,
+        closed: t.closedToday,
+      }[status.state];
   const detail =
     isOpen && status.today
       ? range(status.today)

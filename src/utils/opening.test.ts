@@ -4,6 +4,7 @@ import {
   czechHolidays,
   easterSunday,
   hoursOn,
+  isClosure,
   isHoliday,
   periodFor,
   pragueNow,
@@ -158,4 +159,64 @@ test("out of season the status names the next opening day", () => {
   assert.equal(status.state, "closed");
   assert.equal(status.next?.day, "2026-03-28");
   assert.equal(status.next?.hours.opens, "10:00");
+});
+
+test("a closure covers its first and last day, or the one day it names", () => {
+  const closures = [
+    { from: "2026-07-15" },
+    { from: "2026-08-01", to: "2026-08-03" },
+  ];
+  assert.equal(isClosure(closures, "2026-07-15"), true);
+  assert.equal(isClosure(closures, "2026-07-16"), false);
+  assert.equal(isClosure(closures, "2026-08-01"), true);
+  assert.equal(isClosure(closures, "2026-08-03"), true);
+  assert.equal(isClosure(closures, "2026-08-04"), false);
+  assert.equal(isClosure(undefined, "2026-07-15"), false);
+});
+
+test("a closure shuts a day the season has open", () => {
+  const status = statusAt(
+    OPENING_2026,
+    STATUS_SUBJECTS,
+    new Date("2026-07-15T10:00:00Z"),
+    [{ from: "2026-07-15" }],
+  );
+  assert.equal(status.state, "closed");
+  assert.equal(status.special, true);
+  assert.equal(status.next?.day, "2026-07-16");
+});
+
+test("the next opening is looked for past the end of a closure", () => {
+  const status = statusAt(
+    OPENING_2026,
+    STATUS_SUBJECTS,
+    new Date("2026-07-14T18:00:00Z"),
+    [{ from: "2026-07-15", to: "2026-07-17" }],
+  );
+  assert.equal(status.state, "closedForToday");
+  assert.equal(status.special, undefined);
+  assert.equal(status.next?.day, "2026-07-18");
+});
+
+test("a closure wins over an exception that opens the same days", () => {
+  const status = statusAt(
+    OPENING_2026,
+    STATUS_SUBJECTS,
+    new Date("2026-03-28T10:00:00Z"),
+    [{ from: "2026-03-28", to: "2026-03-29" }],
+  );
+  assert.equal(status.state, "closed");
+  assert.equal(status.special, true);
+  assert.equal(status.next?.day, "2026-04-03");
+});
+
+test("a day shut by the season itself is not called a closure", () => {
+  const status = statusAt(
+    OPENING_2026,
+    STATUS_SUBJECTS,
+    new Date("2026-03-10T10:00:00Z"),
+    [{ from: "2026-07-15" }],
+  );
+  assert.equal(status.state, "closed");
+  assert.equal(status.special, undefined);
 });
