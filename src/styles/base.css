@@ -12,6 +12,7 @@
   --muted-500: #9790a0;
   --muted-text: #777080;
   --status-open: #43c96b;
+  --status-closed: var(--brand-500);
 
   /* Typography primitives */
   --primary-family: var(--font-manrope, system-ui, sans-serif);
