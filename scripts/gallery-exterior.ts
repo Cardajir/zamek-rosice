@@ -317,7 +317,7 @@ async function assetFor(file: string): Promise<string> {
   if (DRY) return `dry-${sha1hash}`;
   const asset = await client.assets.upload("image", body, {
     filename: file,
-    source: { id: file, name: "figma", url: "" },
+    source: { id: file, name: "figma" },
   });
   return asset._id;
 }
