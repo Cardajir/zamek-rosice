@@ -1,0 +1,173 @@
+---
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import type { Image } from "@/sanity/queries.ts";
+
+interface Tour {
+  /** Line above the title: how long the tour takes. */
+  eyebrow?: string;
+  /** Tour title. */
+  title: string;
+  /** Short description. */
+  text?: string;
+  /** Portrait photograph. */
+  image?: Image;
+  /** Links under the text, the first one to the tour's own page. */
+  links: { label: string; href: string }[];
+}
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Tours and exhibitions, in the order they are shown. */
+  tours: Tour[];
+  /** Heading level of each title. */
+  headingTag?: "h2" | "h3";
+}
+
+const { render = true, tours, headingTag: Tag = "h2" } = Astro.props;
+---
+
+{render && tours.length > 0 && (
+  <ul class="tour-list_wrap">
+    {tours.map((tour) => (
+      <li class="tour-list_item">
+        <div class="tour-list_visual">
+          {tour.image && (
+            <SanityImg
+              image={tour.image}
+              ratio={505 / 613}
+              sizes="(width >= 64rem) 27vw, 100vw"
+              maxWidth={1200}
+            />
+          )}
+        </div>
+        <div class="tour-list_content">
+          {tour.eyebrow && <p class="tour-list_eyebrow">{tour.eyebrow}</p>}
+          <Tag class="tour-list_title text-style-h3">{tour.title}</Tag>
+          {tour.text && <p class="tour-list_text">{tour.text}</p>}
+          {tour.links.length > 0 && (
+            <ul class="tour-list_links">
+              {tour.links.map((link) => (
+                <li>
+                  <Button
+                    element="link"
+                    variant="link"
+                    href={link.href}
+                    aria-label={`${link.label}: ${tour.title}`}
+                  >
+                    {link.label}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </li>
+    ))}
+  </ul>
+)}
+
+<style is:global>
+  @layer components {
+    /*
+     * As the design lays it out at 1920 in a 1312px column: a 505 × 613
+     * portrait and a 505px text, swapping sides from one tour to the next,
+     * with a rule 84px below each tour and 84px above the next.
+     */
+    .tour-list_wrap {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tour-list_item {
+      display: grid;
+      gap: var(--space-6);
+      align-items: center;
+
+      & + & {
+        margin-top: clamp(2.5rem, 4.375vw, 5.25rem);
+        padding-top: clamp(2.5rem, 4.375vw, 5.25rem);
+        border-top: var(--border-width) solid var(--text);
+      }
+
+      @media (width >= 64rem) {
+        grid-template-columns: 38.49% 12.8% 38.49% minmax(0, 1fr);
+        gap: 0;
+
+        & > .tour-list_visual {
+          grid-column: 1;
+          grid-row: 1;
+        }
+        & > .tour-list_content {
+          grid-column: 3;
+          grid-row: 1;
+        }
+
+        /* Every second tour: the text on the left, the photograph at the right edge. */
+        &:nth-child(even) {
+          grid-template-columns: 38.49% minmax(0, 1fr) 38.49%;
+          & > .tour-list_visual {
+            grid-column: 3;
+          }
+          & > .tour-list_content {
+            grid-column: 1;
+          }
+        }
+      }
+    }
+
+    .tour-list_visual {
+      width: 100%;
+      max-width: 31.5625rem;
+      aspect-ratio: 505 / 613;
+      background-color: var(--background-2);
+      overflow: clip;
+
+      & > .image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    /* 29px between label, title, text and links. */
+    .tour-list_content {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      gap: 1.8125rem;
+    }
+
+    .tour-list_eyebrow {
+      margin: 0;
+      color: var(--muted-text);
+      font-size: var(--text-main);
+      font-weight: var(--primary-medium);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-wide);
+    }
+
+    .tour-list_title {
+      margin: 0;
+      text-wrap: balance;
+    }
+
+    .tour-list_text {
+      margin: 0;
+    }
+
+    /* The links stand one under another, 16px apart. */
+    .tour-list_links {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      gap: 0;
+      margin: -0.6rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+  }
+</style>

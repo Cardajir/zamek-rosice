@@ -77,27 +77,26 @@ const {
 
 <style is:global>
   @layer components {
+    /* Four rows, shared with the other cards of the list through subgrid. */
     .card-tour_wrap {
       position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: start;
-      height: 100%;
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+      justify-items: start;
     }
 
-    /* Room for a label and a two-line title, so photographs in a row line up. */
+    /* A longer title grows upwards, so the photograph below stays in line. */
     .card-tour_head {
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      min-height: calc(
-        var(--text-main) * 1.2 + var(--space-3) + var(--h4) * 2.1
-      );
       margin-bottom: var(--space-5);
     }
 
     .card-tour_eyebrow {
-      margin: 0 0 var(--space-3);
+      margin: 0 0 1.0625rem;
       color: var(--muted-text);
       font-weight: var(--primary-medium);
       line-height: 1.2;
@@ -123,12 +122,15 @@ const {
       }
     }
 
+    /* Narrower than the photograph, so a text does not run into its neighbour's. */
     .card-tour_text {
+      max-width: min(100%, 20rem);
       margin: 0 0 var(--space-5);
     }
 
     .card-tour_wrap > .button_wrap {
-      margin-top: auto;
+      grid-row: 4;
+      align-self: end;
       &::after {
         content: "";
         position: absolute;

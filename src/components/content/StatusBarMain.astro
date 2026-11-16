@@ -35,10 +35,10 @@ const center = await slotContent(Astro.slots, "center");
 ---
 
 {render && (
-  <div class:list={["status-bar_wrap", "text-style-small", className]}>
+  <div class:list={["status-bar_wrap", className]}>
     <p class="status-bar_item">
       {note ? (
-        <span>{note}</span>
+        <span class="status-bar_note">{note}</span>
       ) : (
         prices.length > 0 && (
           <Fragment>
@@ -78,8 +78,10 @@ const center = await slotContent(Astro.slots, "center");
       gap: var(--space-4) var(--space-6);
       padding-top: var(--space-4);
       border-top: var(--border-width) solid var(--text);
+      font-size: var(--text-main);
       font-weight: var(--primary-semibold);
-      line-height: var(--line-height-large);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
 
       @media (width >= 48rem) {
         grid-template-columns: 1fr auto 1fr;
@@ -106,10 +108,17 @@ const center = await slotContent(Astro.slots, "center");
       }
     }
 
+    /* Two lines, as the design breaks it. */
+    .status-bar_note {
+      max-width: 15.5rem;
+      text-wrap: balance;
+    }
+
     .status-bar_address {
       display: flex;
       flex-direction: column;
       margin: 0;
+      font-variant-numeric: oldstyle-nums;
       font-family: var(--secondary-family);
       font-weight: var(--secondary-medium);
       line-height: var(--line-height-medium);

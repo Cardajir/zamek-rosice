@@ -8,7 +8,6 @@ import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
 import Button from "@/components/Button.astro";
 import PortableImage from "@/components/utility/PortableImage.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
@@ -46,11 +45,6 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   description={directions.intro}
   alternates={alternates("directions")}
 >
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>
@@ -64,7 +58,8 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   <Section
     containerClass="max-width-small"
     paddingTop="small"
-    paddingBottom="small"
+    paddingBottom="none"
+    class="directions_place"
     data-stacki-key="km7pivlca3c1g"
   >
     <Ornament slot="background" variant={7} size="large" />
@@ -89,8 +84,10 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   <Section
     containerClass="max-width-small"
     render={ways.length > 0}
-    paddingTop="small"
+    paddingTop="none"
+    paddingBottom="none"
     gap="6"
+    class="directions_ways"
     data-stacki-key="k9h0if2g58ofd"
   >
     <Heading tag="h2" variant="h3">
@@ -110,8 +107,43 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   <Section
     containerClass="max-width-small"
     render={Boolean(directions.image)}
-    paddingTop="small"
+    paddingTop="none"
+    class="directions_photo"
   >
     <PortableImage node={directions.image ?? {}} />
   </Section>
 </Layout>
+
+<style is:global>
+  /*
+   * As the design spaces it at 1920: 70px around the rule that parts the
+   * address from the ways here, under their heading and before the
+   * photograph; 60px from one way to the next; 41px from a way's name to
+   * its text.
+   */
+  .directions_place,
+  .directions_ways {
+    --_space: clamp(2.75rem, 3.65vw, 4.375rem);
+  }
+
+  .directions_place {
+    padding-bottom: var(--_space);
+  }
+
+  .directions_ways > .container {
+    row-gap: clamp(2.5rem, 3.125vw, 3.75rem);
+    padding-block: var(--_space);
+    border-top: var(--border-width) solid var(--text);
+
+    & > .heading {
+      margin-block: 0 calc(var(--_space) - clamp(2.5rem, 3.125vw, 3.75rem));
+    }
+
+    & > .layout > * {
+      row-gap: clamp(1.5rem, 2.14vw, 2.5625rem);
+      & > * {
+        margin-block: 0;
+      }
+    }
+  }
+</style>

@@ -7,12 +7,10 @@ import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
 import GalleryMain from "@/components/content/GalleryMain.astro";
 import GalleryNavMain from "@/components/content/GalleryNavMain.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getAlbum, getAlbums } from "@/sanity/page-queries.ts";
-import { shellFor } from "@/sanity/queries.ts";
 import { sized } from "@/utils/image.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
@@ -21,10 +19,7 @@ const album = await getAlbum(lang, Astro.params.slug ?? "");
 
 if (!album || album.images.length === 0) return Astro.rewrite("/404/");
 
-const [shell, albums] = await Promise.all([
-  shellFor(Astro.locals),
-  getAlbums(lang),
-]);
+const albums = await getAlbums(lang);
 
 const cover = album.images[0];
 ---
@@ -34,11 +29,6 @@ const cover = album.images[0];
   image={cover && sized(cover.url, 1200)}
   alternates={alternates("gallery", album.slugs)}
 >
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>

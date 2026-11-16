@@ -8,11 +8,13 @@ interface Props {
   render?: boolean;
   /** The castle's telephone numbers and e-mail address. */
   shell: Pick<Shell, "phone" | "mobile" | "email">;
+  /** `large` sets the lines at heading 2, as on the contact page. */
+  size?: "default" | "large";
   /** Class names for utilities. */
   class?: string;
 }
 
-const { render = true, shell, class: className } = Astro.props;
+const { render = true, shell, size = "default", class: className } = Astro.props;
 
 const t = ui(Astro.locals.lang ?? DEFAULT_LANG);
 const tel = (value: string) => `tel:${value.replace(/[^\d+]/g, "")}`;
@@ -20,7 +22,13 @@ const shown = shell.mobile || shell.phone || shell.email;
 ---
 
 {render && shown && (
-  <address class:list={["contact-lines_wrap", "text-style-h3", className]}>
+  <address
+    class:list={[
+      "contact-lines_wrap",
+      size === "large" ? "text-style-h2 large" : "text-style-h3",
+      className,
+    ]}
+  >
     {shell.mobile && (
       <a class="contact-lines_link" href={tel(shell.mobile)}>
         {t.mobileShort}: {shell.mobile}
@@ -47,6 +55,12 @@ const shown = shell.mobile || shell.phone || shell.email;
       align-items: start;
       font-style: normal;
       line-height: var(--line-height-large);
+
+      /* 64px lines, 8px apart. */
+      &.large {
+        gap: 0.5rem;
+        line-height: 1.1;
+      }
     }
 
     .contact-lines_link {

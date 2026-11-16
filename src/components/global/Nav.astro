@@ -246,8 +246,51 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       setMenu(toggle.getAttribute("aria-expanded") !== "true");
     });
 
+    /*
+     * On the desktop bar a mouse opens a group by pointing at it. Pointing at
+     * the logo or a plain link closes it again, and so does leaving the bar
+     * and its panel. A click right after the panel opened that way leaves it
+     * open instead of shutting what the pointer just opened.
+     */
+    const mouse = (event: PointerEvent) =>
+      event.pointerType === "mouse" && desktop.matches;
+    let hoveredAt = 0;
+    let leaving: number | undefined;
+
+    groups.forEach((button) => {
+      button.addEventListener("pointerenter", (event) => {
+        if (!mouse(event)) return;
+        window.clearTimeout(leaving);
+        if (button.getAttribute("aria-expanded") === "true") return;
+        closeGroups(button);
+        setGroup(button, true);
+        hoveredAt = performance.now();
+      });
+    });
+
+    nav
+      .querySelectorAll<HTMLElement>(".nav_logo, .nav_top_link, .nav_social")
+      .forEach((element) => {
+        element.addEventListener("pointerenter", (event) => {
+          if (mouse(event)) closeGroups();
+        });
+      });
+
+    nav.addEventListener("pointerenter", () => window.clearTimeout(leaving));
+    nav.addEventListener("pointerleave", (event) => {
+      if (!mouse(event)) return;
+      leaving = window.setTimeout(() => closeGroups(), 250);
+    });
+
     groups.forEach((button) => {
       button.addEventListener("click", () => {
+        if (
+          desktop.matches &&
+          button.getAttribute("aria-expanded") === "true" &&
+          performance.now() - hoveredAt < 700
+        ) {
+          return;
+        }
         const open = button.getAttribute("aria-expanded") !== "true";
         closeGroups(button);
         setGroup(button, open);
@@ -667,7 +710,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
 
       .nav_panel_arrow {
         display: block;
-        --_size: 0.9em;
+        --_size: 0.81em;
       }
 
       .nav_aside {

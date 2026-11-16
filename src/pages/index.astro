@@ -55,8 +55,8 @@ const fullDate = new Intl.DateTimeFormat(locale, {
 
   <!-- Heading -->
   <Section paddingTop="small">
-    <ContentWrapper centered>
-      <Ornament variant={1} class="margin-bottom-7" />
+    <ContentWrapper centered class="home_intro">
+      <Ornament variant={1} />
       <Heading tag="h1" maxWidth={22} data-stacki-key="koa1jvho7v6wm">
         {home.heading ?? t.siteTagline}
       </Heading>
@@ -87,7 +87,12 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Tours and permanent exhibitions -->
-  <Section render={home.tours.length > 0} gap="4" data-stacki-key="kbgpiynhcyjom">
+  <Section
+    render={home.tours.length > 0}
+    gap="4"
+    class="home_tours"
+    data-stacki-key="kbgpiynhcyjom"
+  >
     <Heading tag="h2" variant="h5">
       {t.toursHeading}
     </Heading>
@@ -138,3 +143,24 @@ const fullDate = new Intl.DateTimeFormat(locale, {
     />
   </Section>
 </Layout>
+
+<style is:global>
+  /* 61px above and below the opening line, as the design spaces it at 1920. */
+  .home_intro {
+    --_gap: clamp(2.5rem, 3.18vw, 3.8125rem);
+    & .ornament_wrap {
+      margin-bottom: var(--_gap);
+    }
+    & h1 {
+      margin-block: 0;
+    }
+    & .button-wrapper {
+      margin-top: var(--_gap);
+    }
+  }
+
+  /* 64px from the last row of tours to the link, the arrow's line box included. */
+  .home_tours .tours_wrap + .button-wrapper {
+    margin-top: calc(var(--space-8) - var(--space-4) - 0.6rem);
+  }
+</style>

@@ -7,20 +7,15 @@ import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
 import GalleryMain from "@/components/content/GalleryMain.astro";
 import GalleryNavMain from "@/components/content/GalleryNavMain.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getAlbums } from "@/sanity/page-queries.ts";
-import { shellFor } from "@/sanity/queries.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 
-const [shell, albums] = await Promise.all([
-  shellFor(Astro.locals),
-  getAlbums(lang),
-]);
+const albums = await getAlbums(lang);
 
 /* The front page shows the first photographs of every album. */
 const selection = albums.flatMap((album) => album.images);
@@ -31,11 +26,6 @@ const selection = albums.flatMap((album) => album.images);
   description={t.galleryIntro}
   alternates={alternates("gallery")}
 >
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>

@@ -10,11 +10,10 @@ import Paragraph from "@/components/typography/Paragraph.astro";
 import Button from "@/components/Button.astro";
 import SanityImg from "@/components/media/SanityImg.astro";
 import PortableText from "@/components/utility/PortableText.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
-import { getTour, shellFor } from "@/sanity/queries.ts";
+import { getTour } from "@/sanity/queries.ts";
 import { sized } from "@/utils/image.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
@@ -22,8 +21,6 @@ const t = ui(lang);
 const tour = await getTour(lang, Astro.params.slug ?? "");
 
 if (!tour) return Astro.rewrite("/404/");
-
-const shell = await shellFor(Astro.locals);
 
 const { min, max, unlimited } = tour.duration ?? {};
 const span = min && max && min !== max ? `${min}–${max}` : (max ?? min);
@@ -41,11 +38,6 @@ const eyebrow = [length, tour.free && t.freeEntry].filter(Boolean).join(" · ");
   image={tour.image && sized(tour.image.url, 1200)}
   alternates={alternates("tours", tour.slugs)}
 >
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>

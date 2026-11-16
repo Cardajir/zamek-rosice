@@ -3,20 +3,16 @@ import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
-import PromoMain from "@/components/content/PromoMain.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
+import TourListMain from "@/components/content/TourListMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
-import { getTours, shellFor, type TourCard } from "@/sanity/queries.ts";
+import { getTours, type TourCard } from "@/sanity/queries.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 
-const [shell, tours] = await Promise.all([
-  shellFor(Astro.locals),
-  getTours(lang),
-]);
+const tours = await getTours(lang);
 
 const length = ({ duration, free }: TourCard) => {
   if (duration?.unlimited) return `${t.tourLength}: ${t.unlimited}`;
@@ -28,15 +24,10 @@ const length = ({ duration, free }: TourCard) => {
   return free ? t.freeEntry : undefined;
 };
 
-const title = t.toursHeading;
+const title = t.toursPageTitle;
 ---
 
 <Layout title={title} alternates={alternates("tours")}>
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small" data-stacki-key="k31ecoqubhzbm">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small" data-stacki-key="k0wh9yfpbqtj6">
     <ContentWrapper centered>
@@ -47,22 +38,21 @@ const title = t.toursHeading;
   </Section>
 
   <!-- Tours -->
-  <Section render={tours.length > 0} gap="large">
-    {tours.map((tour, index) => (
-      <PromoMain
-        promo={{
-          eyebrow: length(tour),
-          title: tour.title,
-          text: tour.perex,
-          images: tour.image ? [tour.image] : [],
-          link: {
-            label: t.readMore,
-            href: routePath("tours", lang, tour.slug),
-          },
-        }}
-        reverse={index % 2 === 1}
-        data-stacki-key="kz2p43789y75t"
-      />
-    ))}
+  <Section
+    render={tours.length > 0}
+    containerClass="max-width-small"
+    data-stacki-key="kz2p43789y75t"
+  >
+    <TourListMain
+      tours={tours.map((tour) => ({
+        eyebrow: length(tour),
+        title: tour.title,
+        text: tour.perex,
+        image: tour.image,
+        links: [
+          { label: t.readMore, href: routePath("tours", lang, tour.slug) },
+        ],
+      }))}
+    />
   </Section>
 </Layout>

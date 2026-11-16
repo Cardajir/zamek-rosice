@@ -6,6 +6,8 @@ interface Line {
   value?: string;
   /** Where the value leads, when it is a link. */
   href?: string;
+  /** A word set at the far right in the line's own type: "Video", "Podcast". */
+  aside?: string;
 }
 
 interface Row {
@@ -51,6 +53,7 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
         {row.lines.map((line) => (
           <dd class="info-list_line">
             <span class="info-list_text">{line.text}</span>
+            {line.aside && <span class="info-list_aside">{line.aside}</span>}
             {line.value &&
               (line.href ? (
                 <a
@@ -132,6 +135,12 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
 
     .info-list_text {
       max-width: 44ch;
+    }
+
+    .info-list_aside {
+      flex: none;
+      margin-inline-start: auto;
+      text-align: end;
     }
 
     .info-list_value {

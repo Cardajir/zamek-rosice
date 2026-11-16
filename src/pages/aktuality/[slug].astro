@@ -9,7 +9,6 @@ import Paragraph from "@/components/typography/Paragraph.astro";
 import Button from "@/components/Button.astro";
 import SanityImg from "@/components/media/SanityImg.astro";
 import PortableText from "@/components/utility/PortableText.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import {
   DEFAULT_LANG,
   LANGS,
@@ -19,7 +18,7 @@ import {
 } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
-import { getPost, shellFor } from "@/sanity/queries.ts";
+import { getPost } from "@/sanity/queries.ts";
 import { sized } from "@/utils/image.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
@@ -27,8 +26,6 @@ const t = ui(lang);
 const post = await getPost(lang, Astro.params.slug ?? "");
 
 if (!post) return Astro.rewrite("/404/");
-
-const shell = await shellFor(Astro.locals);
 
 const isLang = (value: string): value is Lang =>
   (LANGS as readonly string[]).includes(value);
@@ -68,11 +65,6 @@ const facts = isEvent
   image={post.image && sized(post.image.url, 1200)}
   alternates={versions}
 >
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>

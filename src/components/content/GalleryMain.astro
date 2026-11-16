@@ -27,8 +27,14 @@ const srcset = (photo: Image, widths: number[]) =>
     .map((width) => `${sized(photo.url, width)} ${width}w`)
     .join(", ");
 
+/* The viewer still names the author; the grid shows the description only. */
 const note = (photo: Image) =>
   [photo.caption, photo.credit].filter(Boolean).join(" · ");
+
+/* Authors and copyright, said once in small print under the whole gallery. */
+const credits = [
+  ...new Set(photos.map((photo) => photo.credit).filter(Boolean)),
+];
 
 const items = photos.map((photo, index) => ({
   photo,
@@ -70,15 +76,16 @@ const items = photos.map((photo, index) => ({
                 decoding="async"
               />
             </a>
-            {note && (
-              <figcaption class="gallery_note text-style-small">
-                {note}
-              </figcaption>
+            {photo.caption && (
+              <figcaption class="gallery_note">{photo.caption}</figcaption>
             )}
           </figure>
         </li>
       ))}
     </ul>
+    {credits.length > 0 && (
+      <p class="gallery_credits text-style-small">{credits.join(" · ")}</p>
+    )}
 
     <dialog class="gallery_viewer theme-dark" aria-label={t.photoViewer}>
       <div class="gallery_close">
@@ -222,11 +229,15 @@ const items = photos.map((photo, index) => ({
       grid-column: 1 / -1;
     }
 
+    /* 23px from photograph to description, 15px under the wide first one. */
     .gallery_figure {
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
+      gap: var(--space-4);
       margin: 0;
+      .gallery_item:first-child > & {
+        gap: var(--space-3);
+      }
     }
 
     .gallery_link {
@@ -256,7 +267,19 @@ const items = photos.map((photo, index) => ({
       }
     }
 
+    /* The description under a photograph: semibold, in the text colour. */
     .gallery_note {
+      color: var(--text);
+      font-size: var(--text-main);
+      font-weight: var(--primary-semibold);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      text-align: end;
+    }
+
+    .gallery_credits {
+      margin: var(--space-6) 0 0;
+      color: var(--muted-text);
       text-align: end;
     }
 

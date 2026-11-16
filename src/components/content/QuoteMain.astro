@@ -15,11 +15,11 @@ const { render = true, text, author, date } = Astro.props;
 
 {render && text && (
   <figure class="quote_wrap">
-    <blockquote class="quote_text text-style-h3">
+    <blockquote class="quote_text text-style-h2">
       <p>“{text}”</p>
     </blockquote>
     {(author || date) && (
-      <figcaption class="quote_caption text-style-small">
+      <figcaption class="quote_caption">
         {[author, date].filter(Boolean).join(", ")}
       </figcaption>
     )}
@@ -32,7 +32,7 @@ const { render = true, text, author, date } = Astro.props;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-6);
+      gap: var(--space-7);
       max-width: 76.25rem;
       margin-inline: auto;
       text-align: center;
@@ -46,8 +46,14 @@ const { render = true, text, author, date } = Astro.props;
       }
     }
 
+    /* The design's serif caption, with its old-style figures in the date. */
     .quote_caption {
-      font-weight: var(--primary-semibold);
+      font-family: var(--secondary-family);
+      font-size: var(--text-large);
+      font-weight: var(--secondary-medium);
+      line-height: 1.1;
+      letter-spacing: var(--letter-spacing-snug);
+      font-variant-numeric: oldstyle-nums;
     }
   }
 </style>

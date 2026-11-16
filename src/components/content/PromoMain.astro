@@ -22,6 +22,11 @@ const {
 } = Astro.props;
 
 const images = promo.images.slice(0, 2);
+/* A line break in the Studio's text field starts a new paragraph. */
+const paragraphs = (promo.text ?? "")
+  .split(/\n+/)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
 ---
 
 {render && promo.title && (
@@ -33,11 +38,11 @@ const images = promo.images.slice(0, 2);
     ]}
   >
     <div class="promo_content">
-      {promo.eyebrow && (
-        <p class="promo_eyebrow text-style-small">{promo.eyebrow}</p>
-      )}
+      {promo.eyebrow && <p class="promo_eyebrow">{promo.eyebrow}</p>}
       <Tag class="promo_title text-style-h3">{promo.title}</Tag>
-      {promo.text && <p class="promo_text">{promo.text}</p>}
+      {paragraphs.map((paragraph) => (
+        <p class="promo_text">{paragraph}</p>
+      ))}
       {promo.link && (
         <Button
           element="link"
@@ -98,75 +103,133 @@ const images = promo.images.slice(0, 2);
       align-items: start;
     }
 
+    /* 29px between label, title and text, as the design spaces them. */
     .promo_eyebrow {
-      margin: 0 0 var(--space-3);
+      margin: 0 0 1.8125rem;
       color: var(--muted-text);
+      font-size: var(--text-main);
+      font-weight: var(--primary-medium);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-wide);
     }
 
     .promo_title {
-      margin: 0 0 var(--space-6);
+      margin: 0 0 1.8125rem;
       text-wrap: balance;
     }
 
     .promo_text {
-      margin: 0 0 var(--space-6);
+      margin: 0 0 var(--space-4);
+      &:last-of-type {
+        margin-bottom: var(--space-5);
+      }
     }
 
+    /*
+     * Two photographs as the design composes them at 1920 (and at 402 on a
+     * phone): a tall one behind and the scene laid over it. Every offset is
+     * a share of the back photograph's width, so the pair scales as one.
+     * Text on the left: the scene runs off the right edge of the page.
+     * Text on the right: the scene overlaps the back one towards the text.
+     */
     .promo_visual {
       position: relative;
       view-timeline: --promo block;
+
+      /* On a phone the photographs come first, the text under them. */
+      @media (width < 64rem) {
+        order: -1;
+      }
       justify-self: end;
       width: 100%;
       max-width: 50.5rem;
       display: grid;
+      align-items: start;
 
       .promo_wrap.reverse & {
         justify-self: start;
       }
 
-      grid-template-columns: repeat(12, 1fr);
-      align-items: start;
-
       & > .image {
-        grid-column: 1 / -1;
-        grid-row: 1;
+        grid-area: 1 / 1;
         width: 100%;
         height: auto;
         aspect-ratio: 4 / 5;
         object-fit: cover;
       }
 
-      /* A tall detail behind, the scene itself laid over it and out to the text's side. */
-      &.pair > .image:first-child {
-        width: 79%;
-        justify-self: end;
-        aspect-ratio: 2 / 3;
-      }
-
-      &.pair > .image:last-child {
-        position: relative;
-        width: 87%;
+      &.pair {
+        --_back: 69.15vw;
+        --_back-ratio: 278 / 415;
+        --_front: 107.6%;
+        --_front-ratio: 299 / 241;
+        --_front-x: 121.5%;
+        --_front-y: 31.2%;
+        width: var(--_back);
+        max-width: none;
         justify-self: start;
-        margin-top: 23%;
-        aspect-ratio: 5 / 4;
 
-        /* The scene in front slides a touch faster than the detail behind it. */
-        @supports (animation-timeline: view()) {
-          @media (prefers-reduced-motion: no-preference) {
-            animation: promo-drift linear both;
-            animation-timeline: --promo;
-            animation-range: cover;
+        @media (width >= 64rem) {
+          .promo_wrap:not(.reverse) & {
+            justify-self: end;
+          }
+        }
+
+        .promo_wrap.reverse & {
+          --_back: 68.16vw;
+          --_back-ratio: 274 / 321;
+          --_front: 100%;
+          --_front-ratio: 274 / 329;
+          --_front-x: 23.4%;
+          --_front-y: 31.6%;
+        }
+
+        @media (width >= 64rem) {
+          --_back: 33.23vw;
+          --_back-ratio: 638 / 957;
+          --_front: 110.35%;
+          --_front-ratio: 704 / 567;
+          --_front-x: 84.01%;
+          --_front-y: 29%;
+
+          .promo_wrap.reverse & {
+            --_back: 28.07vw;
+            --_back-ratio: 539 / 713;
+            --_front: 128.39%;
+            --_front-ratio: 692 / 782;
+            --_front-x: 40.26%;
+            --_front-y: 38.4%;
+          }
+        }
+
+        & > .image:first-child {
+          aspect-ratio: var(--_back-ratio);
+        }
+
+        & > .image:last-child {
+          position: relative;
+          justify-self: start;
+          width: var(--_front);
+          max-width: none;
+          margin-left: var(--_front-x);
+          margin-top: var(--_front-y);
+          aspect-ratio: var(--_front-ratio);
+
+          /* The scene in front slides a touch faster than the photograph behind it. */
+          @supports (animation-timeline: view()) {
+            @media (prefers-reduced-motion: no-preference) {
+              animation: promo-drift linear both;
+              animation-timeline: --promo;
+              animation-range: cover;
+            }
           }
         }
       }
+    }
 
-      .promo_wrap.reverse &.pair > .image:first-child {
-        justify-self: start;
-      }
-
-      .promo_wrap.reverse &.pair > .image:last-child {
-        justify-self: end;
-      }
+    /* The scene that runs off the page is cut at the page's edge, not scrolled to. */
+    .section:has(.promo_visual.pair) {
+      overflow-x: clip;
     }
 
     @keyframes promo-drift {

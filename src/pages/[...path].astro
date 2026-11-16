@@ -6,11 +6,10 @@ import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
 import PortableText from "@/components/utility/PortableText.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import { DEFAULT_LANG, LANGS, type Lang } from "@/consts.ts";
 import { matchPage, pagePath } from "@/i18n/pages.ts";
 import { stripLang } from "@/i18n/routes.ts";
-import { getPage, getPageSections, shellFor } from "@/sanity/queries.ts";
+import { getPage, getPageSections } from "@/sanity/queries.ts";
 
 /*
  * Text pages from the page builder. Everything that is not a page in code
@@ -25,10 +24,7 @@ const page = match && (await getPage(lang, match.parent, match.slug));
 
 if (!match || !page) return Astro.rewrite("/404/");
 
-const [shell, sections] = await Promise.all([
-  shellFor(Astro.locals),
-  getPageSections(lang, match.parent, match.slug),
-]);
+const sections = await getPageSections(lang, match.parent, match.slug);
 
 const isLang = (value: string): value is Lang =>
   (LANGS as readonly string[]).includes(value);
@@ -44,11 +40,6 @@ const alternates =
 ---
 
 <Layout title={page.title} description={page.perex} alternates={alternates}>
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>

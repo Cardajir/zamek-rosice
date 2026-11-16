@@ -32,7 +32,7 @@ const eyebrow = ({ duration, free }: TourCard) => {
 {render && tours.length > 0 && (
   <ul class="tours_wrap">
     {tours.map((tour) => (
-      <li>
+      <li class="tours_item">
         <CardTour
           eyebrow={eyebrow(tour)}
           heading={tour.title}
@@ -68,6 +68,18 @@ const eyebrow = ({ duration, free }: TourCard) => {
       @media (width >= 64rem) {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
+    }
+
+    /*
+     * Each card spans four rows of the list (title, photograph, text, link),
+     * so the photographs of one row start on the same line however many
+     * lines the titles above them take.
+     */
+    .tours_item {
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      row-gap: 0;
     }
   }
 </style>

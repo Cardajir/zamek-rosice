@@ -31,6 +31,8 @@ const year = new Date().getFullYear();
 /* "Správa zámku Rosice, příspěvková organizace": the name, then its legal form. */
 const [name, ...form] = shell.organisation.split(", ");
 const cta = shell.cta;
+/* One sentence to a line: "Máte dotaz?" above "Neváhejte se nám ozvat". */
+const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
 ---
 
 {render && (
@@ -39,7 +41,11 @@ const cta = shell.cta;
       <div class:list={["footer_cta", "theme-dark", cta.image && "has-image"]}>
         {cta.image && <SanityImg image={{ ...cta.image, alt: "" }} />}
         <div class="footer_cta_content">
-          <h2 class="footer_cta_title text-style-h1">{cta.title}</h2>
+          <h2 class="footer_cta_title text-style-h1">
+            {ctaLines.map((line) => (
+              <span>{line}</span>
+            ))}
+          </h2>
           {cta.link && (
             <Button element="link" variant="link" href={cta.link.href}>
               {cta.link.label}
@@ -161,7 +167,7 @@ const cta = shell.cta;
         content: "";
         position: absolute;
         inset: 0;
-        background-color: color-mix(in lab, var(--dark-900) 35%, transparent);
+        background-color: color-mix(in lab, black 45%, transparent);
       }
     }
 
@@ -185,9 +191,12 @@ const cta = shell.cta;
     }
 
     .footer_cta_title {
-      max-width: 18ch;
       text-transform: uppercase;
       line-height: var(--line-height-small);
+      text-wrap: balance;
+      & > span {
+        display: block;
+      }
     }
 
     .footer_inner {

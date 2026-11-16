@@ -5,7 +5,6 @@ import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Grid from "@/components/wrapper/Grid.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Button from "@/components/Button.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
@@ -37,11 +36,6 @@ const sections = [
 ---
 
 <Layout title={t.siteMapTitle} alternates={alternates("siteMap")}>
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>

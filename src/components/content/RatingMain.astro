@@ -1,5 +1,5 @@
 ---
-import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
+import { DEFAULT_LANG } from "@/consts.ts";
 import { ui } from "@/i18n/ui.ts";
 
 interface Props {
@@ -18,13 +18,8 @@ interface Props {
 const { render = true, value, label, source, href } = Astro.props;
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
-const formatted =
-  value === undefined
-    ? undefined
-    : new Intl.NumberFormat(LANG_LOCALES[lang], {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1,
-      }).format(value);
+/* Written with a point in every language, as the design sets it. */
+const formatted = value === undefined ? undefined : value.toFixed(1);
 ---
 
 {render && formatted && (
@@ -53,7 +48,6 @@ const formatted =
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-2);
       text-align: center;
     }
 
@@ -61,16 +55,22 @@ const formatted =
       margin: 0;
     }
 
+    /* Spacing as drawn at 1920: 37px under the number, 11px above the source. */
     .rating_label {
-      margin: 0;
+      margin: clamp(1.5rem, 1.93vw, 2.3125rem) 0 0;
       font-family: var(--secondary-family);
       font-weight: var(--secondary-medium);
+      line-height: 1.1;
+      letter-spacing: var(--letter-spacing-snug);
+      font-variant-numeric: oldstyle-nums;
     }
 
     .rating_source {
-      margin: 0;
+      margin: 0.6875rem 0 0;
+      font-size: var(--text-main);
       font-weight: var(--primary-semibold);
-      letter-spacing: var(--letter-spacing-wide);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
       text-transform: uppercase;
       text-decoration: none;
     }

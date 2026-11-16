@@ -138,7 +138,7 @@ const {
     }
 
     .card-event_eyebrow {
-      margin: 0 0 var(--space-3);
+      margin: 0 0 1.0625rem;
       color: var(--muted-text);
       font-weight: var(--primary-medium);
       line-height: 1.2;
@@ -149,10 +149,18 @@ const {
       text-wrap: balance;
     }
 
+    /*
+     * The underline is always there, in the typeface's own thin weight, and
+     * fades in from transparent on hover instead of appearing at once.
+     */
     .card-event_title_link {
-      text-decoration: none;
-      text-underline-offset: 0.12em;
-      text-decoration-thickness: var(--border-width);
+      text-decoration-line: underline;
+      text-decoration-color: transparent;
+      text-decoration-thickness: from-font;
+      text-underline-position: from-font;
+      text-decoration-skip-ink: none;
+      transition: text-decoration-color calc(var(--hover-duration) * 2)
+        var(--hover-ease);
       &::after {
         content: "";
         position: absolute;
@@ -205,7 +213,7 @@ const {
     @media (hover: hover) {
       .card-event_wrap:hover {
         & .card-event_title_link {
-          text-decoration: underline;
+          text-decoration-color: currentcolor;
         }
         & .card-event_aside > .button_wrap {
           opacity: 1;
@@ -215,7 +223,7 @@ const {
 
     .card-event_wrap:focus-within {
       & .card-event_title_link {
-        text-decoration: underline;
+        text-decoration-color: currentcolor;
       }
       & .card-event_aside > .button_wrap {
         opacity: 1;

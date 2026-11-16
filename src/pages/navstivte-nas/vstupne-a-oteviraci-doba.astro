@@ -6,7 +6,6 @@ import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
 import InfoListMain from "@/components/content/InfoListMain.astro";
-import StatusBarMain from "@/components/content/StatusBarMain.astro";
 import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
@@ -96,11 +95,6 @@ const hours = hoursTable(admission.periods, admission.subjects, {
 ---
 
 <Layout title={t.admissionTitle} alternates={alternates("admission")}>
-  <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
-    <StatusBarMain shell={shell} />
-  </Section>
-
   <!-- Title -->
   <Section paddingTop="small" paddingBottom="small">
     <ContentWrapper centered>
@@ -117,6 +111,7 @@ const hours = hoursTable(admission.periods, admission.subjects, {
     paddingTop="small"
     paddingBottom="small"
     gap="7"
+    class="visit_lists"
     data-stacki-key="kfpj138slaeim"
   >
     <Ornament slot="background" variant={2} size="large" />
@@ -146,6 +141,7 @@ const hours = hoursTable(admission.periods, admission.subjects, {
     render={hours.length > 0}
     paddingTop="small"
     gap="7"
+    class="visit_lists"
     data-stacki-key="kh4s861k3m1zc"
   >
     <Ornament slot="background" variant={4} size="large" />
@@ -177,3 +173,21 @@ const hours = hoursTable(admission.periods, admission.subjects, {
     <Paragraph>{t.groupsByArrangement}</Paragraph>
   </Section>
 </Layout>
+
+<style is:global>
+  /*
+   * As the design spaces it at 1920: 70px under the section's heading and
+   * between one admission or season and the next, 41px between a list's
+   * title, its introduction and its table.
+   */
+  .visit_lists > .container {
+    row-gap: clamp(2.75rem, 3.65vw, 4.375rem);
+
+    & > .layout > * {
+      row-gap: clamp(1.5rem, 2.14vw, 2.5625rem);
+      & > * {
+        margin-block: 0;
+      }
+    }
+  }
+</style>
