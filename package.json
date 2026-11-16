@@ -16,7 +16,10 @@
     "test": "node --test \"src/**/*.test.ts\"",
     "deploy": "astro build && wrangler deploy",
     "seed": "sanity exec scripts/seed.ts --with-user-token --",
-    "migrate": "sanity exec scripts/migrate-wp.ts --with-user-token --"
+    "migrate": "sanity exec scripts/migrate-wp.ts --with-user-token --",
+    "alt:export": "python scripts/alt-texty/export.py",
+    "alt:read": "python scripts/alt-texty/read.py",
+    "alt:apply": "sanity exec scripts/alt-texty/apply.ts --with-user-token --"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",
