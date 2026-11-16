@@ -2,6 +2,10 @@
 import Button from "@/components/Button.astro";
 import ContactLinesMain from "@/components/content/ContactLinesMain.astro";
 import SanityImg from "@/components/media/SanityImg.astro";
+import kudyznudy from "@/assets/partners/kudyznudy.webp";
+import monogram from "@/assets/partners/monogram.svg";
+import objevujPamatky from "@/assets/partners/objevuj-pamatky.webp";
+import rosice from "@/assets/partners/rosice.svg";
 import { DEFAULT_LANG, SITE_NAME } from "@/consts.ts";
 import { ui } from "@/i18n/ui.ts";
 import type { Shell } from "@/sanity/queries.ts";
@@ -31,6 +35,38 @@ const year = new Date().getFullYear();
 /* "Správa zámku Rosice, příspěvková organizace": the name, then its legal form. */
 const [name, ...form] = shell.organisation.split(", ");
 const cta = shell.cta;
+/*
+ * The marks the design sets in the footer, shown until the Studio names
+ * partners for it. Sizes are the design's at 1920; a phone stacks them.
+ */
+const DESIGN_LOGOS = [
+  { key: "monogram", name: "", url: "", image: monogram, width: 70, height: 67 },
+  {
+    key: "objevuj",
+    name: "Objevuj památky",
+    url: "",
+    image: objevujPamatky,
+    width: 138,
+    height: 50,
+  },
+  {
+    key: "kudyznudy",
+    name: "Kudy z nudy",
+    url: "https://www.kudyznudy.cz/",
+    image: kudyznudy,
+    width: 214,
+    height: 58,
+  },
+  {
+    key: "rosice",
+    name: "Město Rosice",
+    url: "https://www.rosice.cz/",
+    image: rosice,
+    width: 141,
+    height: 36,
+  },
+];
+
 /* One sentence to a line: "Máte dotaz?" above "Neváhejte se nám ozvat". */
 const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
 ---
@@ -56,11 +92,8 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
     )}
     <div class="footer_inner">
       <div class="footer_top">
-        <p class="footer_organisation text-style-small">
-          <strong>
-            {name}
-            {form.length > 0 && ","}
-          </strong>
+        <p class="footer_organisation">
+          <strong>{`${name}${form.length > 0 ? "," : ""}`}</strong>
           {form.length > 0 && <span>{form.join(", ")}</span>}
         </p>
         <nav class="footer_nav" aria-label={t.footerNavigation}>
@@ -79,6 +112,40 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       </div>
       <div class="footer_middle">
         <ContactLinesMain shell={shell} />
+        {shell.partners.length === 0 && (
+          <ul class="footer_partners is-design">
+            {DESIGN_LOGOS.map((logo) => (
+              <li class={`footer_logo is-${logo.key}`}>
+                {logo.url ? (
+                  <a
+                    class="footer_partner"
+                    href={logo.url}
+                    aria-label={logo.name}
+                    rel="noopener"
+                  >
+                    <img
+                      src={logo.image.src}
+                      width={logo.width}
+                      height={logo.height}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </a>
+                ) : (
+                  <img
+                    src={logo.image.src}
+                    width={logo.width}
+                    height={logo.height}
+                    alt={logo.name}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
         {shell.partners.length > 0 && (
           <ul class="footer_partners">
             {shell.partners.map((partner) => (
@@ -106,9 +173,10 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
           </ul>
         )}
       </div>
-      <div class="footer_bottom text-style-small">
-        <p>
-          Copyright &copy; {year}, {SITE_NAME}. {t.allRightsReserved}
+      <div class="footer_bottom">
+        <p class="footer_copyright">
+          <span>Copyright &copy; {year}, {SITE_NAME}.</span>{" "}
+          <span>{t.allRightsReserved}</span>
         </p>
         <p>Design by Jakub Maca, 2026</p>
       </div>
@@ -118,12 +186,28 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
 
 <style is:global>
   @layer components {
+    /*
+     * The footer as the design draws it, at 1920 and on a 402px phone: a rule,
+     * the call to action on a photograph, a rule, the organisation and links,
+     * the contact lines and partner marks, a rule and the copyright, with a
+     * generous margin left under it.
+     */
     .footer_wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
       padding-inline: var(--site-margin);
-      padding-bottom: var(--space-5);
+      /* 119px under the copyright at 1920, 64px on a phone. */
+      padding-bottom: clamp(4rem, 3.0896rem + 3.6232vw, 7.4375rem);
+
+      /* The rule over the photograph: 14px above it at 1920, 9px on a phone. */
+      &::before {
+        content: "";
+        width: 100%;
+        max-width: var(--max-width-main);
+        margin-bottom: clamp(0.5625rem, 0.4797rem + 0.3294vw, 0.875rem);
+        border-top: var(--border-width) solid var(--text);
+      }
     }
 
     .footer_cta {
@@ -138,11 +222,17 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       color: var(--text);
       overflow: clip;
 
+      /* 1647 × 702 at 1920; 370 × 489 on a phone. */
       &.has-image {
-        aspect-ratio: 1647 / 702;
-        min-height: 26rem;
-        max-height: 44rem;
+        aspect-ratio: 370 / 489;
+        min-height: 0;
         view-timeline: --footer-cta block;
+
+        @media (width >= 48rem) {
+          aspect-ratio: 1647 / 702;
+          min-height: 26rem;
+          max-height: 44rem;
+        }
       }
 
       /* The photograph drifts a little slower than the page; still where that is unsupported or unwanted. */
@@ -190,12 +280,16 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       text-align: center;
     }
 
+    /* The heading's own leading: 41.8 on 37 on a phone, 104 on 100 at 1920. */
     .footer_cta_title {
+      max-width: 18.75rem;
       text-transform: uppercase;
-      line-height: var(--line-height-small);
       text-wrap: balance;
       & > span {
         display: block;
+      }
+      @media (width >= 48rem) {
+        max-width: none;
       }
     }
 
@@ -204,38 +298,51 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       max-width: var(--max-width-main);
       display: flex;
       flex-direction: column;
-      gap: var(--space-8);
-      padding-top: var(--space-7);
+      /* 13px under the photograph at 1920, 8px on a phone. */
+      margin-top: clamp(0.5rem, 0.4172rem + 0.3294vw, 0.8125rem);
+      /* 68px from the rule to the organisation at 1920, 17px on a phone. */
+      padding-top: clamp(1.0625rem, 0.218rem + 3.36vw, 4.25rem);
       border-top: var(--border-width) solid var(--text);
-      margin-top: var(--space-3);
     }
 
     .footer_top,
     .footer_middle {
       display: flex;
       flex-direction: column;
-      gap: var(--space-7);
     }
 
+    /* On a phone: the organisation small and to the right, as in the status bars above. */
     .footer_organisation {
       display: flex;
       flex-direction: column;
+      align-self: end;
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: var(--primary-semibold);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      text-align: end;
+      & > strong {
+        font-weight: inherit;
+      }
       & > span::first-letter {
         text-transform: uppercase;
       }
     }
 
+    /* Three groups of links, 18px on a phone and 16px at 1920. */
     .footer_nav {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-      gap: var(--space-6) var(--space-7);
+      gap: 1.8125rem;
+      margin-top: 3.4375rem;
     }
 
     .footer_links {
       display: flex;
       flex-direction: column;
-      gap: var(--space-1);
-      font-size: var(--text-small);
+      gap: 0.3125rem;
+      font-size: clamp(1rem, 1.1583rem - 0.1318vw, 1.125rem);
+      line-height: 1.4;
     }
 
     .footer_link {
@@ -249,24 +356,118 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       }
     }
 
+    /*
+     * On a phone the contact lines and the marks each sit between rules;
+     * the lines are set like the opening heading, in capitals.
+     */
+    .footer_middle {
+      margin-top: 3.25rem;
+      padding-top: 1.875rem;
+      border-top: var(--border-width) solid var(--text);
+
+      & > .contact-lines_wrap {
+        @media (width < 64rem) {
+          gap: 0.5rem;
+          line-height: 1.2;
+          letter-spacing: var(--letter-spacing-tight);
+          text-transform: uppercase;
+          font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
+        }
+      }
+    }
+
     .footer_partners {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: var(--space-6) var(--space-8);
+      margin-top: 1.6875rem;
+      padding-top: 2.5625rem;
+      border-top: var(--border-width) solid var(--text);
       & img {
         max-height: 3rem;
         width: auto;
       }
     }
 
+    .footer_partner {
+      display: block;
+      transition: opacity var(--hover-duration) var(--hover-ease);
+      @media (hover: hover) {
+        &:hover {
+          opacity: 0.6;
+        }
+      }
+    }
+
+    /*
+     * The design's marks on a phone: three stacked on the left, the monogram
+     * on the right standing on the same line as the last of them.
+     */
+    .footer_partners.is-design {
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0;
+
+      & img {
+        display: block;
+        max-height: none;
+        height: auto;
+      }
+
+      & > .is-kudyznudy {
+        grid-area: 1 / 1;
+        margin-left: 0.125rem;
+        & img {
+          width: 9.9375rem;
+        }
+      }
+      & > .is-rosice {
+        grid-area: 2 / 1;
+        margin: 1.75rem 0 0 0.875rem;
+        & img {
+          width: 6.5625rem;
+        }
+      }
+      & > .is-objevuj {
+        grid-area: 3 / 1;
+        margin: 2.125rem 0 0 0.875rem;
+        & img {
+          width: 6.4375rem;
+        }
+      }
+      & > .is-monogram {
+        grid-area: 1 / 2 / 4 / 3;
+        align-self: end;
+        margin-right: 1rem;
+        & img {
+          width: 5.5rem;
+        }
+      }
+    }
+
     .footer_bottom {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: var(--space-2) var(--space-6);
-      padding-top: var(--space-4);
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 2.5625rem;
+      padding-top: 1rem;
       border-top: var(--border-width) solid var(--text);
+      font-size: 0.75rem;
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      & > p {
+        margin: 0;
+      }
+    }
+
+    /* A phone breaks the copyright after the castle's name. */
+    .footer_copyright > span {
+      @media (width < 64rem) {
+        display: block;
+      }
     }
 
     @media (width >= 64rem) {
@@ -277,20 +478,81 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
         align-items: start;
       }
 
-      .footer_middle {
-        align-items: end;
+      .footer_organisation {
+        align-self: start;
+        font-size: var(--text-small);
+        font-weight: var(--primary-regular);
+        line-height: 1.4;
+        letter-spacing: var(--letter-spacing-wide);
+        text-align: start;
+        & > strong {
+          font-weight: var(--primary-semibold);
+        }
       }
 
+      /* The links start 24px lower than the organisation, 51% across, in columns 267px apart. */
       .footer_nav {
-        grid-template-columns: repeat(3, auto);
-        flex: 0 1 50%;
-        justify-content: space-between;
+        grid-template-columns: 33.25% 33.5% auto;
+        flex: 0 0 48.8%;
+        gap: var(--space-6) 0;
+        margin-top: 1.25rem;
+      }
+
+      .footer_middle {
+        align-items: end;
+        margin-top: 5.8125rem;
+        padding-top: 0;
+        border-top: 0;
       }
 
       .footer_partners {
-        flex: 0 1 50%;
+        flex: 0 0 48.8%;
         justify-content: space-between;
         flex-wrap: nowrap;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      /* At 1920 the four marks share the links' width in one row, the last 27px short of the edge. */
+      .footer_partners.is-design {
+        display: flex;
+        align-items: center;
+        padding-right: 1.6875rem;
+        padding-bottom: 0.25rem;
+
+        & > .is-kudyznudy,
+        & > .is-rosice,
+        & > .is-objevuj {
+          margin: 0;
+        }
+        & > .is-monogram {
+          margin-right: 0;
+          & img {
+            width: 4.375rem;
+          }
+        }
+        & > .is-objevuj img {
+          width: 8.625rem;
+        }
+        & > .is-kudyznudy img {
+          width: 13.375rem;
+        }
+        & > .is-rosice img {
+          width: 8.8125rem;
+        }
+      }
+
+      .footer_bottom {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: var(--space-2) var(--space-6);
+        margin-top: 2.8125rem;
+        padding-top: 1.3125rem;
+        font-size: var(--text-small);
+        line-height: 1.4;
+        letter-spacing: var(--letter-spacing-wide);
       }
     }
   }

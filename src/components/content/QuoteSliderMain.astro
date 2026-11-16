@@ -1,0 +1,343 @@
+---
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/arrow-full.svg";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Quote } from "@/utils/text-blocks.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Quotations, shown one at a time in this order. */
+  quotes: Quote[];
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, quotes, class: className } = Astro.props;
+
+const t = ui(Astro.locals.lang ?? DEFAULT_LANG);
+
+const shown = quotes.filter((quote) => quote.paragraphs.some(Boolean));
+/* A date closing the source goes on a line of its own, as in the design. */
+const lines = (source: string) => {
+  const dated = /^(.+,)\s+(\d[\d.\s]*)$/.exec(source);
+  return dated ? [dated[1]!, dated[2]!] : [source];
+};
+const numbered = (index: number) =>
+  t.quoteOf
+    .replace("{n}", String(index + 1))
+    .replace("{total}", String(shown.length));
+---
+
+{render && shown.length > 0 && (
+  <section
+    class:list={["quote-slider_wrap", className]}
+    aria-roledescription={shown.length > 1 ? "carousel" : undefined}
+    aria-label={t.quotes}
+  >
+    <div class="quote-slider_list">
+      {shown.map((quote, index) => (
+        <figure
+          class:list={["quote-slider_item", index === 0 && "is-current"]}
+          role={shown.length > 1 ? "group" : undefined}
+          aria-roledescription={shown.length > 1 ? "slide" : undefined}
+          aria-label={shown.length > 1 ? numbered(index) : undefined}
+        >
+          <blockquote class="quote-slider_text text-style-h2">
+            {quote.paragraphs.map((paragraph, line) => (
+              <p>
+                {`${line === 0 ? "“" : ""}${paragraph}${line === quote.paragraphs.length - 1 ? "”" : ""}`}
+              </p>
+            ))}
+          </blockquote>
+          {quote.source && (
+            <figcaption class="quote-slider_source">
+              {lines(quote.source).map((part, line) => (
+                <>
+                  {line > 0 && <br />}
+                  {part}
+                </>
+              ))}
+            </figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+
+    {shown.length > 1 && (
+      <div class="quote-slider_controls">
+        <div class="quote-slider_markers">
+          {shown.map((_, index) => (
+            <button
+              class="quote-slider_marker"
+              type="button"
+              aria-label={numbered(index)}
+              aria-current={index === 0 ? "true" : "false"}
+              data-quote-to={index}
+            />
+          ))}
+        </div>
+        <button
+          class="quote-slider_step is-back"
+          type="button"
+          aria-label={t.previousQuote}
+          data-quote-step="-1"
+        >
+          <span class="quote-slider_step-mark">
+            <Icon src={arrow} variant="small" />
+          </span>
+        </button>
+        <button
+          class="quote-slider_step is-forward"
+          type="button"
+          aria-label={t.nextQuote}
+          data-quote-step="1"
+        >
+          <span class="quote-slider_step-mark">
+            <Icon src={arrow} variant="small" />
+          </span>
+        </button>
+      </div>
+    )}
+  </section>
+)}
+
+<script>
+  for (const slider of document.querySelectorAll<HTMLElement>(
+    ".quote-slider_wrap",
+  )) {
+    const list = slider.querySelector<HTMLElement>(".quote-slider_list");
+    const items = [
+      ...slider.querySelectorAll<HTMLElement>(".quote-slider_item"),
+    ];
+    const markers = [
+      ...slider.querySelectorAll<HTMLButtonElement>("[data-quote-to]"),
+    ];
+    const steps = [
+      ...slider.querySelectorAll<HTMLButtonElement>("[data-quote-step]"),
+    ];
+    if (!list || items.length < 2) continue;
+
+    let current = 0;
+
+    /* Only the quotation on show is reachable; the others wait, unread. */
+    const show = (index: number) => {
+      current = (index + items.length) % items.length;
+      items.forEach((item, i) => {
+        item.classList.toggle("is-current", i === current);
+        item.inert = i !== current;
+      });
+      markers.forEach((marker, i) =>
+        marker.setAttribute("aria-current", String(i === current)),
+      );
+    };
+
+    for (const step of steps) {
+      step.addEventListener("click", () =>
+        show(current + Number(step.dataset.quoteStep)),
+      );
+    }
+    for (const marker of markers) {
+      marker.addEventListener("click", () =>
+        show(Number(marker.dataset.quoteTo)),
+      );
+    }
+
+    show(0);
+    slider.classList.add("is-ready");
+    /* Announced from now on, when a visitor turns to another quotation. */
+    list.setAttribute("aria-live", "polite");
+  }
+</script>
+
+<style is:global>
+  @layer components {
+    /*
+     * As the design draws it: the quotation centred, its source under it,
+     * then the dots. A phone has the arrows beside the dots; from 64rem they
+     * sit at the edges of the window, level with the quotation.
+     */
+    .quote-slider_wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      width: 100%;
+      text-align: center;
+    }
+
+    .quote-slider_list {
+      display: grid;
+      gap: var(--_source-gap);
+      --_source-gap: clamp(5.2125rem, 6.0109rem + -0.6653vw, 5.8438rem);
+    }
+
+    /*
+     * Every quotation takes the same place, centred in the room the longest
+     * one needs, so the dots and the page under them keep still.
+     */
+    .quote-slider_wrap.is-ready {
+      & .quote-slider_list {
+        grid-row: 1;
+        grid-column: 1;
+      }
+
+      & .quote-slider_item {
+        grid-row: 1;
+        grid-column: 1;
+        align-self: center;
+        visibility: hidden;
+        opacity: 0;
+        transition:
+          opacity 0.4s ease,
+          visibility 0.4s;
+
+        &.is-current {
+          visibility: visible;
+          opacity: 1;
+        }
+      }
+    }
+
+    .quote-slider_item {
+      display: grid;
+      gap: var(--_source-gap);
+      justify-items: center;
+      margin: 0;
+    }
+
+    .quote-slider_text {
+      max-width: 76.25rem;
+      margin: 0;
+      line-height: clamp(1.95rem, 1.3012rem + 2.5823vw, 4.4rem);
+      text-wrap: balance;
+      /* The alternates the design sets on its quotations (Romie). */
+      font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
+      @media (width < 48rem) {
+        padding-inline: 1rem;
+      }
+      @media (width >= 64rem) {
+        max-width: min(76.25rem, 100vw - 11rem);
+      }
+
+      & > p {
+        margin: 0;
+      }
+      & > p + p {
+        margin-top: 0.5em;
+      }
+    }
+
+    /* The design's serif caption, with its old-style figures in the date. */
+    .quote-slider_source {
+      align-self: start;
+      max-width: 17.5em;
+      font-family: var(--secondary-family);
+      font-size: 1.25rem;
+      font-weight: var(--secondary-medium);
+      line-height: 1.1;
+      letter-spacing: var(--letter-spacing-snug);
+      font-variant-numeric: oldstyle-nums;
+      text-box: trim-both cap alphabetic;
+    }
+
+    .quote-slider_controls {
+      display: none;
+
+      .quote-slider_wrap.is-ready & {
+        display: flex;
+        grid-row: 2;
+        align-items: center;
+        margin-top: 4.34rem;
+        padding-inline: 1rem;
+        @media (width >= 64rem) {
+          display: contents;
+        }
+      }
+    }
+
+    .quote-slider_markers {
+      display: flex;
+      margin-inline-end: auto;
+      padding-inline-start: 0.375rem;
+      @media (width >= 64rem) {
+        grid-row: 2;
+        grid-column: 1;
+        justify-self: center;
+        margin: 3.34rem 0 0;
+        padding: 0;
+      }
+    }
+
+    /* A dot with room around it for a finger; filled for the one on show. */
+    .quote-slider_marker {
+      display: grid;
+      place-items: center;
+      width: clamp(1rem, 0.9007rem + 0.3953vw, 1.375rem);
+      height: 1.5rem;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+
+      &::before {
+        content: "";
+        width: clamp(0.6875rem, 0.6213rem + 0.2635vw, 0.9375rem);
+        aspect-ratio: 1;
+        border: var(--border-width) solid currentcolor;
+        border-radius: var(--radius-round);
+        transition: background-color var(--hover-duration) var(--hover-ease);
+      }
+      &[aria-current="true"]::before {
+        background-color: currentcolor;
+      }
+      @media (hover: hover) {
+        &:hover::before {
+          background-color: currentcolor;
+        }
+      }
+    }
+
+    .quote-slider_step {
+      display: grid;
+      place-items: center;
+      padding: 0.625rem;
+      border: 0;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+      @media (width < 64rem) {
+        &.is-forward {
+          margin-inline-end: -0.625rem;
+        }
+      }
+      @media (width >= 64rem) {
+        grid-row: 1;
+        grid-column: 1;
+        align-self: start;
+        /* Level with the third line of the longest quotation, as at 1920. */
+        margin-top: calc(var(--h2) * 2.14);
+        &.is-back {
+          justify-self: start;
+          margin-inline-start: calc(50% - 50vw + 1.5625rem);
+        }
+        &.is-forward {
+          justify-self: end;
+          margin-inline-end: calc(50% - 50vw + 1.5625rem);
+        }
+      }
+    }
+
+    .quote-slider_step-mark {
+      display: flex;
+      font-size: 1.5625rem;
+      @media (width >= 64rem) {
+        font-size: 2.5rem;
+      }
+
+      .is-back > & {
+        rotate: 180deg;
+      }
+    }
+  }
+</style>

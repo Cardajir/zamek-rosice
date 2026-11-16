@@ -73,7 +73,7 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
 
   <!-- Organisation -->
   <Section
-    containerClass="max-width-small"
+    containerClass="max-width-small statutory_block"
     paddingTop="small"
     paddingBottom="small"
   >
@@ -87,7 +87,7 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
 
   <!-- Further pages -->
   <Section
-    containerClass="max-width-small"
+    containerClass="max-width-small statutory_block"
     render={statutory.pages.length > 0}
     paddingTop="small"
     paddingBottom="small"
@@ -107,7 +107,7 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
 
   <!-- Documents -->
   <Section
-    containerClass="max-width-small"
+    containerClass="max-width-small statutory_block"
     render={groups.length > 0}
     paddingTop="small"
     gap="7"
@@ -131,3 +131,14 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
     ))}
   </Section>
 </Layout>
+
+<style is:global>
+  /* On a phone the headings and links line up with the inset rows of the lists. */
+  @media (width < 48rem) {
+    .statutory_block > h2,
+    .statutory_block > .button-wrapper,
+    .statutory_block > .layout h3 {
+      padding-inline: 1rem;
+    }
+  }
+</style>

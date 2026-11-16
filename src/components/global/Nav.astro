@@ -48,6 +48,22 @@ const socials = shell.socials.flatMap(({ network, url }) =>
 {render && (
   <header class:list={["nav_wrap", overlap && "overlap"]}>
     <div class="nav_inner">
+      {socials.length > 0 && (
+        <ul class="nav_bar_socials">
+          {socials.map((social) => (
+            <li>
+              <a
+                class="nav_social"
+                href={social.url}
+                aria-label={social.name}
+                rel="noopener"
+              >
+                <Icon src={social.icon} variant="small" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       <a class="nav_logo" href={routePath("home", lang)} aria-label={SITE_NAME}>
         <Logo class="nav_logo_mark" />
       </a>
@@ -82,8 +98,8 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                 </button>
                 <div class="nav_panel" id={`nav-panel-${index}`}>
                   <ul class="nav_panel_list">
-                    {group.items.map((item) => (
-                      <li>
+                    {group.items.map((item, itemIndex) => (
+                      <li style={`--_i: ${itemIndex}`}>
                         <a
                           class="nav_panel_link"
                           href={item.href}
@@ -377,7 +393,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       transition: opacity var(--hover-duration) var(--hover-ease);
       & > .nav_logo_mark {
         flex: none;
-        width: clamp(6.5rem, 8.49vw, 10.1875rem);
+        width: clamp(6.75rem, 8.49vw, 10.1875rem);
         max-width: none;
         height: auto;
       }
@@ -388,9 +404,10 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
     }
 
+    /* Two 31px bars 9px apart, crossing into a 27 × 16 cross when open. */
     .nav_toggle {
-      --_icon-width: 1.75rem;
-      --_bar-gap: 0.5rem;
+      --_icon-width: 1.9375rem;
+      --_bar-gap: 0.5625rem;
       grid-column: 3;
       justify-self: end;
       display: inline-flex;
@@ -398,7 +415,8 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       justify-content: center;
       min-width: 2.75rem;
       min-height: 2.75rem;
-      margin-right: calc((2.75rem - var(--_icon-width)) / -2);
+      /* The bars stop 10px short of the rule, as the design draws them. */
+      margin-right: calc((2.75rem - var(--_icon-width)) / -2 + 0.625rem);
       color: inherit;
     }
 
@@ -426,10 +444,10 @@ const socials = shell.socials.flatMap(({ network, url }) =>
 
     .nav_wrap.open .nav_toggle_icon {
       &::before {
-        transform: translateY(calc(var(--_bar-gap) / 2)) rotate(20deg);
+        transform: translateY(calc(var(--_bar-gap) / 2)) rotate(29deg);
       }
       &::after {
-        transform: translateY(calc(var(--_bar-gap) / -2)) rotate(-20deg);
+        transform: translateY(calc(var(--_bar-gap) / -2)) rotate(-29deg);
       }
     }
 
@@ -442,7 +460,8 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     }
 
     .nav_menu {
-      --_row-pad: clamp(0.875rem, 2.4svh, 1.5rem);
+      /* 24px above and below each 26px row, as the phone design spaces them. */
+      --_row-pad: clamp(0.875rem, 2.75svh, 1.5rem);
       --_row-size: clamp(1.375rem, 3svh, 1.625rem);
       position: absolute;
       top: 100%;
@@ -492,14 +511,16 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       font-family: var(--secondary-family);
       font-weight: var(--secondary-medium);
       font-size: var(--_row-size);
-      line-height: var(--line-height-medium);
+      line-height: 1.05;
       letter-spacing: var(--letter-spacing-snug);
       text-align: start;
       text-decoration: none;
     }
 
-    .nav_group_arrow {
-      --_size: 1.0556em;
+    /* The drawn arrow, 16 × 19. */
+    .nav_group_button > .nav_group_arrow.icon {
+      --_size: 1rem;
+      aspect-ratio: 16 / 19;
       transition: rotate var(--open-duration) var(--open-ease);
       .nav_group.open & {
         rotate: 180deg;
@@ -526,19 +547,22 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
     }
 
+    /* The pages of an open group: 18px, 33px apart, tucked under its name. */
     .nav_panel_list {
       overflow: hidden;
       display: flex;
       flex-direction: column;
       .nav_group.open & {
-        padding-bottom: var(--_row-pad);
+        margin-top: -0.625rem;
+        padding-bottom: 0.875rem;
       }
     }
 
     .nav_panel_link {
       display: block;
       padding-block: 0.25rem;
-      font-size: var(--text-main);
+      font-size: 1.125rem;
+      line-height: 1.4;
       text-decoration: none;
       & > span {
         text-underline-offset: 0.15em;
@@ -559,9 +583,20 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       flex-direction: column;
     }
 
-    /* Whatever height is left over goes above the social links, keeping them at the foot. */
-    .nav_socials {
+    /* Below the desktop width the social links sit on the bar, left of the logo. */
+    .nav_bar_socials {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: start;
       display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: 0.1875rem;
+      font-size: 1.1875rem;
+    }
+
+    .nav_socials {
+      display: none;
       align-items: center;
       gap: var(--space-5);
       margin-top: auto;
@@ -571,7 +606,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     .nav_social {
       display: flex;
       align-items: center;
-      min-width: 1.5rem;
       min-height: 1.5rem;
       transition: opacity var(--hover-duration) var(--hover-ease);
       @media (hover: hover) {
@@ -591,7 +625,8 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         overflow: visible;
       }
 
-      .nav_toggle {
+      .nav_toggle,
+      .nav_bar_socials {
         display: none;
       }
 
@@ -628,10 +663,16 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         display: none;
       }
 
+      .nav_group_button > .nav_group_arrow.icon {
+        --_size: 1.0556em;
+        aspect-ratio: 1 / 1;
+      }
+
       .nav_group_button,
       .nav_top_link {
         width: auto;
         padding-block: var(--space-2);
+        line-height: var(--line-height-medium);
         gap: 0.66em;
         font-family: var(--primary-family);
         font-weight: var(--primary-semibold);
@@ -677,10 +718,33 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       .nav_panel_list {
         gap: 0;
         .nav_group.open & {
+          margin-top: 0;
           padding-bottom: 0;
         }
         & > li {
           border-bottom: var(--border-width) solid var(--text);
+        }
+      }
+
+      /*
+       * As the panel slides down, its pages arrive one after another, each
+       * rising into place a moment after the one above it.
+       */
+      @media (prefers-reduced-motion: no-preference) {
+        .nav_group.open .nav_panel_list > li {
+          animation: nav-panel-item 0.35s var(--open-ease) both;
+          animation-delay: calc(0.08s + var(--_i, 0) * 0.05s);
+        }
+      }
+
+      @keyframes nav-panel-item {
+        from {
+          opacity: 0;
+          translate: 0 0.5rem;
+        }
+        to {
+          opacity: 1;
+          translate: none;
         }
       }
 
@@ -730,9 +794,14 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
 
       .nav_socials {
+        display: flex;
         margin-top: 0;
         padding-block: 0;
         gap: var(--space-3);
+      }
+
+      .nav_social {
+        min-width: 1.5rem;
       }
     }
   }

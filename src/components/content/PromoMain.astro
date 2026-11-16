@@ -1,5 +1,6 @@
 ---
 import Button from "@/components/Button.astro";
+import putto from "@/assets/ornaments/ornament-7.svg";
 import SanityImg from "@/components/media/SanityImg.astro";
 import type { Promo } from "@/sanity/queries.ts";
 
@@ -12,6 +13,8 @@ interface Props {
   headingTag?: "h2" | "h3";
   /** Put the text on the right and the photographs on the left. */
   reverse?: boolean;
+  /** A pale putto behind the text, from 64rem up. */
+  backdrop?: boolean;
 }
 
 const {
@@ -19,6 +22,7 @@ const {
   promo,
   headingTag: Tag = "h2",
   reverse = false,
+  backdrop = false,
 } = Astro.props;
 
 const images = promo.images.slice(0, 2);
@@ -38,6 +42,17 @@ const paragraphs = (promo.text ?? "")
     ]}
   >
     <div class="promo_content">
+      {backdrop && (
+        <img
+          class="promo_backdrop"
+          src={putto.src}
+          width="644"
+          height="566"
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      )}
       {promo.eyebrow && <p class="promo_eyebrow">{promo.eyebrow}</p>}
       <Tag class="promo_title text-style-h3">{promo.title}</Tag>
       {paragraphs.map((paragraph) => (
@@ -75,11 +90,14 @@ const paragraphs = (promo.text ?? "")
       display: grid;
       gap: var(--space-7);
       align-items: center;
+      /* On a phone the text and the photographs keep 32px from the edges. */
+      padding-inline: 1rem;
 
       @media (width >= 64rem) {
         grid-template-columns: minmax(0, 31.5rem) minmax(0, 1fr);
         gap: var(--space-8);
-        padding-inline: var(--space-6);
+        /* The photographs stop 32px short of the page’s edges. */
+        padding-inline: 2rem;
 
         &.reverse {
           grid-template-columns: minmax(0, 1fr) minmax(0, 31.5rem);
@@ -98,27 +116,69 @@ const paragraphs = (promo.text ?? "")
     }
 
     .promo_content {
+      position: relative;
+      isolation: isolate;
       display: flex;
       flex-direction: column;
       align-items: start;
     }
 
-    /* 29px between label, title and text, as the design spaces them. */
+    /*
+     * The pale putto as the design sets it at 1920: 566px tall in a 644px
+     * box that starts 54px left of the text and 324px above it.
+     */
+    .promo_backdrop {
+      display: none;
+
+      @media (width >= 64rem) {
+        display: block;
+        position: absolute;
+        z-index: -1;
+        top: -16.875vw;
+        left: -1.4583vw;
+        width: 30.83vw;
+        max-width: none;
+        height: auto;
+        opacity: 0.075;
+        pointer-events: none;
+        user-select: none;
+      }
+    }
+
+    /*
+     * 29px between label, title and text at 1920. A phone draws them tighter
+     * under the label and looser under the title.
+     */
     .promo_eyebrow {
-      margin: 0 0 1.8125rem;
+      margin: 0 0 1.5rem;
+      @media (width >= 48rem) {
+        margin-bottom: 1.8125rem;
+      }
       color: var(--muted-text);
-      font-size: var(--text-main);
+      font-size: var(--text-small);
       font-weight: var(--primary-medium);
       line-height: 1.2;
       letter-spacing: var(--letter-spacing-wide);
     }
 
     .promo_title {
-      margin: 0 0 1.8125rem;
+      margin: 0 0 2rem;
+      @media (width >= 48rem) {
+        margin-bottom: 1.8125rem;
+      }
       text-wrap: balance;
     }
 
+    /* 14px on a phone, 18px from 48rem, as the design sets body copy in a promo. */
+    .promo_eyebrow,
     .promo_text {
+      @media (width >= 48rem) {
+        font-size: var(--text-main);
+      }
+    }
+
+    .promo_text {
+      font-size: var(--text-small);
       margin: 0 0 var(--space-4);
       &:last-of-type {
         margin-bottom: var(--space-5);
@@ -129,8 +189,8 @@ const paragraphs = (promo.text ?? "")
      * Two photographs as the design composes them at 1920 (and at 402 on a
      * phone): a tall one behind and the scene laid over it. Every offset is
      * a share of the back photograph's width, so the pair scales as one.
-     * Text on the left: the scene runs off the right edge of the page.
-     * Text on the right: the scene overlaps the back one towards the text.
+     * At 1920 the scene overlaps the back one towards the text; on a phone,
+     * where the photographs come first, it steps down and to the right.
      */
     .promo_visual {
       position: relative;
@@ -163,8 +223,8 @@ const paragraphs = (promo.text ?? "")
         --_back-ratio: 278 / 415;
         --_front: 107.6%;
         --_front-ratio: 299 / 241;
-        --_front-x: 121.5%;
-        --_front-y: 31.2%;
+        --_front-x: 14.03%;
+        --_front-y: 30.94%;
         width: var(--_back);
         max-width: none;
         justify-self: start;
@@ -175,13 +235,17 @@ const paragraphs = (promo.text ?? "")
           }
         }
 
+        /* Photographs on the right: the one behind starts at the page’s edge. */
         .promo_wrap.reverse & {
           --_back: 68.16vw;
           --_back-ratio: 274 / 321;
           --_front: 100%;
           --_front-ratio: 274 / 329;
-          --_front-x: 23.4%;
-          --_front-y: 31.6%;
+          --_front-x: 23.36%;
+          --_front-y: 31.75%;
+          @media (width < 64rem) {
+            margin-left: -1rem;
+          }
         }
 
         @media (width >= 64rem) {
@@ -189,7 +253,7 @@ const paragraphs = (promo.text ?? "")
           --_back-ratio: 638 / 957;
           --_front: 110.35%;
           --_front-ratio: 704 / 567;
-          --_front-x: 84.01%;
+          --_front-x: -26.33%;
           --_front-y: 29%;
 
           .promo_wrap.reverse & {

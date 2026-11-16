@@ -25,6 +25,8 @@ interface Props extends Omit<HTMLAttributes<"textarea">, "rows"> {
   maxLines?: number;
   /** Require the field and mark its label. */
   required?: boolean;
+  /** Visually hide the label. */
+  labelHidden?: boolean;
 }
 
 const {
@@ -36,6 +38,7 @@ const {
   minLines = 3,
   maxLines = 12,
   required = false,
+  labelHidden = false,
   class: className,
   ...rest
 } = Astro.props;
@@ -46,7 +49,9 @@ const {
     class:list={["field", "form-textarea", className]}
     style={`--_min-lines: ${minLines}; --_max-lines: ${maxLines};`}
   >
-    <span class="field-label text-style-main">
+    <span
+      class:list={["field-label text-style-main", labelHidden && "sr-only"]}
+    >
       <span>{label}</span>
       {required && (
         <span class="field-star" aria-hidden="true">

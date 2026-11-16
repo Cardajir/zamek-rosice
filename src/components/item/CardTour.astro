@@ -57,7 +57,9 @@ const {
             width: imageWidth,
             height: imageHeight,
           }}
-          sizes="(width >= 64rem) 25vw, (width >= 30rem) 50vw, 100vw"
+          ratio={1}
+          narrowRatio={339 / 193}
+          sizes="(width >= 64rem) 25vw, (width >= 48rem) 50vw, 100vw"
           maxWidth={1200}
         />
       )}
@@ -77,7 +79,11 @@ const {
 
 <style is:global>
   @layer components {
-    /* Four rows, shared with the other cards of the list through subgrid. */
+    /*
+     * Four rows, shared with the other cards of the list through subgrid. On
+     * a phone (402) the card is one column with a 339 × 193 landscape on top,
+     * then the label, title, text and link at the spacing the design gives.
+     */
     .card-tour_wrap {
       position: relative;
       display: grid;
@@ -85,6 +91,12 @@ const {
       grid-template-rows: subgrid;
       row-gap: 0;
       justify-items: start;
+
+      @media (width < 48rem) {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+      }
     }
 
     /* A longer title grows upwards, so the photograph below stays in line. */
@@ -93,6 +105,9 @@ const {
       flex-direction: column;
       justify-content: flex-end;
       margin-bottom: var(--space-5);
+      @media (width < 48rem) {
+        margin-bottom: 2.1625rem;
+      }
     }
 
     .card-tour_eyebrow {
@@ -100,6 +115,10 @@ const {
       color: var(--muted-text);
       font-weight: var(--primary-medium);
       line-height: 1.2;
+      @media (width < 48rem) {
+        margin-bottom: 1.475rem;
+        font-size: var(--text-small);
+      }
     }
 
     .card-tour_title {
@@ -108,13 +127,22 @@ const {
     }
 
     .card-tour_visual {
+      position: relative;
       width: 100%;
       aspect-ratio: 1 / 1;
       margin-bottom: var(--space-6);
       background-color: var(--background-2);
       overflow: clip;
 
+      @media (width < 48rem) {
+        order: -1;
+        aspect-ratio: 339 / 193;
+        margin-bottom: 2.1875rem;
+      }
+
       & > .image {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -126,11 +154,20 @@ const {
     .card-tour_text {
       max-width: min(100%, 20rem);
       margin: 0 0 var(--space-5);
+      @media (width < 48rem) {
+        max-width: none;
+        margin-bottom: 1.49375rem;
+        font-size: var(--text-small);
+        line-height: 1.4;
+      }
     }
 
     .card-tour_wrap > .button_wrap {
       grid-row: 4;
       align-self: end;
+      @media (width < 48rem) {
+        align-self: start;
+      }
       &::after {
         content: "";
         position: absolute;

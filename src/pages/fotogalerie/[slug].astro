@@ -1,9 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
-import Ornament from "@/components/media/Ornament.astro";
-import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
-import Eyebrow from "@/components/typography/Eyebrow.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import Heading from "@/components/typography/Heading.astro";
 import GalleryMain from "@/components/content/GalleryMain.astro";
 import GalleryNavMain from "@/components/content/GalleryNavMain.astro";
@@ -21,6 +19,11 @@ if (!album || album.images.length === 0) return Astro.rewrite("/404/");
 
 const albums = await getAlbums(lang);
 
+/* The first album is the gallery's front page; its own address leads there. */
+if (albums[0]?.slug === album.slug) {
+  return Astro.redirect(routePath("gallery", lang), 301);
+}
+
 const cover = album.images[0];
 ---
 
@@ -29,35 +32,32 @@ const cover = album.images[0];
   image={cover && sized(cover.url, 1200)}
   alternates={alternates("gallery", album.slugs)}
 >
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
-    <ContentWrapper centered>
-      <Eyebrow>{t.galleryTitle}</Eyebrow>
-      <Heading tag="h1" variant="h2">
-        {album.title}
-      </Heading>
-    </ContentWrapper>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={t.galleryTitle} />
   </Section>
 
   <!-- Albums -->
-  <Section paddingTop="small" paddingBottom="small" gap="4" align="center">
-    <Ornament variant={6} />
-    <Eyebrow>{t.galleryIntro}</Eyebrow>
+  <Section id="alba" paddingTop="none" paddingBottom="none">
     <GalleryNavMain
       label={t.galleryAlbums}
-      items={[
-        { label: t.selectedPhotos, href: routePath("gallery", lang) },
-        ...albums.map((item) => ({
-          label: item.title,
-          href: routePath("gallery", lang, item.slug),
-          current: item.slug === album.slug,
-        })),
-      ]}
+      intro={t.galleryIntro}
+      items={albums.map((item, index) => ({
+        label: item.title,
+        href:
+          index === 0
+            ? routePath("gallery", lang)
+            : routePath("gallery", lang, item.slug),
+        current: item.slug === album.slug,
+      }))}
     />
   </Section>
 
   <!-- Photographs -->
-  <Section paddingTop="small">
-    <GalleryMain photos={album.images} />
+  <Section paddingTop="large" paddingBottom="none" gap="0">
+    <Heading tag="h2" class="sr-only">
+      {album.title}
+    </Heading>
+    <GalleryMain photos={album.images} back="#alba" />
   </Section>
 </Layout>

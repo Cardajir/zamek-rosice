@@ -13,15 +13,12 @@ import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getDirections } from "@/sanity/page-queries.ts";
-import { shellFor } from "@/sanity/queries.ts";
+import { formatPlain } from "@/utils/text-blocks.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 
-const [shell, directions] = await Promise.all([
-  shellFor(Astro.locals),
-  getDirections(lang),
-]);
+const directions = await getDirections(lang);
 
 /* An editor's own map link wins; otherwise the castle's coordinates on Mapy.com. */
 const { location } = directions;
@@ -30,20 +27,39 @@ const mapUrl =
   (location &&
     `https://mapy.com/fnc/v1/showmap?mapset=basic&center=${location.lng},${location.lat}&zoom=17&marker=true`);
 
+/* The Studio's plain text: its paragraphs, line breaks and bold words. */
+const escape = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+const paragraphs = (value?: string) =>
+  formatPlain(value).map((lines) =>
+    lines
+      .map((runs) =>
+        runs
+          .map(({ text, bold }) =>
+            bold ? `<strong>${escape(text)}</strong>` : escape(text),
+          )
+          .join(""),
+      )
+      .join("<br />"),
+  );
+
 const ways = [
   { heading: t.byCar, text: directions.byCar },
   { heading: t.byTrain, text: directions.byTrain },
   { heading: t.byBus, text: directions.byBus },
   { heading: t.parking, text: directions.parking },
   { heading: t.accessibility, text: directions.accessibility },
-].filter((way) => way.text);
-
-const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
+]
+  .map((way) => ({ heading: way.heading, paragraphs: paragraphs(way.text) }))
+  .filter((way) => way.paragraphs.length > 0);
 ---
 
 <Layout
   title={t.directionsTitle}
-  description={directions.intro}
+  description={directions.intro?.replace(/\*\*/g, "")}
   alternates={alternates("directions")}
 >
   <!-- Photograph and title -->
@@ -51,18 +67,24 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
     <PageHeroMain title={t.directionsTitle} />
   </Section>
 
-  <!-- Address and map -->
+  <!-- Where the castle is, and the map -->
   <Section
     containerClass="max-width-small"
-    paddingTop="small"
+    paddingTop="none"
     paddingBottom="none"
     class="directions_place"
     data-stacki-key="km7pivlca3c1g"
   >
     <Ornament slot="background" variant={7} size="large" />
     <ContentWrapper>
-      <Paragraph variant="large">{address}</Paragraph>
-      <Paragraph maxWidth={80}>{directions.intro}</Paragraph>
+      <Heading tag="h2" variant="h3">
+        {t.directionsTitle}
+      </Heading>
+      {paragraphs(directions.intro).map((html) => (
+        <Paragraph variant="large">
+          <Fragment set:html={html} />
+        </Paragraph>
+      ))}
       <ButtonWrapper>
         <Button
           render={Boolean(mapUrl)}
@@ -83,7 +105,6 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
     render={ways.length > 0}
     paddingTop="none"
     paddingBottom="none"
-    gap="6"
     class="directions_ways"
     data-stacki-key="k9h0if2g58ofd"
   >
@@ -95,7 +116,11 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
         <Heading tag="h3" variant="h6">
           {way.heading}
         </Heading>
-        <Paragraph maxWidth={80}>{way.text}</Paragraph>
+        {way.paragraphs.map((html) => (
+          <Paragraph variant="large">
+            <Fragment set:html={html} />
+          </Paragraph>
+        ))}
       </ContentWrapper>
     ))}
   </Section>
@@ -105,6 +130,7 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
     containerClass="max-width-small"
     render={Boolean(directions.image)}
     paddingTop="none"
+    paddingBottom="none"
     class="directions_photo"
   >
     <PortableImage node={directions.image ?? {}} />
@@ -113,34 +139,74 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
 
 <style is:global>
   /*
-   * As the design spaces it at 1920: 70px around the rule that parts the
-   * address from the ways here, under their heading and before the
-   * photograph; 60px from one way to the next; 41px from a way's name to
-   * its text.
+   * As the design spaces it at 1920, from line to line: 267px from the rule
+   * under the photograph to the first heading; 86px under a big heading,
+   * 55px under a small one; 38px between paragraphs, 73px between ways;
+   * 33px from the text to the map link, 76px and 78px either side of the
+   * rule (the link box reaches below its words); 78px down to the photograph
+   * and 196px under its caption. A phone keeps the text 1rem in from the
+   * rule, with the spacing of the design's other phone pages.
    */
   .directions_place,
-  .directions_ways {
-    --_space: clamp(2.75rem, 3.65vw, 4.375rem);
+  .directions_ways,
+  .directions_photo {
+    --_after-title: clamp(3.375rem, 2.8702rem + 2.0092vw, 5.2813rem);
+    --_after-heading: clamp(1.9187rem, 1.5215rem + 1.581vw, 3.4188rem);
+    --_paragraph: clamp(1.2312rem, 0.935rem + 1.1792vw, 2.35rem);
+    --_way: clamp(2.5rem, 1.9588rem + 2.1542vw, 4.5438rem);
+
+    & > .container {
+      row-gap: 0;
+      @media (width < 48rem) {
+        padding-inline: 1rem;
+      }
+    }
+    & .layout > * > * {
+      margin-block: 0;
+    }
+    & .text-style-large {
+      line-height: clamp(1.45rem, 1.3209rem + 0.5138vw, 1.9375rem);
+    }
+    & .text + .text {
+      margin-top: var(--_paragraph);
+    }
+    & .heading.text-style-h3 + * {
+      margin-top: var(--_after-title);
+    }
+    & .heading.text-style-h6 + * {
+      margin-top: var(--_after-heading);
+    }
   }
 
   .directions_place {
-    padding-bottom: var(--_space);
+    padding-top: clamp(3.5625rem, 0.0867rem + 13.834vw, 16.6875rem);
+    padding-bottom: clamp(2.8312rem, 2.434rem + 1.581vw, 4.3312rem);
+
+    & .button-wrapper {
+      margin-top: clamp(0.525rem, 0.3793rem + 0.5797vw, 1.075rem);
+    }
   }
 
   .directions_ways > .container {
-    row-gap: clamp(2.5rem, 3.125vw, 3.75rem);
-    padding-block: var(--_space);
+    padding-block: clamp(4.1rem, 3.8997rem + 0.7971vw, 4.8563rem)
+      clamp(2.5rem, 1.8744rem + 2.4901vw, 4.8625rem);
     border-top: var(--border-width) solid var(--text);
 
-    & > .heading {
-      margin-block: 0 calc(var(--_space) - clamp(2.5rem, 3.125vw, 3.75rem));
+    & > .layout + .layout {
+      margin-top: var(--_way);
     }
+  }
 
-    & > .layout > * {
-      row-gap: clamp(1.5rem, 2.14vw, 2.5625rem);
-      & > * {
-        margin-block: 0;
+  .directions_photo {
+    @media (width < 48rem) {
+      & > .container {
+        padding-inline: 0;
       }
     }
+  }
+
+  .directions_ways:last-child > .container,
+  .directions_photo {
+    padding-bottom: clamp(5.0625rem, 3.1641rem + 7.556vw, 12.2312rem);
   }
 </style>

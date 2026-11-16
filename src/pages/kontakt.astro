@@ -2,7 +2,6 @@
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import PageHeroMain from "@/components/content/PageHeroMain.astro";
-import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
@@ -84,38 +83,42 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
           action="/api/contact"
           successMessage={t.formSent}
           errorMessage={t.formFailed}
-          class="margin-top-5"
+          variant="lined"
+          class="margin-top-7"
           data-stacki-key="kkakiy7iycqos"
         >
           <Input
             variant="first-name"
             label={t.formName}
             name="name"
-            placeholder=""
             maxlength={100}
             required
+            labelHidden
             data-stacki-key="khx919k18xg6t"
           />
           <Input
             variant="last-name"
             label={t.formSurname}
             name="surname"
-            placeholder=""
             maxlength={100}
+            labelHidden
           />
           <Input
             variant="email"
             label={t.formEmail}
             name="email"
-            placeholder=""
             maxlength={200}
             required
+            labelHidden
           />
           <Textarea
             label={t.formMessage}
             name="message"
+            placeholder={t.formMessage}
+            minLines={1}
             maxlength={5000}
             required
+            labelHidden
           />
           <div class="sr-only" aria-hidden="true">
             <label>
@@ -128,7 +131,17 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
               />
             </label>
           </div>
-          <Choice label={t.formConsent} name="consent" required />
+          <div class="form_row">
+            <Choice
+              label={t.formConsent}
+              name="consent"
+              variant="round"
+              required
+            />
+            <Button variant="link" type="submit">
+              {t.formSubmit}
+            </Button>
+          </div>
           {turnstileKey && (
             <div
               class="cf-turnstile"
@@ -137,11 +150,6 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
               data-appearance="interaction-only"
             />
           )}
-          <ButtonWrapper marginTop="0" class="alignment-end">
-            <Button variant="link" type="submit">
-              {t.formSubmit}
-            </Button>
-          </ButtonWrapper>
         </Form>
       </div>
     </ContentWrapper>

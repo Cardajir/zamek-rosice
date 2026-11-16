@@ -43,7 +43,8 @@ type Kind =
       emphasis?: never;
       label?: never;
       pressed?: never;
-      direction?: never;
+      /** `back` turns the arrow to point left, for a link back up a level. */
+      direction?: "forward" | "back";
     }
   | {
       variant: "play";
@@ -129,7 +130,9 @@ const named = {
       "button_wrap",
       emphasis !== "primary" && emphasis,
       variant !== "main" && variant,
-      variant === "arrow" && direction === "back" && "back",
+      (variant === "arrow" || variant === "link") &&
+        direction === "back" &&
+        "back",
       className,
     ]}
     aria-label={isWritten ? undefined : (label ?? named[variant])}
@@ -283,6 +286,24 @@ const named = {
           & > .button_mark,
           & > .button_text {
             transition-property: opacity, background-size;
+          }
+        }
+
+        /* Pointing back: the arrow only leans further left on hover. */
+        &.back {
+          & > .button_mark_end {
+            display: none;
+          }
+          @media (hover: hover) {
+            &:hover:not(:disabled) {
+              & > .button_mark:not(.button_mark_end) {
+                opacity: 1;
+                translate: -0.3em 0;
+              }
+              & > .button_text {
+                translate: none;
+              }
+            }
           }
         }
       }

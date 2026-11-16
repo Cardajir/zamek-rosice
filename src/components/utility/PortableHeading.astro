@@ -1,0 +1,25 @@
+---
+import type { BlockProps } from "astro-portabletext/types";
+
+type Props = BlockProps;
+
+const { node } = Astro.props;
+
+/*
+ * The level keeps the page's outline in order; the look stays the one the
+ * editor picked, so renumbering a heading never changes its size.
+ */
+const Tag = (/^h[2-6]$/.test(node.style ?? "") ? node.style : "h2") as "h2";
+const look = (node as { look?: string }).look ?? node.style;
+const STYLES: Record<string, string> = {
+  h2: "text-style-h3",
+  h3: "text-style-h5",
+  h4: "text-style-h6",
+  h5: "text-style-h6",
+  h6: "text-style-h6",
+};
+---
+
+<Tag class:list={["portable-text_heading", STYLES[look ?? ""] ?? STYLES.h2]}>
+  <slot />
+</Tag>

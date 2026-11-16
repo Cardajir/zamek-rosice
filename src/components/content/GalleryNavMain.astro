@@ -1,20 +1,26 @@
 ---
+import Ornament from "@/components/media/Ornament.astro";
+
 interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
   /** Accessible label. */
   label: string;
+  /** A short serif line above the albums. */
+  intro?: string;
   /** Albums to choose from; the one being shown is marked `current`. */
   items: { label: string; href: string; current?: boolean }[];
   /** Class names for utilities. */
   class?: string;
 }
 
-const { render = true, label, items, class: className } = Astro.props;
+const { render = true, label, intro, items, class: className } = Astro.props;
 ---
 
 {render && items.length > 0 && (
   <nav class:list={["gallery-nav_wrap", className]} aria-label={label}>
+    <Ornament variant={6} />
+    {intro && <p class="gallery-nav_intro">{intro}</p>}
     <ul class="gallery-nav_list">
       {items.map((item) => (
         <li>
@@ -33,15 +39,43 @@ const { render = true, label, items, class: className } = Astro.props;
 
 <style is:global>
   @layer components {
+    /*
+     * The triton 96px under the photograph's rule on a phone and 165px at
+     * 1920, the serif line 51px and 73px under it, the first album 58px and
+     * 75px under that. The room under the list tops up the next section's
+     * large padding to the design's 130px and 230px.
+     */
     .gallery-nav_wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       width: 100%;
+      padding-block: clamp(6rem, 4.858rem + 4.545vw, 10.3125rem)
+        clamp(2.1938rem, 1.8381rem + 1.4163vw, 3.5375rem);
+
+      & > .gallery-nav_intro {
+        margin-block: clamp(3.2rem, 2.8376rem + 1.4427vw, 4.5688rem)
+          clamp(3.2188rem, 3.0418rem + 0.7049vw, 3.8875rem);
+      }
+    }
+
+    /* The design's serif line: 20px at 1920, 16px on a phone. */
+    .gallery-nav_intro {
+      font-family: var(--secondary-family);
+      font-size: var(--text-large);
+      font-weight: var(--secondary-medium);
+      line-height: 1.1;
+      letter-spacing: var(--letter-spacing-snug);
+      font-variant-numeric: oldstyle-nums;
+      text-align: center;
     }
 
     .gallery-nav_list {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-6);
+      /* 47px from album to album on a phone, 102px at 1920. */
+      gap: clamp(0.9875rem, 0.7261rem + 1.0408vw, 1.975rem);
       text-align: center;
     }
 

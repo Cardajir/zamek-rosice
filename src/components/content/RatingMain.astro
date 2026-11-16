@@ -1,4 +1,5 @@
 ---
+import putto from "@/assets/ornaments/ornament-7.svg";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { ui } from "@/i18n/ui.ts";
 
@@ -24,6 +25,15 @@ const formatted = value === undefined ? undefined : value.toFixed(1);
 
 {render && formatted && (
   <div class="rating_wrap">
+    <img
+      class="rating_backdrop"
+      src={putto.src}
+      width="284"
+      height="272"
+      alt=""
+      loading="lazy"
+      decoding="async"
+    />
     <p class="rating_value text-style-h1">
       <span aria-hidden="true">{formatted}</span>
       <span class="sr-only">
@@ -45,19 +55,47 @@ const formatted = value === undefined ? undefined : value.toFixed(1);
 <style is:global>
   @layer components {
     .rating_wrap {
+      position: relative;
+      isolation: isolate;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
 
+    /*
+     * On a phone a pale putto stands behind the score, as the design draws
+     * it: 284px wide, reaching 64px above the number and a little right of
+     * its middle. The desktop puts the putto behind the Šenk instead.
+     */
+    .rating_backdrop {
+      position: absolute;
+      z-index: -1;
+      top: -4.5rem;
+      left: calc(50% + 0.75rem);
+      width: 17.75rem;
+      max-width: none;
+      height: auto;
+      translate: -50% 0;
+      opacity: 0.075;
+      pointer-events: none;
+      user-select: none;
+
+      @media (width >= 48rem) {
+        display: none;
+      }
+    }
+
+    /* 100px at 1920, 62px on a phone. */
     .rating_value {
       margin: 0;
+      font-size: clamp(3.8656rem, 3.234rem + 2.513vw, 6.25rem);
     }
 
     /* Spacing as drawn at 1920: 37px under the number, 11px above the source. */
     .rating_label {
-      margin: clamp(1.5rem, 1.93vw, 2.3125rem) 0 0;
+      margin: clamp(1.6875rem, 1.93vw, 2.3125rem) 0 0;
+      font-size: 1.25rem;
       font-family: var(--secondary-family);
       font-weight: var(--secondary-medium);
       line-height: 1.1;
@@ -65,9 +103,11 @@ const formatted = value === undefined ? undefined : value.toFixed(1);
       font-variant-numeric: oldstyle-nums;
     }
 
+    /* 11px under the line at 1920, 17px on a phone where the source is smaller. */
     .rating_source {
-      margin: 0.6875rem 0 0;
-      font-size: var(--text-main);
+      margin: clamp(0.6875rem, 1.162rem - 0.3953vw, 1.0625rem) 0 0;
+      /* 18px at 1920, 12px on a phone. */
+      font-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
       font-weight: var(--primary-semibold);
       line-height: 1.2;
       letter-spacing: var(--letter-spacing-snug);

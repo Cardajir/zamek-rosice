@@ -313,6 +313,8 @@ export interface TourCard {
   duration?: { min?: number; max?: number; unlimited?: boolean };
   free?: boolean;
   image?: Image;
+  /** Slug of the album linked to the tour, in the requested language. */
+  gallery?: string;
 }
 
 export interface Promo {
@@ -579,7 +581,8 @@ const TOUR_FIELDS = `
   "slug": coalesce(slug[$lang].current, slug.cs.current),
   "perex": ${text("perex")},
   kind, duration, free,
-  "image": images[0]${IMAGE}`;
+  "image": images[0]${IMAGE},
+  "gallery": coalesce(gallery->slug[$lang].current, gallery->slug.cs.current)`;
 
 const TOURS = `*[_type == "tour"] | order(order asc){${TOUR_FIELDS}}`;
 

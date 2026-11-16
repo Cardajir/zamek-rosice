@@ -52,6 +52,10 @@ const eyebrow = ({ duration, free }: TourCard) => {
 
 <style is:global>
   @layer components {
+    /*
+     * One column on a phone: each tour set in 16px between full-width rules,
+     * 30px below the rule above it. Two columns from 48rem, four from 64rem.
+     */
     .tours_wrap {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -59,10 +63,13 @@ const eyebrow = ({ duration, free }: TourCard) => {
       width: 100%;
       padding-top: var(--space-8);
       border-top: var(--border-width) solid var(--text);
-      @media (width >= 30rem) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      @media (width < 48rem) {
+        gap: 0;
+        padding-top: 0;
+        border-bottom: var(--border-width) solid var(--text);
       }
       @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         padding-inline: var(--space-6);
       }
       @media (width >= 64rem) {
@@ -80,6 +87,13 @@ const eyebrow = ({ duration, free }: TourCard) => {
       grid-row: span 4;
       grid-template-rows: subgrid;
       row-gap: 0;
+      @media (width < 48rem) {
+        display: block;
+        padding: 1.875rem 1rem 1.4375rem;
+        & + & {
+          border-top: var(--border-width) solid var(--text);
+        }
+      }
     }
   }
 </style>

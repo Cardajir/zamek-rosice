@@ -48,7 +48,7 @@ const center = await slotContent(Astro.slots, "center");
         )
       )}
     </p>
-    <div class="status-bar_center">
+    <div class:list={["status-bar_center", !center && "is-address"]}>
       {center ? (
         <Fragment set:html={center} />
       ) : (
@@ -74,17 +74,25 @@ const center = await slotContent(Astro.slots, "center");
     .status-bar_wrap {
       width: 100%;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: auto auto;
+      justify-content: space-between;
       gap: var(--space-4) var(--space-6);
-      padding-top: var(--space-4);
+      /* 17px from the rule to the text on a phone, as the design sets it. */
+      padding-top: 0.9375rem;
+
+      @media (width >= 48rem) {
+        padding-top: var(--space-4);
+      }
       border-top: var(--border-width) solid var(--text);
-      font-size: var(--text-main);
+      /* 18px at 1920, 12px on a phone. */
+      font-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
       font-weight: var(--primary-semibold);
       line-height: 1.2;
       letter-spacing: var(--letter-spacing-snug);
 
       @media (width >= 48rem) {
         grid-template-columns: 1fr auto 1fr;
+        justify-content: normal;
       }
     }
 
@@ -106,12 +114,25 @@ const center = await slotContent(Astro.slots, "center");
         grid-column: 2;
         grid-row: 1;
       }
+
+      /* On a phone whatever stands in the middle drops 110px below the bar. */
+      &:not(.is-address) {
+        @media (width < 48rem) {
+          margin-top: 5.625rem;
+        }
+      }
+
+      /* A phone shows no address here; the footer and contact page carry it. */
+      &.is-address {
+        @media (width < 48rem) {
+          display: none;
+        }
+      }
     }
 
-    /* Two lines, as the design breaks it. */
+    /* Two lines, broken after “památka” as the design breaks it. */
     .status-bar_note {
-      max-width: 15.5rem;
-      text-wrap: balance;
+      max-width: 12.5em;
     }
 
     .status-bar_address {

@@ -2,6 +2,7 @@
 import Parallax from "@/components/media/Parallax.astro";
 import SanityImg from "@/components/media/SanityImg.astro";
 import { shellFor, type Image } from "@/sanity/queries.ts";
+import { slotContent } from "@/utils/slots.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -18,6 +19,8 @@ interface Props {
 
 const { render = true, title, rule = true, class: className } = Astro.props;
 const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
+/* A link set in the photograph’s top-left corner, such as the way back up. */
+const corner = await slotContent(Astro.slots, "corner");
 ---
 
 {render && title && (
@@ -28,10 +31,16 @@ const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
           <SanityImg
             image={{ ...image, alt: "" }}
             ratio={1645 / 705}
+            narrowRatio={1}
             loading="eager"
             fetchPriority="high"
           />
         </Parallax>
+      )}
+      {corner && (
+        <div class="page-hero_corner">
+          <Fragment set:html={corner} />
+        </div>
       )}
       <h1 class="page-hero_title text-style-h1">{title}</h1>
     </div>
@@ -47,7 +56,8 @@ const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
      */
     .page-hero_wrap {
       width: 100%;
-      padding-bottom: 0.8125rem;
+      /* 13px at 1920, 8px on a phone. */
+      padding-bottom: clamp(0.5rem, 0.4172rem + 0.3294vw, 0.8125rem);
 
       &.has-rule {
         border-bottom: var(--border-width) solid var(--text);
@@ -61,9 +71,13 @@ const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
       min-height: 12rem;
       padding: var(--space-6);
 
+      /* 1645 × 705 at 1920; square on a phone. */
       &.has-image {
         aspect-ratio: 1645 / 705;
         min-height: 16rem;
+        @media (width < 48rem) {
+          aspect-ratio: 1;
+        }
         padding: 0;
         overflow: clip;
         background-color: var(--background);
@@ -74,7 +88,8 @@ const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
           inset: 0;
           height: 100%;
 
-          & > .image {
+          & > .image,
+          & > picture > .image {
             height: 100%;
             object-fit: cover;
           }
@@ -89,10 +104,19 @@ const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
       }
     }
 
+    /* 33px in and 36px down at 1920. */
+    .page-hero_corner {
+      position: absolute;
+      z-index: 1;
+      top: clamp(1rem, 0.6696rem + 1.3175vw, 2.25rem);
+      left: clamp(1rem, 0.7397rem + 1.0382vw, 2.0625rem);
+    }
+
+    /* The title in a 968px box, wide enough for a tour’s name on one line. */
     .page-hero_title {
       position: relative;
       z-index: 1;
-      max-width: 48.375rem;
+      max-width: calc(60.5rem + var(--space-5) * 2);
       margin: 0;
       padding-inline: var(--space-5);
       text-align: center;

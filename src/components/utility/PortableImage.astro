@@ -22,27 +22,35 @@ const note = [node.caption, node.credit].filter(Boolean).join(" · ");
   <figure class="portable-image_wrap">
     <SanityImg
       image={{ ...node, url }}
-      sizes="(width >= 48rem) 46rem, 100vw"
+      sizes="(width >= 82rem) 82rem, 100vw"
       maxWidth={1600}
     />
-    {note && <figcaption class="text-style-small">{note}</figcaption>}
+    {note && <figcaption class="portable-image_caption">{note}</figcaption>}
   </figure>
 )}
 
 <style is:global>
   @layer components {
     .portable-image_wrap {
-      margin-block: var(--space-6);
+      width: 100%;
 
       & > .image {
         width: 100%;
         height: auto;
       }
+    }
 
-      & > figcaption {
-        margin-top: var(--space-2);
-        color: var(--muted-text);
-      }
+    /* The design's caption: set right under the photograph, semibold. */
+    .portable-image_caption {
+      max-width: 22em;
+      margin: clamp(1rem, 0.8047rem + 0.7773vw, 1.7375rem) 0 0 auto;
+      font-size: clamp(0.75rem, 0.6507rem + 0.3953vw, 1.125rem);
+      font-weight: var(--primary-semibold);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      text-align: end;
+      text-wrap: balance;
+      text-box: trim-both cap alphabetic;
     }
   }
 </style>

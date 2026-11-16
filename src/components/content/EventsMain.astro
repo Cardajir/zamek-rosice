@@ -1,5 +1,6 @@
 ---
 import CardEvent from "@/components/item/CardEvent.astro";
+import Button from "@/components/Button.astro";
 import { DEFAULT_LANG, LANG_LOCALES, SITE_TIME_ZONE } from "@/consts.ts";
 import { routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
@@ -10,11 +11,32 @@ interface Props {
   render?: boolean;
   /** News items and events, in the order they are shown. */
   posts: Post[];
+  /** Label above the list, set in italics. Omit when the page gives its own. */
+  heading?: string;
   /** Heading level of each item. */
   headingTag?: "h2" | "h3" | "h4";
+  /** List layout: rows, or the one large pinned item. */
+  variant?: "main" | "featured";
+  /**
+   * How many items to show before the "show more" link. Omit to show all.
+   *
+   * @min 1
+   * @int
+   */
+  pageSize?: number;
+  /** Set the list on a grey band that runs the full width of the page. */
+  shaded?: boolean;
 }
 
-const { render = true, posts, headingTag = "h3" } = Astro.props;
+const {
+  render = true,
+  posts,
+  heading,
+  headingTag = "h3",
+  variant = "main",
+  pageSize,
+  shaded = false,
+} = Astro.props;
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -40,36 +62,115 @@ const when = (post: Post) => {
     datetime: value,
   };
 };
+
+const hiddenCount = pageSize ? Math.max(posts.length - pageSize, 0) : 0;
 ---
 
 {render && posts.length > 0 && (
-  <ul class="events_wrap">
-    {posts.map((post) => (
-      <li>
-        <CardEvent
-          eyebrow={post.kind === "event" ? t.event : t.news}
-          heading={post.title}
-          headingTag={headingTag}
-          lead={post.eventPrice}
-          text={post.perex}
-          href={routePath("news", lang, post.slug)}
-          buttonLabel={t.readMore}
-          image={post.image?.url}
-          imageAlt={post.image?.alt}
-          imageWidth={post.image?.width}
-          imageHeight={post.image?.height}
-          {...when(post)}
-        />
-      </li>
-    ))}
-  </ul>
+  <div
+    class:list={["events_wrap", shaded && "shaded"]}
+    data-events-page={hiddenCount > 0 ? pageSize : undefined}>
+    {heading && <h2 class="events_heading text-style-h5">{heading}</h2>}
+    <ul class="events_list">
+      {posts.map((post, index) => (
+        <li hidden={pageSize !== undefined && index >= pageSize}>
+          <CardEvent
+            eyebrow={post.kind === "event" ? t.event : t.news}
+            heading={post.title}
+            headingTag={headingTag}
+            lead={post.eventPrice}
+            text={post.perex}
+            href={routePath("news", lang, post.slug)}
+            buttonLabel={t.readMore}
+            image={post.image?.url}
+            imageAlt={post.image?.alt}
+            imageWidth={post.image?.width}
+            imageHeight={post.image?.height}
+            variant={variant}
+            {...when(post)}
+          />
+        </li>
+      ))}
+    </ul>
+    {hiddenCount > 0 && (
+      <div class="events_more">
+        <Button variant="link" data-events-more>
+          {t.showMore} (<span data-events-count>{hiddenCount}</span>)
+        </Button>
+        <noscript>
+          <style is:inline>
+            .events_list > li[hidden] {
+              display: block;
+            }
+            .events_more {
+              display: none;
+            }
+          </style>
+        </noscript>
+      </div>
+    )}
+  </div>
 )}
+
+<script>
+  /* Each press of "show more" reveals the next page of items and focuses the first. */
+  for (const wrap of document.querySelectorAll<HTMLElement>(
+    "[data-events-page]",
+  )) {
+    const size = Number(wrap.dataset.eventsPage);
+    const more = wrap.querySelector<HTMLElement>("[data-events-more]");
+    const count = wrap.querySelector<HTMLElement>("[data-events-count]");
+    more?.addEventListener("click", () => {
+      const hidden = [
+        ...wrap.querySelectorAll<HTMLElement>(".events_list > li[hidden]"),
+      ];
+      const next = hidden.slice(0, size);
+      for (const item of next) item.hidden = false;
+      next[0]?.querySelector<HTMLElement>("a")?.focus();
+      const left = hidden.length - next.length;
+      if (count) count.textContent = String(left);
+      if (left === 0) more.closest(".events_more")?.remove();
+    });
+  }
+</script>
 
 <style is:global>
   @layer components {
     .events_wrap {
+      --_inset: clamp(1rem, 0.6524rem + 1.3834vw, 2.3125rem);
       width: 100%;
+    }
+
+    /* The italic label sits above the first rule, in line with the cards' text from 48rem. */
+    .events_heading {
+      margin: 0 0 clamp(1.2188rem, 0.6808rem + 2.141vw, 3.25rem);
+
+      @media (width >= 48rem) {
+        padding-inline-start: clamp(0rem, -0.5627rem + 2.2398vw, 2.125rem);
+      }
+    }
+
+    /*
+     * The band is painted by the list's own border image pushed out to the
+     * page edges, so it needs no wrapper. It leaves the design's white gap
+     * above and below it.
+     */
+    .events_wrap.shaded {
+      margin-block: clamp(-0.5375rem, 3.5732rem - 3.4256vw, 2.7125rem)
+        clamp(0rem, -0.6786rem + 2.7009vw, 2.5625rem);
+      padding-block: clamp(5.5938rem, 4.7248rem + 3.4585vw, 8.875rem)
+        clamp(4.8375rem, 4.1589rem + 2.7009vw, 7.4rem);
+      border-image: conic-gradient(var(--background-2) 0 0) fill 0 // 0
+        100vmax;
+    }
+
+    .events_list {
       border-bottom: var(--border-width) solid var(--text);
+    }
+
+    .events_more {
+      margin-top: clamp(1.6406rem, 1.2599rem + 1.5152vw, 3.0781rem);
+      padding-inline: var(--_inset);
     }
   }
 </style>

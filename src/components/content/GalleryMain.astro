@@ -1,5 +1,7 @@
 ---
-import Button from "@/components/Button.astro";
+import Icon from "@/components/media/Icon.astro";
+import Ornament from "@/components/media/Ornament.astro";
+import arrow from "@/assets/icons/arrow-full.svg";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { ui } from "@/i18n/ui.ts";
 import type { Image } from "@/sanity/queries.ts";
@@ -10,11 +12,13 @@ interface Props {
   render?: boolean;
   /** Photographs, in the order they are shown. */
   photos: Image[];
+  /** Address of the album list, for the link back to it under the photographs. */
+  back?: string;
   /** Class names for utilities. */
   class?: string;
 }
 
-const { render = true, photos, class: className } = Astro.props;
+const { render = true, photos, back, class: className } = Astro.props;
 
 const t = ui(Astro.locals.lang ?? DEFAULT_LANG);
 
@@ -27,10 +31,6 @@ const srcset = (photo: Image, widths: number[]) =>
     .map((width) => `${sized(photo.url, width)} ${width}w`)
     .join(", ");
 
-/* The viewer still names the author; the grid shows the description only. */
-const note = (photo: Image) =>
-  [photo.caption, photo.credit].filter(Boolean).join(" · ");
-
 /* Authors and copyright, said once in small print under the whole gallery. */
 const credits = [
   ...new Set(photos.map((photo) => photo.credit).filter(Boolean)),
@@ -38,19 +38,24 @@ const credits = [
 
 const items = photos.map((photo, index) => ({
   photo,
-  note: note(photo),
   /* A photograph with no description is still a link that says what it does. */
   name: photo.alt || photo.caption || `${t.enlargePhoto} ${index + 1}`,
   size: scaled(photo, 1200),
 }));
+
+/*
+ * Two columns on a phone leave a hole after the wide first photograph when
+ * the rest are odd in number; the design fills it with the rose.
+ */
+const filler = (items.length - 1) % 2 === 1;
 ---
 
 {render && items.length > 0 && (
   <div class:list={["gallery_wrap", className]}>
     <ul class="gallery_list">
-      {items.map(({ photo, note, name, size }, index) => (
+      {items.map(({ photo, name, size }, index) => (
         <li class="gallery_item">
-          <figure class="gallery_figure">
+          <figure class:list={["gallery_figure", !photo.caption && "is-bare"]}>
             <a
               class="gallery_link"
               href={sized(photo.url, 2400)}
@@ -58,7 +63,7 @@ const items = photos.map((photo, index) => ({
               data-gallery-open={index}
               data-srcset={srcset(photo, FULL_WIDTHS)}
               data-alt={photo.alt ?? photo.caption ?? ""}
-              data-note={note}
+              data-note={photo.caption ?? ""}
             >
               <img
                 class="gallery_thumb"
@@ -66,8 +71,8 @@ const items = photos.map((photo, index) => ({
                 srcset={srcset(photo, THUMB_WIDTHS)}
                 sizes={
                   index === 0
-                    ? "100vw"
-                    : "(width >= 64rem) 33vw, (width >= 30rem) 50vw, 100vw"
+                    ? "(width >= 82rem) 82rem, 100vw"
+                    : "(width >= 64rem) 27rem, 50vw"
                 }
                 width={size.width}
                 height={size.height}
@@ -82,44 +87,83 @@ const items = photos.map((photo, index) => ({
           </figure>
         </li>
       ))}
+      {filler && (
+        <li class="gallery_item gallery_filler" aria-hidden="true">
+          <Ornament variant={5} />
+        </li>
+      )}
     </ul>
-    {credits.length > 0 && (
-      <p class="gallery_credits text-style-small">{credits.join(" · ")}</p>
+
+    {(back || credits.length > 0) && (
+      <div class="gallery_end">
+        {back && (
+          <a class="gallery_back" href={back}>
+            <span class="gallery_back-mark">
+              <Icon src={arrow} variant="small" />
+            </span>
+            <span class="gallery_back-text">{t.backToAlbums}</span>
+          </a>
+        )}
+        {credits.length > 0 && (
+          <p class="gallery_credits">{credits.join(" · ")}</p>
+        )}
+      </div>
     )}
 
-    <dialog class="gallery_viewer theme-dark" aria-label={t.photoViewer}>
-      <div class="gallery_close">
-        <Button
-          variant="close"
-          emphasis="secondary"
-          label={t.closeViewer}
-          data-gallery-close
-        />
-      </div>
-      <div class="gallery_step gallery_step-back">
-        <Button
-          variant="arrow"
-          emphasis="secondary"
-          direction="back"
-          label={t.previousPhoto}
-          data-gallery-step="-1"
-        />
-      </div>
+    <dialog class="gallery_viewer" aria-label={t.photoViewer}>
+      <button
+        class="gallery_close"
+        type="button"
+        aria-label={t.closeViewer}
+        data-gallery-close
+      >
+        <svg
+          class="gallery_close-mark"
+          viewBox="0 0 14 14"
+          width="14"
+          height="14"
+          aria-hidden="true"
+        >
+          <path
+            d="M1.4 14 0 12.6 5.6 7 0 1.4 1.4 0 7 5.6 12.6 0 14 1.4 8.4 7l5.6 5.6-1.4 1.4L7 8.4 1.4 14Z"
+            fill="currentColor"
+          />
+        </svg>
+      </button>
+      <button
+        class="gallery_step is-back"
+        type="button"
+        aria-label={t.previousPhoto}
+        data-gallery-step="-1"
+      >
+        <span class="gallery_step-mark">
+          <Icon src={arrow} variant="small" />
+        </span>
+      </button>
+      <button
+        class="gallery_step is-forward"
+        type="button"
+        aria-label={t.nextPhoto}
+        data-gallery-step="1"
+      >
+        <span class="gallery_step-mark">
+          <Icon src={arrow} variant="small" />
+        </span>
+      </button>
       <figure class="gallery_stage">
-        <img class="gallery_photo" alt="" sizes="100vw" decoding="async" />
-        <figcaption class="gallery_caption text-style-small">
+        <div class="gallery_frame">
+          <img
+            class="gallery_photo"
+            alt=""
+            sizes="(width >= 48rem) min(83rem, 100vw - 15rem), 100vw"
+            decoding="async"
+          />
+        </div>
+        <figcaption class="gallery_caption">
           <span class="gallery_count" aria-live="polite" />
           <span class="gallery_text" />
         </figcaption>
       </figure>
-      <div class="gallery_step gallery_step-forward">
-        <Button
-          variant="arrow"
-          emphasis="secondary"
-          label={t.nextPhoto}
-          data-gallery-step="1"
-        />
-      </div>
     </dialog>
   </div>
 )}
@@ -139,7 +183,17 @@ const items = photos.map((photo, index) => ({
 
     let current = 0;
 
-    const show = (index: number) => {
+    /* The next photograph is fetched while the visitor looks at this one. */
+    const preload = (index: number) => {
+      const link = links[(index + links.length) % links.length];
+      if (!link) return;
+      const next = new Image();
+      next.sizes = photo.sizes;
+      next.srcset = link.dataset.srcset ?? "";
+      next.src = link.href;
+    };
+
+    const show = (index: number, step = 1) => {
       current = (index + links.length) % links.length;
       const link = links[current];
       if (!link) return;
@@ -148,6 +202,7 @@ const items = photos.map((photo, index) => ({
       photo.alt = link.dataset.alt ?? "";
       count.textContent = `${current + 1}/${links.length}`;
       text.textContent = link.dataset.note ?? "";
+      preload(current + step);
     };
 
     for (const [index, link] of links.entries()) {
@@ -162,8 +217,9 @@ const items = photos.map((photo, index) => ({
       });
     }
 
+    /* Only a press that starts and ends on the dark surround closes it. */
     let fromBackdrop = false;
-    viewer.addEventListener("mousedown", (event) => {
+    viewer.addEventListener("pointerdown", (event) => {
       fromBackdrop = event.target === viewer;
     });
 
@@ -171,14 +227,16 @@ const items = photos.map((photo, index) => ({
       const target = event.target;
       if (!(target instanceof Element)) return;
       const step = target.closest<HTMLElement>("[data-gallery-step]");
-      if (step) show(current + Number(step.dataset.galleryStep));
-      else if (target.closest("[data-gallery-close]")) viewer.close();
+      if (step) {
+        const by = Number(step.dataset.galleryStep);
+        show(current + by, by);
+      } else if (target.closest("[data-gallery-close]")) viewer.close();
       else if (fromBackdrop && target === viewer) viewer.close();
       fromBackdrop = false;
     });
 
     viewer.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowLeft") show(current - 1);
+      if (event.key === "ArrowLeft") show(current - 1, -1);
       else if (event.key === "ArrowRight") show(current + 1);
     });
 
@@ -191,7 +249,10 @@ const items = photos.map((photo, index) => ({
       if (startX === undefined) return;
       const moved = event.clientX - startX;
       startX = undefined;
-      if (Math.abs(moved) > 40) show(current + (moved < 0 ? 1 : -1));
+      if (Math.abs(moved) > 40) {
+        const by = moved < 0 ? 1 : -1;
+        show(current + by, by);
+      }
     });
 
     /* Focus goes back to the photograph the visitor was last looking at. */
@@ -209,34 +270,49 @@ const items = photos.map((photo, index) => ({
       overflow: hidden;
     }
 
+    /*
+     * 1312px wide at 1920. On a phone the photographs sit a further 17px in
+     * from the page edge, like the cards elsewhere.
+     */
     .gallery_wrap {
+      --_note-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
+      --_note-gap: clamp(0.6875rem, 0.4889rem + 0.7905vw, 1.4375rem);
+
       width: 100%;
+      max-width: var(--max-width-small);
+      margin-inline: auto;
+      padding-inline: 1.0625rem;
+      @media (width >= 48rem) {
+        padding-inline: 0;
+      }
     }
 
+    /* 17px and 23px between photographs on a phone, 22px and 90px at 1920. */
     .gallery_list {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-6) var(--site-gutter);
-      @media (width >= 30rem) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(1.4375rem, 0.3285rem + 4.4137vw, 5.625rem)
+        clamp(1.0625rem, 0.9797rem + 0.3294vw, 1.375rem);
       @media (width >= 64rem) {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 
+    /* The wide first photograph: 35px under its description on a phone, 88px at 1920. */
     .gallery_item:first-child {
       grid-column: 1 / -1;
+      margin-block-end: clamp(-0.125rem, 0.9817rem - 0.9223vw, 0.75rem);
     }
 
-    /* 23px from photograph to description, 15px under the wide first one. */
     .gallery_figure {
       display: flex;
       flex-direction: column;
-      gap: var(--space-4);
+      gap: var(--_note-gap);
       margin: 0;
-      .gallery_item:first-child > & {
-        gap: var(--space-3);
+
+      /* No description: the same room is kept, so the rows stay even. */
+      &.is-bare {
+        padding-block-end: calc(var(--_note-gap) + var(--_note-size) * 1.2);
       }
     }
 
@@ -249,14 +325,17 @@ const items = photos.map((photo, index) => ({
     .gallery_thumb {
       display: block;
       width: 100%;
-      aspect-ratio: 13 / 12;
+      aspect-ratio: 1 / 1;
       object-fit: cover;
       transition: scale var(--hover-duration) var(--hover-ease);
+      @media (width >= 64rem) {
+        aspect-ratio: 423 / 347;
+      }
 
       .gallery_item:first-child & {
-        aspect-ratio: 3 / 2;
+        aspect-ratio: 337 / 241;
         @media (width >= 48rem) {
-          aspect-ratio: 2 / 1;
+          aspect-ratio: 1312 / 670;
         }
       }
 
@@ -267,101 +346,245 @@ const items = photos.map((photo, index) => ({
       }
     }
 
-    /* The description under a photograph: semibold, in the text colour. */
+    /* The description under a photograph: 12px on a phone, 18px at 1920. */
     .gallery_note {
       color: var(--text);
-      font-size: var(--text-main);
+      font-size: var(--_note-size);
       font-weight: var(--primary-semibold);
       line-height: 1.2;
       letter-spacing: var(--letter-spacing-snug);
       text-align: end;
     }
 
+    /* The rose in the hole the odd photograph leaves; three columns have none. */
+    .gallery_filler {
+      display: grid;
+      align-content: center;
+      aspect-ratio: 1 / 1;
+      @media (width >= 64rem) {
+        display: none;
+      }
+    }
+
+    /*
+     * The link back to the albums, and the authors in small print at the
+     * other end of the same line, the only place they are named.
+     */
+    .gallery_end {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-3) var(--space-6);
+      /* 132px under the last description on a phone, 127px at 1920. */
+      margin-block-start: clamp(6.9125rem, 7.3077rem - 0.3294vw, 7.225rem);
+      /* The footer's rule 36px under the last line on a phone, 44px at 1920. */
+      padding-block-end: clamp(1.65rem, 2.4089rem - 0.6324vw, 2.25rem);
+    }
+
     .gallery_credits {
-      margin: var(--space-6) 0 0;
+      flex: 1 1 18rem;
       color: var(--muted-text);
+      font-size: clamp(0.75rem, 0.6837rem + 0.2635vw, 1rem);
+      line-height: 1.2;
       text-align: end;
     }
 
-    .gallery_viewer {
-      width: 100%;
-      max-width: none;
-      height: 100%;
-      max-height: none;
-      margin: 0;
-      padding: var(--space-4);
-      border: 0;
-      background-color: var(--background);
-      color: var(--text);
+    /* The serif link back up to the album list, as the design draws it. */
+    .gallery_back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.54em;
+      margin-inline-start: -1.0625rem;
+      padding-block: 0.4em;
+      color: var(--link-text);
+      font-family: var(--secondary-family);
+      font-size: var(--text-button);
+      font-style: italic;
+      font-weight: var(--secondary-medium);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      text-decoration: none;
+      @media (width >= 48rem) {
+        margin-inline-start: 0;
+      }
 
-      &[open] {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        align-items: center;
-        gap: var(--space-3);
-        @media (width >= 48rem) {
-          grid-template-columns: auto minmax(0, 1fr) auto;
+      /* The line that grows on hover runs under the words only. */
+      & > .gallery_back-text {
+        padding-bottom: 0.12em;
+        background-image: linear-gradient(currentcolor, currentcolor);
+        background-repeat: no-repeat;
+        background-position: 100% 100%;
+        background-size: 0 var(--border-width);
+        transition: background-size calc(var(--hover-duration) * 2)
+          var(--hover-ease);
+      }
+      @media (hover: hover) {
+        &:hover > .gallery_back-text {
+          background-position: 0 100%;
+          background-size: 100% var(--border-width);
         }
       }
+    }
+
+    .gallery_back-mark {
+      display: flex;
+      font-size: 0.8333em;
+      rotate: -90deg;
+    }
+
+    /*
+     * The viewer dims the page to a quarter. On a phone the site's bar stays
+     * clear above it, as in the design; tapping it or the dark surround closes.
+     */
+    .gallery_viewer {
+      --_top: 1.1875rem;
+      --_bottom: 6.1875rem;
+      --_side: var(--site-gutter);
+      --_bar: var(--nav-height, 5.25rem);
+
+      inset: var(--_bar) 0 0;
+      width: 100%;
+      max-width: none;
+      height: auto;
+      max-height: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      overflow: hidden;
+      background: transparent;
+      color: #fff;
 
       &::backdrop {
-        background-color: var(--background);
-      }
-    }
-
-    .gallery_close {
-      position: absolute;
-      inset: var(--space-4) var(--space-4) auto auto;
-      z-index: 1;
-    }
-
-    .gallery_step {
-      position: absolute;
-      inset-block-end: var(--space-4);
-      inset-inline-end: var(--space-4);
-      z-index: 1;
-
-      &.gallery_step-back {
-        inset-inline-end: calc(var(--space-4) + 3.5em);
+        background: linear-gradient(
+          transparent var(--nav-height, 5.25rem),
+          rgb(0 0 0 / 0.75) var(--nav-height, 5.25rem)
+        );
       }
 
       @media (width >= 48rem) {
-        position: static;
+        --_top: 2.875rem;
+        --_bottom: 7.6875rem;
+        --_side: max(7.5rem, (100% - 83rem) / 2);
+        --_bar: 0rem;
+
+        &::backdrop {
+          background: rgb(0 0 0 / 0.75);
+        }
       }
     }
 
     .gallery_stage {
-      display: grid;
-      grid-template-rows: minmax(0, 1fr) auto;
-      gap: var(--space-3);
-      height: 100%;
-      min-height: 0;
+      position: absolute;
+      inset: 0;
       margin: 0;
+      pointer-events: none;
+    }
+
+    /* The photograph, whole, as large as the space between the controls allows. */
+    .gallery_frame {
+      position: absolute;
+      inset: var(--_top) var(--_side) var(--_bottom);
+      display: grid;
+      place-items: center;
     }
 
     .gallery_photo {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      object-fit: contain;
+      max-width: 100%;
+      max-height: 100%;
+      pointer-events: auto;
       user-select: none;
       touch-action: pan-y;
     }
 
+    /*
+     * The count and the description, bottom left: stacked on a phone, side by
+     * side from a tablet, the description on the page's own left edge.
+     */
     .gallery_caption {
-      display: flex;
-      align-items: baseline;
-      gap: var(--space-5);
-      min-height: 2lh;
-      padding-inline-end: 8em;
+      position: absolute;
+      inset: auto 7.5rem 1.6875rem var(--site-gutter);
+      display: grid;
+      gap: 0.5rem;
+      font-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
+      font-weight: var(--primary-semibold);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      white-space: pre-line;
       @media (width >= 48rem) {
-        padding-inline-end: 0;
+        inset: auto var(--_side) 2.25rem 2.1875rem;
+        grid-template-columns: 6.375rem minmax(0, 1fr);
+        align-items: end;
+        gap: 0;
       }
     }
 
-    .gallery_count {
-      flex: none;
-      font-weight: var(--primary-semibold);
+    .gallery_text:empty {
+      display: none;
+    }
+
+    .gallery_close,
+    .gallery_step {
+      position: absolute;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      padding: 0.625rem;
+      border: 0;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    /* A cross, top right; on a phone it shows only to the keyboard. */
+    .gallery_close {
+      inset: 0.375rem 0.375rem auto auto;
+      &:not(:focus-visible) {
+        @media (width < 48rem) {
+          clip-path: inset(50%);
+        }
+      }
+      @media (width >= 48rem) {
+        inset: 2.5625rem 2.375rem auto auto;
+      }
+    }
+
+    .gallery_close-mark {
+      display: block;
+      width: 0.875rem;
+      height: auto;
+    }
+
+    /* 25px arrows bottom right on a phone, 40px at the sides at 1920. */
+    .gallery_step {
+      inset: auto 0.375rem 0.9375rem auto;
+      &.is-back {
+        inset-inline-end: 3.1875rem;
+      }
+      @media (width >= 48rem) {
+        inset: 50% auto auto 1.5625rem;
+        translate: 0 -50%;
+        &.is-forward {
+          inset-inline: auto 2.25rem;
+        }
+      }
+      &.is-back {
+        @media (width >= 48rem) {
+          inset-inline-end: auto;
+        }
+      }
+    }
+
+    .gallery_step-mark {
+      display: flex;
+      font-size: 1.5625rem;
+      @media (width >= 48rem) {
+        font-size: 2.5rem;
+      }
+
+      .is-back > & {
+        rotate: 180deg;
+      }
     }
   }
 </style>

@@ -65,7 +65,7 @@
 
   /* Nav */
   --nav-height: clamp(var(--nav-height-min) / 16 * 1rem, ((var(--nav-height-min) - ((var(--nav-height-max) - var(--nav-height-min)) / (var(--viewport-max) - var(--viewport-min)) * var(--viewport-min))) / 16 * 1rem + ((var(--nav-height-max) - var(--nav-height-min)) / (var(--viewport-max) - var(--viewport-min))) * 100vw), var(--nav-height-max) / 16 * 1rem);
-  --nav-height-min: 80;
+  --nav-height-min: 84;
   --nav-height-max: 111;
 
   /* Typography styles */
@@ -106,7 +106,7 @@
   --h2-text-wrap: balance;
 
   --h3: clamp(var(--h3-min) / 16 * 1rem, ((var(--h3-min) - ((var(--h3-max) - var(--h3-min)) / (var(--viewport-max) - var(--viewport-min)) * var(--viewport-min))) / 16 * 1rem + ((var(--h3-max) - var(--h3-min)) / (var(--viewport-max) - var(--viewport-min))) * 100vw), var(--h3-max) / 16 * 1rem);
-  --h3-min: 20;
+  --h3-min: 26;
   --h3-max: 44;
   --h3-line-height: 1.05;
   --h3-letter-spacing: var(--letter-spacing-snug);
@@ -118,7 +118,7 @@
   --h3-text-wrap: balance;
 
   --h4: clamp(var(--h4-min) / 16 * 1rem, ((var(--h4-min) - ((var(--h4-max) - var(--h4-min)) / (var(--viewport-max) - var(--viewport-min)) * var(--viewport-min))) / 16 * 1rem + ((var(--h4-max) - var(--h4-min)) / (var(--viewport-max) - var(--viewport-min))) * 100vw), var(--h4-max) / 16 * 1rem);
-  --h4-min: 20;
+  --h4-min: 26;
   --h4-max: 37;
   --h4-line-height: 1.05;
   --h4-letter-spacing: var(--letter-spacing-snug);
@@ -142,7 +142,7 @@
   --h5-text-wrap: balance;
 
   --h6: clamp(var(--h6-min) / 16 * 1rem, ((var(--h6-min) - ((var(--h6-max) - var(--h6-min)) / (var(--viewport-max) - var(--viewport-min)) * var(--viewport-min))) / 16 * 1rem + ((var(--h6-max) - var(--h6-min)) / (var(--viewport-max) - var(--viewport-min))) * 100vw), var(--h6-max) / 16 * 1rem);
-  --h6-min: 18;
+  --h6-min: 20;
   --h6-max: 28;
   --h6-line-height: 1.05;
   --h6-letter-spacing: var(--letter-spacing-snug);
@@ -154,7 +154,7 @@
   --h6-text-wrap: balance;
 
   --text-large: clamp(var(--text-large-min) / 16 * 1rem, ((var(--text-large-min) - ((var(--text-large-max) - var(--text-large-min)) / (var(--viewport-max) - var(--viewport-min)) * var(--viewport-min))) / 16 * 1rem + ((var(--text-large-max) - var(--text-large-min)) / (var(--viewport-max) - var(--viewport-min))) * 100vw), var(--text-large-max) / 16 * 1rem);
-  --text-large-min: 14;
+  --text-large-min: 16;
   --text-large-max: 20;
   --text-large-line-height: 1.55;
   --text-large-letter-spacing: var(--letter-spacing-wide);
@@ -190,7 +190,7 @@
   --text-small-text-wrap: pretty;
 
   --text-button: clamp(var(--text-button-min) / 16 * 1rem, ((var(--text-button-min) - ((var(--text-button-max) - var(--text-button-min)) / (var(--viewport-max) - var(--viewport-min)) * var(--viewport-min))) / 16 * 1rem + ((var(--text-button-max) - var(--text-button-min)) / (var(--viewport-max) - var(--viewport-min))) * 100vw), var(--text-button-max) / 16 * 1rem);
-  --text-button-min: 18;
+  --text-button-min: 24;
   --text-button-max: 24;
 
   /* Site layout */
@@ -242,6 +242,19 @@
   --section-space-nav-overlap: clamp(var(--section-space-nav-overlap-min) / 16 * 1rem, ((var(--section-space-nav-overlap-min) - ((var(--section-space-nav-overlap-max) - var(--section-space-nav-overlap-min)) / (var(--viewport-max) - var(--viewport-min)) * var(--viewport-min))) / 16 * 1rem + ((var(--section-space-nav-overlap-max) - var(--section-space-nav-overlap-min)) / (var(--viewport-max) - var(--viewport-min))) * 100vw), var(--section-space-nav-overlap-max) / 16 * 1rem);
   --section-space-nav-overlap-min: 160;
   --section-space-nav-overlap-max: 224;
+}
+
+/*
+ * The phone design (402 wide) sets its headings looser than the desktop one:
+ * 37/41.8 for the opening line and 26/31.2 for titles and quotes.
+ */
+@media (width < 48rem) {
+  :root {
+    --h1-line-height: 1.13;
+    --h2-line-height: 1.2;
+    --h3-line-height: 1.2;
+    --h4-line-height: 1.2;
+  }
 }
 
 /* Color themes */

@@ -38,12 +38,13 @@ const fullDate = new Intl.DateTimeFormat(locale, {
 
 <Layout alternates={alternates("home")} data-stacki-key="k35k3zr3zntn9">
   <!-- Hero photograph and status bar -->
-  <Section paddingTop="none" paddingBottom="small" gap="3">
+  <Section paddingTop="none" paddingBottom="small" gap="3" class="home_hero">
     {home.heroImage && (
       <Parallax>
         <SanityImg
           image={home.heroImage}
           ratio={7 / 3}
+          narrowRatio={1}
           loading="eager"
           fetchPriority="high"
           data-stacki-key="kqcjjl4yu46m6"
@@ -74,11 +75,12 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Upcoming events -->
-  <Section render={home.posts.length > 0} gap="5">
-    <Heading tag="h2" variant="h5">
-      {t.upcomingEvents}
-    </Heading>
-    <EventsMain posts={home.posts} data-stacki-key="k5sx4lf6l3vmv" />
+  <Section render={home.posts.length > 0} gap="5" class="home_events">
+    <EventsMain
+      posts={home.posts}
+      heading={t.upcomingEvents}
+      data-stacki-key="k5sx4lf6l3vmv"
+    />
     <ButtonWrapper>
       <Button element="link" variant="link" href={routePath("news", lang)}>
         {t.allEvents}
@@ -105,10 +107,19 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Heritage note, rating and status -->
-  <Section paddingTop="small" paddingBottom="small" gap="3">
+  <Section
+    paddingTop="small"
+    paddingBottom="small"
+    gap="3"
+    class="home_heritage"
+  >
     {home.secondImage && (
       <Parallax>
-        <SanityImg image={home.secondImage} ratio={7 / 3} />
+        <SanityImg
+          image={home.secondImage}
+          ratio={7 / 3}
+          narrowRatio={370 / 252}
+        />
       </Parallax>
     )}
     <StatusBarMain shell={shell} note={home.heritageNote}>
@@ -123,9 +134,19 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Weddings, the Šenk hall, school trips -->
-  <Section render={home.promos.length > 0} gap="large" data-stacki-key="k539eip7f0rga">
+  <Section
+    render={home.promos.length > 0}
+    gap="large"
+    class="home_promos"
+    data-stacki-key="k539eip7f0rga"
+  >
     {home.promos.map((promo, index) => (
-      <PromoMain promo={promo} reverse={index % 2 === 1} data-stacki-key="k03odtz2ndt5b" />
+      <PromoMain
+        promo={promo}
+        reverse={index % 2 === 1}
+        backdrop={index === 1}
+        data-stacki-key="k03odtz2ndt5b"
+      />
     ))}
   </Section>
 
@@ -145,6 +166,33 @@ const fullDate = new Intl.DateTimeFormat(locale, {
 </Layout>
 
 <style is:global>
+  /* On a phone the photograph sits 8px above the status bar’s rule. */
+  @media (width < 48rem) {
+    .home_hero > .container,
+    .home_heritage > .container {
+      row-gap: 0.5rem;
+    }
+    /*
+     * The promos as the phone design spaces them: 148px under the rating,
+     * 147px from one link to the next photographs, 173px before a pair that
+     * starts at the page’s edge.
+     */
+    .home_promos.section {
+      padding-top: calc(var(--section-space-medium) + 2.25rem);
+    }
+    .home_promos > .container {
+      row-gap: 9.1875rem;
+    }
+    .home_promos .promo_wrap.reverse {
+      margin-top: 1.625rem;
+    }
+
+    /* 88px from the status bar to the ornament. */
+    .home_hero.section {
+      padding-bottom: 2.3125rem;
+    }
+  }
+
   /* 61px above and below the opening line, as the design spaces it at 1920. */
   .home_intro {
     --_gap: clamp(2.5rem, 3.18vw, 3.8125rem);
@@ -153,6 +201,10 @@ const fullDate = new Intl.DateTimeFormat(locale, {
     }
     & h1 {
       margin-block: 0;
+      /* On a phone the line keeps 32px from either edge. */
+      @media (width < 48rem) {
+        padding-inline: 1rem;
+      }
     }
     & .button-wrapper {
       margin-top: var(--_gap);
@@ -160,7 +212,20 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   }
 
   /* 64px from the last row of tours to the link, the arrow's line box included. */
+  /* On a phone the link lines up with the cards’ text. */
+  .home_events .button-wrapper {
+    @media (width < 48rem) {
+      margin-top: -1.3125rem;
+      padding-left: 1rem;
+    }
+  }
+
   .home_tours .tours_wrap + .button-wrapper {
     margin-top: calc(var(--space-8) - var(--space-4) - 0.6rem);
+    /* On a phone: 77px under the last rule, in line with the cards’ text. */
+    @media (width < 48rem) {
+      margin-top: calc(var(--space-8) - var(--space-4) - 0.6rem + 0.875rem);
+      padding-left: 1rem;
+    }
   }
 </style>

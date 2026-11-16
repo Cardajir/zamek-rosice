@@ -76,33 +76,47 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
 
 <style is:global>
   @layer components {
+    /*
+     * As the design draws its price and opening-hours tables: rules across
+     * the column, the label in bold, and from the line above each cap to the
+     * rule under each baseline 23px and 22px on a phone, 30px and 29px at
+     * 1920. On a phone the words sit 1rem in from the ends of the rules.
+     */
     .info-list_wrap {
+      --_pad-top: clamp(1.4563rem, 1.3487rem + 0.4282vw, 1.8625rem);
+      --_pad-bottom: clamp(1.4rem, 1.2941rem + 0.4216vw, 1.8rem);
+      --_inset: 1rem;
       width: 100%;
       margin-block: var(--space-3) 0;
       border-bottom: var(--border-width) solid var(--text);
+      @media (width >= 48rem) {
+        --_inset: 0rem;
+      }
     }
 
     .info-list_row {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       column-gap: var(--site-gutter);
-      padding-block: var(--space-4);
+      padding-inline: var(--_inset);
       border-top: var(--border-width) solid var(--text);
       @media (width >= 48rem) {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        padding-block: 0;
       }
     }
 
-    /* The label sits level with its first line; further lines follow under a dotted rule. */
+    /* The label sits level with its first line; further lines follow under a dashed rule. */
     .info-list_label {
-      padding-bottom: var(--space-2);
-      font-weight: var(--primary-semibold);
+      padding-top: var(--_pad-top);
+      padding-bottom: 1.2312rem;
+      font-weight: var(--primary-bold);
+      line-height: clamp(1.45rem, 1.3209rem + 0.5138vw, 1.9375rem);
       @media (width >= 48rem) {
         grid-column: 1;
         grid-row: 1;
         align-self: center;
-        padding-block: var(--space-4);
+        max-width: 18.55em;
+        padding-block: var(--_pad-top) var(--_pad-bottom);
       }
     }
 
@@ -113,28 +127,41 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
       justify-content: space-between;
       gap: var(--space-4);
       margin: 0;
-      padding-block: var(--space-2);
+      padding-block: var(--_pad-top) var(--_pad-bottom);
       @media (width >= 48rem) {
         grid-column: 2;
-        padding-block: var(--space-4);
+      }
+
+      .info-list_label + & {
+        @media (width < 48rem) {
+          padding-top: 0;
+        }
       }
 
       & + &::before {
         content: "";
         position: absolute;
         inset-block-start: 0;
-        inset-inline-end: 0;
-        width: 100%;
-        border-top: var(--border-width) dotted var(--text);
-        opacity: 0.4;
+        inset-inline: calc(-1 * var(--_inset));
+        border-top: var(--border-width) dashed var(--text);
+        opacity: 0.3;
         @media (width >= 48rem) {
+          inset-inline: auto 0;
           width: calc(200% + var(--site-gutter));
         }
       }
     }
 
+    /* Beside a price, the words wrap where the design wraps them. */
     .info-list_text {
-      max-width: 44ch;
+      text-box: trim-both cap alphabetic;
+
+      .info-list_line:has(.info-list_value) & {
+        max-width: 14em;
+        @media (width >= 48rem) {
+          max-width: 21.5em;
+        }
+      }
     }
 
     .info-list_aside {
@@ -143,10 +170,13 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
       text-align: end;
     }
 
+    /* A price: plain on a phone, bold beside the wider table. */
     .info-list_value {
       flex: none;
-      font-weight: var(--primary-semibold);
       white-space: nowrap;
+      @media (width >= 48rem) {
+        font-weight: var(--primary-bold);
+      }
     }
 
     .info-list_link {

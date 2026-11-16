@@ -1,0 +1,291 @@
+---
+import Button from "@/components/Button.astro";
+import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
+import Icon from "@/components/media/Icon.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import RichText from "@/components/typography/RichText.astro";
+import PortableText from "@/components/utility/PortableText.astro";
+import arrow from "@/assets/icons/arrow-full.svg";
+import type { Image } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Article title. */
+  heading: string;
+  /** Short line above the title, such as a cancelled event's notice. */
+  eyebrow?: string;
+  /** Poster or photograph beside the text. */
+  image?: Image;
+  /** Portable Text blocks from Sanity. */
+  body?: unknown[];
+  /** Text shown when there is no body. */
+  text?: string;
+  /** Label and value pairs set as ruled rows above the text: when, where, admission. */
+  facts?: [string, string][];
+  /** Ticket link destination. */
+  ticketHref?: string;
+  /** Ticket link label. */
+  ticketLabel?: string;
+  /** Destination of the link back to the list. */
+  backHref: string;
+  /** Label of the link back to the list. */
+  backLabel: string;
+}
+
+const {
+  render = true,
+  heading,
+  eyebrow,
+  image,
+  body,
+  text,
+  facts = [],
+  ticketHref,
+  ticketLabel,
+  backHref,
+  backLabel,
+} = Astro.props;
+
+const hasBody = Boolean(body?.length);
+---
+
+{render && heading && (
+  <article class="news-article_wrap">
+    <a class="news-article_back" href={backHref}>
+      <Icon class="news-article_back_mark" src={arrow} variant="small" />
+      <span class="news-article_back_text text-style-trim">{backLabel}</span>
+    </a>
+    <div class="news-article_layout">
+      <div class:list={["news-article_visual", !image && "is-empty"]}>
+        {image && (
+          <SanityImg
+            image={image}
+            sizes="(width >= 48rem) 25vw, 100vw"
+            maxWidth={1400}
+            loading="eager"
+          />
+        )}
+      </div>
+      <div class="news-article_content">
+        {eyebrow && (
+          <p class="news-article_eyebrow text-style-main">{eyebrow}</p>
+        )}
+        <h1 class="news-article_title text-style-h3">{heading}</h1>
+        {facts.length > 0 && (
+          <dl class="news-article_facts">
+            {facts.map(([label, value]) => (
+              <div class="news-article_fact">
+                <dt class="news-article_fact_label text-style-large">
+                  {label}
+                </dt>
+                <dd class="news-article_fact_value text-style-main">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        {ticketHref && ticketLabel && (
+          <div class="news-article_tickets">
+            <ButtonWrapper>
+              <Button element="link" variant="link" href={ticketHref}>
+                {ticketLabel}
+              </Button>
+            </ButtonWrapper>
+          </div>
+        )}
+        <div class="news-article_body">
+          {hasBody ? (
+            <PortableText value={body} />
+          ) : (
+            <div class="news-article_text">
+              <RichText variant="large">
+                <p>{text}</p>
+              </RichText>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+    <a class="news-article_back is-end" href={backHref}>
+      <Icon class="news-article_back_mark" src={arrow} variant="small" />
+      <span class="news-article_back_text text-style-trim">{backLabel}</span>
+    </a>
+  </article>
+)}
+
+<style is:global>
+  @layer components {
+    /*
+     * A news item or event: the link back to the list under the menu, then
+     * the poster on the left and the title and text on the right. On a
+     * phone they stack. Spacing runs from baseline to capitals, as the text
+     * is trimmed to its letters.
+     */
+    .news-article_wrap {
+      --_inset: 0rem;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      width: 100%;
+
+      /* On a phone the text sits 1rem in from the rules and the poster, as Sanity text does. */
+      @media (width < 48rem) {
+        --_inset: 1rem;
+      }
+    }
+
+    /* The red italic link of the buttons, with its arrow turned back. */
+    .news-article_back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.54em;
+      padding-block: 0.25em;
+      color: var(--link-text);
+      font-family: var(--secondary-family);
+      font-size: var(--text-button);
+      font-style: italic;
+      font-weight: var(--secondary-medium);
+      letter-spacing: var(--letter-spacing-snug);
+      line-height: 1.2;
+      text-decoration: none;
+
+      &.is-end {
+        margin-top: clamp(4rem, 1.0208rem + 11.8577vw, 15.25rem);
+      }
+    }
+
+    .news-article_wrap .news-article_back > .news-article_back_mark {
+      --_size: 0.8333em;
+      rotate: 180deg;
+    }
+
+    .news-article_back_text {
+      padding-bottom: 0.12em;
+      background-image: linear-gradient(
+        var(--link-border-hover),
+        var(--link-border-hover)
+      );
+      background-repeat: no-repeat;
+      background-position: 100% 100%;
+      background-size: 0 var(--border-width);
+      transition: background-size calc(var(--hover-duration) * 2)
+        var(--hover-ease);
+    }
+
+    @media (hover: hover) {
+      .news-article_back:hover > .news-article_back_text {
+        background-position: 0 100%;
+        background-size: 100% var(--border-width);
+      }
+    }
+
+    .news-article_layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-areas: "visual" "content";
+      row-gap: 2rem;
+      width: 100%;
+      margin-top: clamp(2rem, 0.56rem + 5.7312vw, 7.4375rem);
+
+      @media (width >= 48rem) {
+        grid-template-columns: 436fr 236fr 975fr;
+        grid-template-areas: "visual . content";
+        align-items: start;
+      }
+    }
+
+    .news-article_visual {
+      grid-area: visual;
+
+      & > .image {
+        display: block;
+        width: 100%;
+      }
+
+      &.is-empty {
+        display: none;
+
+        @media (width >= 48rem) {
+          display: block;
+        }
+      }
+    }
+
+    .news-article_content {
+      grid-area: content;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      min-width: 0;
+
+      @media (width >= 48rem) {
+        padding-top: clamp(0rem, -0.1274rem + 0.5072vw, 0.4813rem);
+      }
+    }
+
+    .news-article_eyebrow,
+    .news-article_title,
+    .news-article_fact,
+    .news-article_tickets,
+    .news-article_text {
+      padding-inline: var(--_inset);
+    }
+
+    .news-article_eyebrow {
+      margin: 0 0 var(--space-4);
+      color: var(--muted-text);
+      font-size: var(--text-small);
+      font-weight: var(--primary-medium);
+      line-height: 1.2;
+
+      @media (width >= 48rem) {
+        font-size: var(--text-main);
+      }
+    }
+
+    .news-article_title {
+      margin: 0;
+      text-wrap: balance;
+    }
+
+    /* Ruled rows: the label in bold on the left, the value on the right. */
+    .news-article_facts {
+      width: 100%;
+      margin: clamp(2rem, 1.1344rem + 3.4453vw, 5.2687rem) 0 0;
+      border-bottom: var(--border-width) solid var(--text);
+    }
+
+    .news-article_fact {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: end;
+      gap: var(--space-2) var(--space-6);
+      padding-block: clamp(1.25rem, 1.0878rem + 0.6456vw, 1.8625rem)
+        clamp(1.25rem, 1.1043rem + 0.5797vw, 1.8rem);
+      border-top: var(--border-width) solid var(--text);
+    }
+
+    .news-article_fact_label {
+      font-weight: var(--primary-bold);
+    }
+
+    .news-article_fact_value {
+      margin: 0;
+      text-align: end;
+    }
+
+    .news-article_tickets {
+      margin-top: var(--space-5);
+    }
+
+    .news-article_body {
+      width: 100%;
+      margin-top: clamp(2rem, 1.1344rem + 3.4453vw, 5.2687rem);
+    }
+
+    .news-article_facts ~ .news-article_body {
+      margin-top: clamp(2rem, 1.6028rem + 1.581vw, 3.5rem);
+    }
+  }
+</style>

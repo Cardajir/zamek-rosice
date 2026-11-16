@@ -2,6 +2,7 @@
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import PageHeroMain from "@/components/content/PageHeroMain.astro";
+import QuoteSliderMain from "@/components/content/QuoteSliderMain.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
@@ -10,6 +11,7 @@ import { DEFAULT_LANG, LANGS, type Lang } from "@/consts.ts";
 import { matchPage, pagePath } from "@/i18n/pages.ts";
 import { stripLang } from "@/i18n/routes.ts";
 import { getPage, getPageSections } from "@/sanity/queries.ts";
+import { leadingQuotes } from "@/utils/text-blocks.ts";
 
 /*
  * Text pages from the page builder. Everything that is not a page in code
@@ -25,6 +27,20 @@ const page = match && (await getPage(lang, match.parent, match.slug));
 if (!match || !page) return Astro.rewrite("/404/");
 
 const sections = await getPageSections(lang, match.parent, match.slug);
+
+/*
+ * Quotations a page opens with rotate in one place under the photograph,
+ * as Z historie is drawn; the text goes on below them.
+ */
+const opening =
+  sections[0]?._type === "sectionRichText"
+    ? leadingQuotes(sections[0].body ?? [])
+    : { quotes: [], rest: sections[0]?.body ?? [] };
+const quoted = opening.quotes.length > 0;
+const texts = sections.map((section, index) => ({
+  ...section,
+  body: index === 0 ? opening.rest : (section.body ?? []),
+}));
 
 const isLang = (value: string): value is Lang =>
   (LANGS as readonly string[]).includes(value);
@@ -45,8 +61,24 @@ const alternates =
     <PageHeroMain title={page.title} />
   </Section>
 
+  <!-- Quotations -->
+  <Section
+    render={quoted}
+    paddingTop="none"
+    paddingBottom="none"
+    class="text-page_quotes"
+  >
+    <Ornament variant={2} />
+    <QuoteSliderMain quotes={opening.quotes} />
+  </Section>
+
   <!-- Introduction -->
-  <Section render={Boolean(page.perex)} paddingTop="small" paddingBottom="none">
+  <Section
+    render={Boolean(page.perex)}
+    paddingTop="none"
+    paddingBottom="none"
+    class="text-page_part"
+  >
     <ContentWrapper centered>
       <Paragraph variant="large" maxWidth={60}>
         {page.perex}
@@ -55,14 +87,20 @@ const alternates =
   </Section>
 
   <!-- Sections -->
-  {sections.map((section, index) => (
+  {texts.map((section, index) => (
     <Section
-      render={section._type === "sectionRichText"}
-      paddingTop="small"
+      render={section._type === "sectionRichText" && section.body.length > 0}
+      paddingTop="none"
+      paddingBottom="none"
       containerClass="max-width-small"
+      class:list={[
+        "text-page_part",
+        index === 0 && quoted && "after-quotes",
+        index === texts.length - 1 && "is-last",
+      ]}
     >
       <Ornament
-        render={index === 0}
+        render={index === 0 && !quoted}
         slot="background"
         variant={1}
         size="large"
@@ -71,3 +109,34 @@ const alternates =
     </Section>
   ))}
 </Layout>
+
+<style is:global>
+  /*
+   * As the design spaces its text pages at 402 and at 1920, from the rule
+   * under the photograph to the first line: 57px and 267px, or to the
+   * ornament over the quotations, 95px and 163px; 95px and 69px from that
+   * ornament to the quotation; 85px and 149px from the dots to the text;
+   * 81px and 166px under the last line.
+   */
+  .text-page_quotes {
+    padding-top: clamp(5.9125rem, 4.7754rem + 4.5257vw, 10.2063rem);
+
+    & > .container {
+      row-gap: clamp(4.3rem, 6.3632rem + -1.7194vw, 5.9313rem);
+    }
+  }
+
+  .text-page_part {
+    padding-top: clamp(3.5625rem, 0.0867rem + 13.834vw, 16.6875rem);
+
+    &.after-quotes {
+      padding-top: clamp(4.35rem, 3.1103rem + 4.9341vw, 9.0313rem);
+    }
+    & + .text-page_part {
+      padding-top: clamp(1.2312rem, 0.935rem + 1.1792vw, 2.35rem);
+    }
+    &.is-last {
+      padding-bottom: clamp(5.0625rem, 3.6556rem + 5.5995vw, 10.375rem);
+    }
+  }
+</style>

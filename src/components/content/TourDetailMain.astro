@@ -1,0 +1,260 @@
+---
+import Button from "@/components/Button.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import PortableText from "@/components/utility/PortableText.astro";
+import { DEFAULT_LANG } from "@/consts.ts";
+import { routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Image } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Line above the links: how long the tour takes, or that entry is free. */
+  eyebrow?: string;
+  /** Links beside the label: admission, the tour's album. */
+  links: { label: string; href: string }[];
+  /** Tour title, repeated above the text. */
+  title: string;
+  /** Portable Text blocks from Sanity. */
+  body?: unknown[];
+  /** Photographs below the text: one wide, two halves, four quarters, and again. */
+  images: Image[];
+}
+
+const { render = true, eyebrow, links, title, body, images } = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+/* Where a photograph falls in the repeating run of seven, and its crop. */
+const SLOTS = [
+  { ratio: 1312 / 877, sizes: "(width >= 48rem) 69vw, 100vw" },
+  { ratio: 640 / 451, sizes: "(width >= 48rem) 34vw, 100vw" },
+  { ratio: 640 / 451, sizes: "(width >= 48rem) 34vw, 100vw" },
+  { ratio: 312 / 228, sizes: "(width >= 48rem) 17vw, 50vw" },
+  { ratio: 312 / 228, sizes: "(width >= 48rem) 17vw, 50vw" },
+  { ratio: 312 / 228, sizes: "(width >= 48rem) 17vw, 50vw" },
+  { ratio: 312 / 228, sizes: "(width >= 48rem) 17vw, 50vw" },
+] as const;
+---
+
+{render && title && (
+  <div class="tour-detail_wrap">
+    <div class="tour-detail_meta">
+      {eyebrow && <p class="tour-detail_eyebrow">{eyebrow}</p>}
+      {links.length > 0 && (
+        <ul class="tour-detail_links">
+          {links.map((link) => (
+            <li>
+              <Button element="link" variant="link" href={link.href}>
+                {link.label}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+
+    <h2 class="tour-detail_title text-style-h3">{title}</h2>
+    <PortableText value={body} />
+
+    {images.length > 0 && (
+      <ul class="tour-detail_photos">
+        {images.map((image, index) => {
+          const slot = SLOTS[index % SLOTS.length];
+          return (
+            <li class="tour-detail_photo" data-slot={index % SLOTS.length}>
+              <figure class="tour-detail_figure">
+                <div class="tour-detail_visual">
+                  <SanityImg
+                    image={image}
+                    ratio={slot.ratio}
+                    sizes={slot.sizes}
+                    maxWidth={2000}
+                  />
+                </div>
+                {image.caption && (
+                  <figcaption class="tour-detail_caption">
+                    {image.caption}
+                  </figcaption>
+                )}
+              </figure>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+
+    <ul class="tour-detail_after">
+      <li class="tour-detail_more">
+        <Button element="link" variant="link" href={routePath("gallery", lang)}>
+          {t.allGalleries}
+        </Button>
+      </li>
+      <li class="tour-detail_back">
+        <Button
+          element="link"
+          variant="link"
+          direction="back"
+          href={routePath("tours", lang)}
+        >
+          {t.backToTours}
+        </Button>
+      </li>
+    </ul>
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    /*
+     * A tour's page under its photograph, as the design sets it at 1920 in a
+     * 1312px column: the length and links in the right-hand 505px, the title
+     * and text across the column, then the photographs — one wide, two
+     * halves, four quarters — each captioned at its right edge. On a phone the
+     * same run in one column, the quarters two to a row.
+     */
+    .tour-detail_wrap {
+      width: 100%;
+      padding: clamp(1.875rem, 1.786rem + 0.356vw, 2.2125rem) 0
+        clamp(1.5625rem, 1.47rem + 0.369vw, 1.9125rem);
+    }
+
+    .tour-detail_meta {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      @media (width >= 48rem) {
+        width: 38.49%;
+        margin-left: auto;
+      }
+    }
+
+    .tour-detail_eyebrow {
+      margin: 0;
+      color: var(--muted-text);
+      font-size: var(--text-small);
+      font-weight: var(--primary-medium);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-wide);
+      @media (width >= 48rem) {
+        font-size: var(--text-main);
+      }
+    }
+
+    /* 52px from link to link on a phone, 42px at 1920. */
+    .tour-detail_links {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      margin: clamp(0.875rem, 0.781rem + 0.3755vw, 1.23125rem) 0 0;
+      padding: 0;
+      list-style: none;
+
+      & > li + li {
+        margin-top: clamp(0.175rem, 0.9656rem - 0.6588vw, 0.8rem);
+      }
+    }
+
+    .tour-detail_title {
+      margin: clamp(3.75rem, 2.103rem + 6.555vw, 9.96875rem) 0
+        clamp(2.1625rem, 1.368rem + 3.162vw, 5.1625rem);
+      text-wrap: balance;
+    }
+
+    /*
+     * Seven tracks at 1920: 312 16 312 33 312 16 312. A wide photograph takes
+     * them all, a half three, a quarter one.
+     */
+    .tour-detail_photos {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 1rem minmax(0, 1fr);
+      row-gap: clamp(1.875rem, 1.534rem + 1.357vw, 3.1625rem);
+      align-items: start;
+      margin: clamp(3.125rem, 1.8125rem + 5.224vw, 8.08125rem) 0 0;
+      padding: 0;
+      list-style: none;
+
+      @media (width >= 48rem) {
+        grid-template-columns:
+          minmax(0, 1fr) 1rem minmax(0, 1fr) clamp(1rem, 1.719vw, 2.0625rem)
+          minmax(0, 1fr) 1rem minmax(0, 1fr);
+      }
+    }
+
+    .tour-detail_photo {
+      grid-column: 1 / -1;
+
+      @media (width < 48rem) {
+        &:is([data-slot="3"], [data-slot="5"]) {
+          grid-column: 1;
+        }
+        &:is([data-slot="4"], [data-slot="6"]) {
+          grid-column: 3;
+        }
+      }
+
+      @media (width >= 48rem) {
+        &[data-slot="1"] {
+          grid-column: 1 / 4;
+        }
+        &[data-slot="2"] {
+          grid-column: 5 / 8;
+        }
+        &[data-slot="3"] {
+          grid-column: 1;
+        }
+        &[data-slot="4"] {
+          grid-column: 3;
+        }
+        &[data-slot="5"] {
+          grid-column: 5;
+        }
+        &[data-slot="6"] {
+          grid-column: 7;
+        }
+      }
+    }
+
+    .tour-detail_figure {
+      margin: 0;
+    }
+
+    .tour-detail_visual {
+      position: relative;
+      background-color: var(--background-2);
+      overflow: clip;
+
+      & > .image {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+    }
+
+    /* C2 semibold: 12px on a phone, 18px at 1920. */
+    .tour-detail_caption {
+      margin-top: clamp(1rem, 0.8rem + 0.797vw, 1.75625rem);
+      font-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
+      font-weight: var(--primary-semibold);
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      text-align: end;
+      text-box: trim-both cap alphabetic;
+    }
+
+    .tour-detail_after {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      margin: clamp(2.5rem, 1.469rem + 4.104vw, 6.39375rem) 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tour-detail_back {
+      margin-top: clamp(5rem, 2.683rem + 9.223vw, 13.75rem);
+    }
+  }
+</style>

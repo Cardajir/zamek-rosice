@@ -19,6 +19,13 @@ interface Props extends Omit<HTMLAttributes<"img">, "src" | "alt"> {
    * @min 0
    */
   ratio?: number;
+  /**
+   * Width divided by height on a phone (below 48rem), where the design crops
+   * some photographs differently. Omit to use `ratio` everywhere.
+   *
+   * @min 0
+   */
+  narrowRatio?: number;
   /** Responsive `sizes` value. */
   sizes?: string;
   /**
@@ -38,6 +45,7 @@ const {
   render = true,
   image,
   ratio,
+  narrowRatio,
   sizes = "100vw",
   maxWidth = 2400,
   loading = "lazy",
@@ -57,6 +65,18 @@ const srcset = image
       )
       .join(", ")
   : undefined;
+/* A phone never needs more than the 1200px version of its own crop. */
+const narrowWidths = widths.filter((width) => width <= 1200);
+const narrowSrcset =
+  image && narrowRatio
+    ? narrowWidths
+        .map(
+          (width) =>
+            `${sized(image.url, width, narrowRatio, image.focus)} ${width}w`,
+        )
+        .join(", ")
+    : undefined;
+
 const height = ratio
   ? Math.round(limit / ratio)
   : image?.width && image.height
@@ -64,7 +84,27 @@ const height = ratio
     : undefined;
 ---
 
-{render && image?.url && (
+{render && image?.url && narrowSrcset && (
+  <picture class="image_picture">
+    <source media="(width < 48rem)" srcset={narrowSrcset} sizes={sizes} />
+    <img
+      class:list={["image", className]}
+      src={sized(image.url, limit, ratio, image.focus)}
+      srcset={srcset}
+      sizes={sizes}
+      width={image.width ? limit : undefined}
+      height={height}
+      alt={image.alt ?? ""}
+      loading={loading}
+      fetchpriority={fetchPriority === "auto" ? undefined : fetchPriority}
+      decoding="async"
+      style={`--_narrow-ratio: ${narrowRatio}`}
+      {...rest}
+    />
+  </picture>
+)}
+
+{render && image?.url && !narrowSrcset && (
   <img
     class:list={["image", className]}
     src={sized(image.url, limit, ratio, image.focus)}
@@ -79,3 +119,19 @@ const height = ratio
     {...rest}
   />
 )}
+
+<style is:global>
+  @layer components {
+    /* The picture only chooses the file; the image inside is what gets laid out. */
+    .image_picture {
+      display: contents;
+
+      /* Hold the phone crop’s shape before the file arrives. */
+      & > img {
+        @media (width < 48rem) {
+          aspect-ratio: var(--_narrow-ratio);
+        }
+      }
+    }
+  }
+</style>

@@ -4,7 +4,6 @@ import Section from "@/components/wrapper/Section.astro";
 import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
-import Heading from "@/components/typography/Heading.astro";
 import EventsMain from "@/components/content/EventsMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
@@ -21,6 +20,9 @@ const pinned = new Set(featured.map((post) => post.slug));
 const upcoming = news.upcoming.filter((post) => !pinned.has(post.slug));
 const archive = news.archive.filter((post) => !pinned.has(post.slug));
 const empty = featured.length + upcoming.length + archive.length === 0;
+
+/* Six items to a page, as the design lists them, then "show more". */
+const PAGE_SIZE = 6;
 ---
 
 <Layout title={t.news} alternates={alternates("news")}>
@@ -32,28 +34,45 @@ const empty = featured.length + upcoming.length + archive.length === 0;
   <!-- Pinned item -->
   <Section
     render={featured.length > 0}
-    paddingTop="small"
+    paddingTop="large"
     paddingBottom="small"
     data-stacki-key="kizj46mp8m2vz"
   >
-    <Ornament slot="background" variant={3} size="large" />
-    <EventsMain posts={featured} headingTag="h2" />
+    <Ornament
+      slot="background"
+      variant={3}
+      size="large"
+      class="padding-top-7 news_ornament"
+    />
+    <EventsMain posts={featured} headingTag="h2" variant="featured" />
   </Section>
 
   <!-- Upcoming events -->
-  <Section render={upcoming.length > 0} paddingTop="small" gap="5" data-stacki-key="k7d195t3t3ixh">
-    <Heading tag="h2" variant="h5">
-      {t.upcomingEvents}
-    </Heading>
-    <EventsMain posts={upcoming} />
+  <Section
+    render={upcoming.length > 0}
+    paddingBottom="large"
+    data-stacki-key="k7d195t3t3ixh"
+  >
+    <EventsMain
+      posts={upcoming}
+      heading={t.upcomingEvents}
+      pageSize={PAGE_SIZE}
+    />
   </Section>
 
   <!-- Archive -->
-  <Section render={archive.length > 0} gap="5" data-stacki-key="k8t0oh5xthw6x">
-    <Heading tag="h2" variant="h5">
-      {t.pastEvents}
-    </Heading>
-    <EventsMain posts={archive} />
+  <Section
+    render={archive.length > 0}
+    paddingTop="none"
+    paddingBottom="large"
+    data-stacki-key="k8t0oh5xthw6x"
+  >
+    <EventsMain
+      posts={archive}
+      heading={t.pastEvents}
+      pageSize={PAGE_SIZE}
+      shaded
+    />
   </Section>
 
   <!-- Nothing in this language yet -->
@@ -63,3 +82,12 @@ const empty = featured.length + upcoming.length + archive.length === 0;
     </ContentWrapper>
   </Section>
 </Layout>
+
+<style is:global>
+  /* The phone design has no ornament over the pinned item. */
+  @media (width < 48rem) {
+    .news_ornament {
+      display: none;
+    }
+  }
+</style>

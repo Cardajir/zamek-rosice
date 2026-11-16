@@ -176,7 +176,8 @@
 
 /* A page that opens on a photograph keeps a hairline of air under the menu's rule. */
 main > .section.padding-top-0:first-child {
-  padding-top: 0.6875rem;
+  /* 11px at 1920, 7px on a phone. */
+  padding-top: clamp(0.4375rem, 0.3712rem + 0.2635vw, 0.6875rem);
 }
 
 .padding-top-1 {

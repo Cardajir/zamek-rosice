@@ -2,23 +2,23 @@
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import PageHeroMain from "@/components/content/PageHeroMain.astro";
-import Ornament from "@/components/media/Ornament.astro";
-import Eyebrow from "@/components/typography/Eyebrow.astro";
 import Heading from "@/components/typography/Heading.astro";
 import GalleryMain from "@/components/content/GalleryMain.astro";
 import GalleryNavMain from "@/components/content/GalleryNavMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
-import { getAlbums } from "@/sanity/page-queries.ts";
+import { getAlbum, getAlbums } from "@/sanity/page-queries.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 
 const albums = await getAlbums(lang);
 
-/* The front page shows the first photographs of every album. */
-const selection = albums.flatMap((album) => album.images);
+/* The front page opens the first album, the castle's exterior in the design. */
+const first = albums[0];
+const album = first && (await getAlbum(lang, first.slug));
+const photos = album?.images ?? [];
 ---
 
 <Layout
@@ -33,36 +33,37 @@ const selection = albums.flatMap((album) => album.images);
 
   <!-- Albums -->
   <Section
+    id="alba"
     render={albums.length > 0}
-    paddingTop="small"
-    paddingBottom="small"
-    gap="4"
-    align="center"
+    paddingTop="none"
+    paddingBottom="none"
   >
-    <Ornament variant={6} />
-    <Eyebrow>{t.galleryIntro}</Eyebrow>
     <GalleryNavMain
       label={t.galleryAlbums}
-      items={[
-        {
-          label: t.selectedPhotos,
-          href: routePath("gallery", lang),
-          current: true,
-        },
-        ...albums.map((album) => ({
-          label: album.title,
-          href: routePath("gallery", lang, album.slug),
-        })),
-      ]}
+      intro={t.galleryIntro}
+      items={albums.map((item, index) => ({
+        label: item.title,
+        href:
+          index === 0
+            ? routePath("gallery", lang)
+            : routePath("gallery", lang, item.slug),
+        current: index === 0,
+      }))}
       data-stacki-key="kvtlgmjf0room"
     />
   </Section>
 
-  <!-- Selected photographs -->
-  <Section render={selection.length > 0} paddingTop="small" gap="5" data-stacki-key="kvs7vlq7y5c71">
-    <Heading tag="h2" variant="h5">
-      {t.selectedPhotos}
+  <!-- Photographs of the first album -->
+  <Section
+    render={photos.length > 0}
+    paddingTop="large"
+    paddingBottom="none"
+    gap="0"
+    data-stacki-key="kvs7vlq7y5c71"
+  >
+    <Heading tag="h2" class="sr-only">
+      {album?.title}
     </Heading>
-    <GalleryMain photos={selection} />
+    <GalleryMain photos={photos} back="#alba" />
   </Section>
 </Layout>

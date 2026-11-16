@@ -4,13 +4,13 @@ import SanityImg from "@/components/media/SanityImg.astro";
 import type { Image } from "@/sanity/queries.ts";
 
 interface Tour {
-  /** Line above the title: how long the tour takes. */
+  /** Line above the title: how long the tour takes, or that entry is free. */
   eyebrow?: string;
   /** Tour title. */
   title: string;
   /** Short description. */
   text?: string;
-  /** Portrait photograph. */
+  /** Photograph: a portrait beside the text, a landscape above it on a phone. */
   image?: Image;
   /** Links under the text, the first one to the tour's own page. */
   links: { label: string; href: string }[];
@@ -37,7 +37,8 @@ const { render = true, tours, headingTag: Tag = "h2" } = Astro.props;
             <SanityImg
               image={tour.image}
               ratio={505 / 613}
-              sizes="(width >= 64rem) 27vw, 100vw"
+              narrowRatio={339 / 193}
+              sizes="(width >= 48rem) 27vw, 100vw"
               maxWidth={1200}
             />
           )}
@@ -73,29 +74,37 @@ const { render = true, tours, headingTag: Tag = "h2" } = Astro.props;
     /*
      * As the design lays it out at 1920 in a 1312px column: a 505 × 613
      * portrait and a 505px text, swapping sides from one tour to the next,
-     * with a rule 84px below each tour and 84px above the next.
+     * with a rule 84px below each tour and 84px above the next. On a phone
+     * (402) each tour is a 339 × 193 landscape above its text, set in 16px
+     * from the rules, which run 30px from the tour on either side.
      */
     .tour-list_wrap {
       width: 100%;
       margin: 0;
-      padding: 0;
+      padding: clamp(2.0625rem, 1.169rem + 3.557vw, 5.4375rem) 0
+        clamp(1.5625rem, 0.3rem + 5.007vw, 6.3125rem);
       list-style: none;
     }
 
     .tour-list_item {
       display: grid;
-      gap: var(--space-6);
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2.1875rem;
 
       & + & {
-        margin-top: clamp(2.5rem, 4.375vw, 5.25rem);
-        padding-top: clamp(2.5rem, 4.375vw, 5.25rem);
+        margin-top: clamp(1.45rem, 0.444rem + 4.005vw, 5.25rem);
+        padding-top: clamp(1.875rem, 0.981rem + 3.557vw, 5.25rem);
         border-top: var(--border-width) solid var(--text);
       }
 
-      @media (width >= 64rem) {
+      @media (width < 48rem) {
+        padding-inline: 1rem;
+      }
+
+      @media (width >= 48rem) {
         grid-template-columns: 38.49% 12.8% 38.49% minmax(0, 1fr);
         gap: 0;
+        align-items: center;
 
         & > .tour-list_visual {
           grid-column: 1;
@@ -120,54 +129,75 @@ const { render = true, tours, headingTag: Tag = "h2" } = Astro.props;
     }
 
     .tour-list_visual {
+      position: relative;
       width: 100%;
-      max-width: 31.5625rem;
-      aspect-ratio: 505 / 613;
+      aspect-ratio: 339 / 193;
       background-color: var(--background-2);
       overflow: clip;
 
       & > .image {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
+
+      @media (width >= 48rem) {
+        max-width: 31.5625rem;
+        aspect-ratio: 505 / 613;
+      }
     }
 
-    /* 29px between label, title, text and links. */
+    /* Label, title, text and links, spaced as the design sets them at 402 and 1920. */
     .tour-list_content {
       display: flex;
       flex-direction: column;
       align-items: start;
-      gap: 1.8125rem;
+      /* Centred on the photograph by the line boxes the design measures, not the trimmed text. */
+      @media (width >= 48rem) {
+        padding-top: 0.75rem;
+      }
     }
 
     .tour-list_eyebrow {
-      margin: 0;
+      margin: 0 0 clamp(1.475rem, 1.194rem + 1.12vw, 2.5375rem);
       color: var(--muted-text);
-      font-size: var(--text-main);
+      font-size: var(--text-small);
       font-weight: var(--primary-medium);
       line-height: 1.2;
       letter-spacing: var(--letter-spacing-wide);
+      @media (width >= 48rem) {
+        font-size: var(--text-main);
+      }
     }
 
     .tour-list_title {
-      margin: 0;
+      margin: 0 0 clamp(2.1625rem, 2.019rem + 0.573vw, 2.70625rem);
       text-wrap: balance;
     }
 
     .tour-list_text {
-      margin: 0;
+      margin: 0 0 clamp(1.49375rem, 1.374rem + 0.474vw, 1.94375rem);
+      font-size: var(--text-small);
+      line-height: 1.4;
+      @media (width >= 48rem) {
+        font-size: var(--text-main);
+      }
     }
 
-    /* The links stand one under another, 16px apart. */
+    /* One link under another: 52px apart on a phone, 45px at 1920. */
     .tour-list_links {
       display: flex;
       flex-direction: column;
       align-items: start;
-      gap: 0;
-      margin: -0.6rem 0 0;
+      margin: 0;
       padding: 0;
       list-style: none;
+
+      & > li + li {
+        margin-top: clamp(0.3625rem, 0.916rem - 0.461vw, 0.8rem);
+      }
     }
   }
 </style>

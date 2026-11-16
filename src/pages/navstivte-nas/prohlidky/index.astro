@@ -13,15 +13,23 @@ const t = ui(lang);
 
 const tours = await getTours(lang);
 
-const length = ({ duration, free }: TourCard) => {
-  if (duration?.unlimited) return `${t.tourLength}: ${t.unlimited}`;
+const eyebrow = ({ duration, free }: TourCard) => {
+  if (free) return t.admissionFree;
+  if (duration?.unlimited) return `${t.tourLength}: ${t.tourLengthUnlimited}`;
   const { min, max } = duration ?? {};
-  if (min || max) {
-    const span = min && max && min !== max ? `${min}–${max}` : (max ?? min);
-    return `${t.tourLength}: ${span} ${t.minutes}`;
-  }
-  return free ? t.freeEntry : undefined;
+  if (!min && !max) return undefined;
+  const span = min && max && min !== max ? `${min}–${max}` : (max ?? min);
+  return `${t.tourLength}: ${span} ${t.minutesLong}`;
 };
+
+/* The tour's page, its admission unless entry is free, and its album (the gallery until one is linked). */
+const links = (tour: TourCard) => [
+  { label: t.readMore, href: routePath("tours", lang, tour.slug) },
+  ...(tour.free
+    ? []
+    : [{ label: t.admissionLink, href: routePath("admission", lang) }]),
+  { label: t.galleryLink, href: routePath("gallery", lang, tour.gallery) },
+];
 
 const title = t.toursPageTitle;
 ---
@@ -35,18 +43,18 @@ const title = t.toursPageTitle;
   <!-- Tours -->
   <Section
     render={tours.length > 0}
+    paddingTop="none"
+    paddingBottom="none"
     containerClass="max-width-small"
     data-stacki-key="kz2p43789y75t"
   >
     <TourListMain
       tours={tours.map((tour) => ({
-        eyebrow: length(tour),
+        eyebrow: eyebrow(tour),
         title: tour.title,
         text: tour.perex,
         image: tour.image,
-        links: [
-          { label: t.readMore, href: routePath("tours", lang, tour.slug) },
-        ],
+        links: links(tour),
       }))}
     />
   </Section>

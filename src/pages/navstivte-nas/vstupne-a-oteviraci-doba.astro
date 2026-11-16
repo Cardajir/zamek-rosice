@@ -105,9 +105,8 @@ const hours = hoursTable(admission.periods, admission.subjects, {
   <Section
     containerClass="max-width-small"
     render={admission.lists.length > 0}
-    paddingTop="small"
-    paddingBottom="small"
-    gap="7"
+    paddingTop="none"
+    paddingBottom="none"
     class="visit_lists"
     data-stacki-key="kfpj138slaeim"
   >
@@ -127,7 +126,7 @@ const hours = hoursTable(admission.periods, admission.subjects, {
             lines: priceLines(row),
           }))}
         />
-        <Paragraph variant="small">{list.note}</Paragraph>
+        <Paragraph>{list.note}</Paragraph>
       </ContentWrapper>
     ))}
   </Section>
@@ -136,8 +135,8 @@ const hours = hoursTable(admission.periods, admission.subjects, {
   <Section
     containerClass="max-width-small"
     render={hours.length > 0}
-    paddingTop="small"
-    gap="7"
+    paddingTop="none"
+    paddingBottom="none"
     class="visit_lists"
     data-stacki-key="kh4s861k3m1zc"
   >
@@ -173,17 +172,60 @@ const hours = hoursTable(admission.periods, admission.subjects, {
 
 <style is:global>
   /*
-   * As the design spaces it at 1920: 70px under the section's heading and
-   * between one admission or season and the next, 41px between a list's
-   * title, its introduction and its table.
+   * As the design spaces it, from line to line at 402 and at 1920: 57px and
+   * 251px from the rule under the photograph to the first heading, 80px and
+   * 208px from the prices to the opening hours; 47px and
+   * 83px under a section's heading, 31px and 55px under a list's title;
+   * 56px and 49px from the introduction to the table, 28px and 46px when a
+   * title has none; 20px and 28px from a table to its note; 40px and 75px
+   * from one list to the next title. On a phone the words sit 1rem in from
+   * the ends of the rules.
    */
-  .visit_lists > .container {
-    row-gap: clamp(2.75rem, 3.65vw, 4.375rem);
+  .visit_lists {
+    padding-top: clamp(3.5625rem, 0.3515rem + 12.78vw, 15.6875rem);
 
-    & > .layout > * {
-      row-gap: clamp(1.5rem, 2.14vw, 2.5625rem);
+    & ~ & {
+      padding-top: clamp(5rem, 2.8847rem + 8.419vw, 12.9875rem);
+      padding-bottom: clamp(5.0625rem, 3.6556rem + 5.5995vw, 10.375rem);
+    }
+
+    & > .container {
+      row-gap: 0;
+
+      & > .heading + * {
+        margin-top: clamp(2.9375rem, 2.3483rem + 2.3452vw, 5.1625rem);
+      }
+      & > .layout + *,
+      & > .info-list_wrap + * {
+        margin-top: clamp(2.5rem, 1.9224rem + 2.2991vw, 4.6813rem);
+      }
+      & > .layout + .text {
+        margin-top: clamp(1.25rem, 1.1242rem + 0.5007vw, 1.725rem);
+      }
+    }
+
+    & .layout > * {
+      row-gap: 0;
       & > * {
         margin-block: 0;
+      }
+      & > .heading + .text {
+        margin-top: clamp(1.9187rem, 1.5166rem + 1.6008vw, 3.4375rem);
+      }
+      & > .heading + .info-list_wrap {
+        margin-top: clamp(1.75rem, 1.4537rem + 1.1792vw, 2.8687rem);
+      }
+      & > .text + .info-list_wrap {
+        margin-top: clamp(3.05rem, 3.6192rem + -0.4743vw, 3.5rem);
+      }
+      & > .info-list_wrap + .text {
+        margin-top: clamp(1.25rem, 1.1242rem + 0.5007vw, 1.725rem);
+      }
+    }
+
+    & :is(.heading, .text) {
+      @media (width < 48rem) {
+        padding-inline: 1rem;
       }
     }
   }
