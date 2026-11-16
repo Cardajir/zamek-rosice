@@ -1,4 +1,16 @@
 /** Site name. Appended to every page title and used as `og:site_name`. */
+/**
+ * The castle's Sanity project. Public: it ships in every page that loads a
+ * photograph. It is the default so a fresh clone shows the real content with
+ * nothing to set up; `PUBLIC_SANITY_PROJECT_ID` in `.env` overrides it, and
+ * the value `none` runs the site without a CMS.
+ */
+export const SANITY_PROJECT_ID = "fhk95ye1";
+
+/** The project id to use, given what the environment asks for. */
+export const sanityProjectId = (configured: string | undefined): string =>
+  configured === "none" ? "" : configured || SANITY_PROJECT_ID;
+
 export const SITE_NAME = "Zámek Rosice";
 /** Fallback meta description for pages that don't set their own. */
 export const SITE_DESCRIPTION =

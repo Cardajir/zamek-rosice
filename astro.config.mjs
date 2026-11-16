@@ -6,19 +6,20 @@ import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import sanity from "@sanity/astro";
-import { SITE_URL } from "./src/consts.ts";
+import { SITE_URL, sanityProjectId } from "./src/consts.ts";
 import { isNoindexRoute } from "./src/utils/seo.ts";
 
 /*
  * The config runs before Vite fills `import.meta.env`, so the Sanity project
- * is read from `.env` here by hand. Without one the site builds and runs with
- * no CMS, and the Studio and its React runtime are left out.
+ * is read from `.env` here by hand. Without one the castle's own project is
+ * used; set to `none`, the site builds and runs with no CMS, and the Studio
+ * and its React runtime are left out.
  */
 const env = {
   ...loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "PUBLIC_"),
   ...process.env,
 };
-const projectId = env.PUBLIC_SANITY_PROJECT_ID ?? "";
+const projectId = sanityProjectId(env.PUBLIC_SANITY_PROJECT_ID);
 const dataset = env.PUBLIC_SANITY_DATASET || "production";
 
 /*

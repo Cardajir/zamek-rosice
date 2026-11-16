@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import { defineCliConfig } from "sanity/cli";
+import { sanityProjectId } from "./src/consts";
 
 /*
  * The CLI runs outside Vite, so `.env` is read here by hand. What it needs to
@@ -9,7 +10,7 @@ if (existsSync(".env")) process.loadEnvFile(".env");
 
 export default defineCliConfig({
   api: {
-    projectId: process.env.PUBLIC_SANITY_PROJECT_ID ?? "",
+    projectId: sanityProjectId(process.env.PUBLIC_SANITY_PROJECT_ID),
     dataset: process.env.PUBLIC_SANITY_DATASET || "production",
   },
 });

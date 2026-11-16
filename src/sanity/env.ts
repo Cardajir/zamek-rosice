@@ -1,8 +1,10 @@
+import { sanityProjectId } from "../consts.ts";
+
 /**
  * Sanity connection details. The project id and dataset are public: they ship
- * in the client bundle either way. They are read from `PUBLIC_` variables so a
- * clone without a `.env` still builds; the site then runs without a CMS and
- * the Studio is not mounted.
+ * in the client bundle either way. A clone without a `.env` uses the castle's
+ * own project; `PUBLIC_SANITY_PROJECT_ID=none` runs the site without a CMS,
+ * and then the Studio is not mounted.
  *
  * Vite fills `import.meta.env`; the Sanity CLI runs outside Vite and reads
  * `process.env` instead.
@@ -16,7 +18,7 @@ const fromNode =
 
 const read = (name: string) => fromVite[name] || fromNode[name] || "";
 
-export const projectId = read("PUBLIC_SANITY_PROJECT_ID");
+export const projectId = sanityProjectId(read("PUBLIC_SANITY_PROJECT_ID"));
 
 export const dataset = read("PUBLIC_SANITY_DATASET") || "production";
 
