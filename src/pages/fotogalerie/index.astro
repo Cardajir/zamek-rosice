@@ -66,11 +66,12 @@ const selection = albums.flatMap((album) => album.images);
           href: routePath("gallery", lang, album.slug),
         })),
       ]}
+      data-stacki-key="kvtlgmjf0room"
     />
   </Section>
 
   <!-- Selected photographs -->
-  <Section render={selection.length > 0} paddingTop="small" gap="5">
+  <Section render={selection.length > 0} paddingTop="small" gap="5" data-stacki-key="kvs7vlq7y5c71">
     <Heading tag="h2" variant="h5">
       {t.selectedPhotos}
     </Heading>

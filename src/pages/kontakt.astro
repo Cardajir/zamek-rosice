@@ -38,7 +38,7 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
 
 <Layout title={t.contactTitle} alternates={alternates("contact")}>
   <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small">
+  <Section paddingTop="none" paddingBottom="small" data-stacki-key="kz7cqta7kuy00">
     <StatusBarMain shell={shell} />
   </Section>
 
@@ -52,17 +52,17 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
   <!-- Contacts and form -->
   <Section paddingTop="small">
     <ContentWrapper variant="columns" column1Class="align-self-start">
-      <ContactLinesMain shell={shell} />
-      <Paragraph>
+      <ContactLinesMain shell={shell} data-stacki-key="k6ku91uzypqe9" />
+      <Paragraph data-stacki-key="kw9b4y5szg33a">
         {shell.organisation}
         <br />
         {address}
       </Paragraph>
-      <Eyebrow render={people.length > 0} tag="h2" class="margin-top-6">
+      <Eyebrow render={people.length > 0} tag="h2" class="margin-top-6" data-stacki-key="k47vpos44lgn1">
         {t.contactPeople}
       </Eyebrow>
       {people.map((person) => (
-        <Paragraph>
+        <Paragraph data-stacki-key="k6vl1r8oknc60">
           {person.name}
           {person.role && `, ${person.role}`}
           {person.phone && (
@@ -90,6 +90,7 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
           successMessage={t.formSent}
           errorMessage={t.formFailed}
           class="margin-top-5"
+          data-stacki-key="kkakiy7iycqos"
         >
           <Input
             variant="first-name"
@@ -98,6 +99,7 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
             placeholder=""
             maxlength={100}
             required
+            data-stacki-key="khx919k18xg6t"
           />
           <Input
             variant="last-name"

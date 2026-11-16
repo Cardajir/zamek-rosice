@@ -44,13 +44,14 @@ const empty = featured.length + upcoming.length + archive.length === 0;
     render={featured.length > 0}
     paddingTop="small"
     paddingBottom="small"
+    data-stacki-key="kizj46mp8m2vz"
   >
     <Ornament slot="background" variant={3} size="large" />
     <EventsMain posts={featured} headingTag="h2" />
   </Section>
 
   <!-- Upcoming events -->
-  <Section render={upcoming.length > 0} paddingTop="small" gap="5">
+  <Section render={upcoming.length > 0} paddingTop="small" gap="5" data-stacki-key="k7d195t3t3ixh">
     <Heading tag="h2" variant="h5">
       {t.upcomingEvents}
     </Heading>
@@ -58,7 +59,7 @@ const empty = featured.length + upcoming.length + archive.length === 0;
   </Section>
 
   <!-- Archive -->
-  <Section render={archive.length > 0} gap="5">
+  <Section render={archive.length > 0} gap="5" data-stacki-key="k8t0oh5xthw6x">
     <Heading tag="h2" variant="h5">
       {t.pastEvents}
     </Heading>

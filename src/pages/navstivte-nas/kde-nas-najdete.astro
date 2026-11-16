@@ -65,6 +65,7 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
     containerClass="max-width-small"
     paddingTop="small"
     paddingBottom="small"
+    data-stacki-key="km7pivlca3c1g"
   >
     <Ornament slot="background" variant={7} size="large" />
     <ContentWrapper>
@@ -90,12 +91,13 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
     render={ways.length > 0}
     paddingTop="small"
     gap="6"
+    data-stacki-key="k9h0if2g58ofd"
   >
     <Heading tag="h2" variant="h3">
       {t.howToGetHere}
     </Heading>
     {ways.map((way) => (
-      <ContentWrapper>
+      <ContentWrapper data-stacki-key="ky9gh7slgsxkn">
         <Heading tag="h3" variant="h6">
           {way.heading}
         </Heading>

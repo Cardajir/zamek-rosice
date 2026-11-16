@@ -36,7 +36,7 @@ const fullDate = new Intl.DateTimeFormat(locale, {
 });
 ---
 
-<Layout alternates={alternates("home")}>
+<Layout alternates={alternates("home")} data-stacki-key="k35k3zr3zntn9">
   <!-- Hero photograph and status bar -->
   <Section paddingTop="none" paddingBottom="small" gap="3">
     {home.heroImage && (
@@ -50,7 +50,7 @@ const fullDate = new Intl.DateTimeFormat(locale, {
         />
       </Parallax>
     )}
-    <StatusBarMain shell={shell} />
+    <StatusBarMain shell={shell} data-stacki-key="kj3d8mvtcsp9m" />
   </Section>
 
   <!-- Heading -->
@@ -78,7 +78,7 @@ const fullDate = new Intl.DateTimeFormat(locale, {
     <Heading tag="h2" variant="h5">
       {t.upcomingEvents}
     </Heading>
-    <EventsMain posts={home.posts} />
+    <EventsMain posts={home.posts} data-stacki-key="k5sx4lf6l3vmv" />
     <ButtonWrapper>
       <Button element="link" variant="link" href={routePath("news", lang)}>
         {t.allEvents}
@@ -87,7 +87,7 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Tours and permanent exhibitions -->
-  <Section render={home.tours.length > 0} gap="4">
+  <Section render={home.tours.length > 0} gap="4" data-stacki-key="kbgpiynhcyjom">
     <Heading tag="h2" variant="h5">
       {t.toursHeading}
     </Heading>
@@ -118,14 +118,14 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Weddings, the Šenk hall, school trips -->
-  <Section render={home.promos.length > 0} gap="large">
+  <Section render={home.promos.length > 0} gap="large" data-stacki-key="k539eip7f0rga">
     {home.promos.map((promo, index) => (
-      <PromoMain promo={promo} reverse={index % 2 === 1} />
+      <PromoMain promo={promo} reverse={index % 2 === 1} data-stacki-key="k03odtz2ndt5b" />
     ))}
   </Section>
 
   <!-- Visitor's quote -->
-  <Section render={Boolean(home.quote)} gap="7">
+  <Section render={Boolean(home.quote)} gap="7" data-stacki-key="kfefupshi3d7c">
     <Ornament variant={2} />
     <QuoteMain
       text={home.quote?.text}
@@ -134,6 +134,7 @@ const fullDate = new Intl.DateTimeFormat(locale, {
         home.quote?.date &&
         fullDate.format(new Date(`${home.quote.date}T00:00:00Z`))
       }
+      data-stacki-key="k14juthpdlpgt"
     />
   </Section>
 </Layout>
