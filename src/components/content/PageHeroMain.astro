@@ -1,0 +1,102 @@
+---
+import Parallax from "@/components/media/Parallax.astro";
+import SanityImg from "@/components/media/SanityImg.astro";
+import { shellFor, type Image } from "@/sanity/queries.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The page's title, set over the photograph as its only heading 1. */
+  title: string;
+  /** The photograph; by default the home page's hero, as the design has it on every subpage. */
+  image?: Image;
+  /** The rule under the photograph. Off where a status bar draws its own. */
+  rule?: boolean;
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const { render = true, title, rule = true, class: className } = Astro.props;
+const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
+---
+
+{render && title && (
+  <div class:list={["page-hero_wrap", rule && "has-rule", className]}>
+    <div class:list={["page-hero_visual", image && "theme-dark has-image"]}>
+      {image && (
+        <Parallax>
+          <SanityImg
+            image={{ ...image, alt: "" }}
+            ratio={1645 / 705}
+            loading="eager"
+            fetchPriority="high"
+          />
+        </Parallax>
+      )}
+      <h1 class="page-hero_title text-style-h1">{title}</h1>
+    </div>
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    /*
+     * The top of every subpage as the design draws it at 1920: the castle's
+     * photograph (1645 × 705) under a dark veil, the page's title centred on
+     * it, and a rule 13px below.
+     */
+    .page-hero_wrap {
+      width: 100%;
+      padding-bottom: 0.8125rem;
+
+      &.has-rule {
+        border-bottom: var(--border-width) solid var(--text);
+      }
+    }
+
+    .page-hero_visual {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 12rem;
+      padding: var(--space-6);
+
+      &.has-image {
+        aspect-ratio: 1645 / 705;
+        min-height: 16rem;
+        padding: 0;
+        overflow: clip;
+        background-color: var(--background);
+        color: var(--text);
+
+        & > .parallax_wrap {
+          position: absolute;
+          inset: 0;
+          height: 100%;
+
+          & > .image {
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-color: color-mix(in lab, black 45%, transparent);
+        }
+      }
+    }
+
+    .page-hero_title {
+      position: relative;
+      z-index: 1;
+      max-width: 48.375rem;
+      margin: 0;
+      padding-inline: var(--space-5);
+      text-align: center;
+      text-wrap: balance;
+    }
+  }
+</style>

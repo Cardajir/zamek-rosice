@@ -1,9 +1,9 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
-import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
 import PortableText from "@/components/utility/PortableText.astro";
 import { DEFAULT_LANG, LANGS, type Lang } from "@/consts.ts";
@@ -40,10 +40,14 @@ const alternates =
 ---
 
 <Layout title={page.title} description={page.perex} alternates={alternates}>
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={page.title} />
+  </Section>
+
+  <!-- Introduction -->
+  <Section render={Boolean(page.perex)} paddingTop="small" paddingBottom="none">
     <ContentWrapper centered>
-      <Heading tag="h1">{page.title}</Heading>
       <Paragraph variant="large" maxWidth={60}>
         {page.perex}
       </Paragraph>

@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
@@ -34,17 +35,16 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
 ---
 
 <Layout title={t.contactTitle} alternates={alternates("contact")}>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={t.contactTitle} rule={false} />
+  </Section>
+
   <!-- Status bar -->
   <Section paddingTop="none" paddingBottom="small" data-stacki-key="kz7cqta7kuy00">
     <StatusBarMain shell={shell} note={shell.organisation} />
   </Section>
 
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
-    <ContentWrapper centered>
-      <Heading tag="h1">{t.contactTitle}</Heading>
-    </ContentWrapper>
-  </Section>
 
   <!-- Contacts and form -->
   <Section paddingTop="small">

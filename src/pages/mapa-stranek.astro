@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Grid from "@/components/wrapper/Grid.astro";
 import Heading from "@/components/typography/Heading.astro";
@@ -36,11 +37,9 @@ const sections = [
 ---
 
 <Layout title={t.siteMapTitle} alternates={alternates("siteMap")}>
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
-    <ContentWrapper centered>
-      <Heading tag="h1">{t.siteMapTitle}</Heading>
-    </ContentWrapper>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={t.siteMapTitle} />
   </Section>
 
   <!-- Pages -->

@@ -1,8 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
-import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
-import Heading from "@/components/typography/Heading.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import TourListMain from "@/components/content/TourListMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
@@ -28,13 +27,9 @@ const title = t.toursPageTitle;
 ---
 
 <Layout title={title} alternates={alternates("tours")}>
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small" data-stacki-key="k0wh9yfpbqtj6">
-    <ContentWrapper centered>
-      <Heading tag="h1" maxWidth={20}>
-        {title}
-      </Heading>
-    </ContentWrapper>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={title} />
   </Section>
 
   <!-- Tours -->

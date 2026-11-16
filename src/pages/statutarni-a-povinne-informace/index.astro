@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
@@ -65,13 +66,9 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
 ---
 
 <Layout title={t.statutoryTitle} alternates={alternates("statutory")}>
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
-    <ContentWrapper centered>
-      <Heading tag="h1" maxWidth={16}>
-        {t.statutoryTitle}
-      </Heading>
-    </ContentWrapper>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={t.statutoryTitle} />
   </Section>
 
   <!-- Organisation -->

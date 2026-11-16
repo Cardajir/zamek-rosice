@@ -121,6 +121,8 @@ export interface Shell {
   /** Days the castle is shut whatever the opening hours say. */
   closures: Closure[];
   cta?: { title: string; image?: Image; link?: NavLink };
+  /** The photograph at the top of every subpage: the home page's hero, as the design has it. */
+  pageHero?: Image;
 }
 
 /* ---------------------------------------------------------------- links -- */
@@ -190,6 +192,7 @@ interface RawShell {
   opening?: RawPeriod[];
   closures?: Closure[] | null;
   cta?: { title?: string; image?: Image; link?: RawLink } | null;
+  pageHero?: Image | null;
 }
 
 const SHELL = `{
@@ -216,6 +219,7 @@ const SHELL = `{
   "closures": *[_id == "visitInfo"][0].closures[defined(from)]{
     from, to, "reason": ${text("reason")}
   },
+  "pageHero": *[_id == "homePage"][0].heroImage${IMAGE},
   "cta": *[_id == "homePage"][0].cta{
     "title": ${text("title")},
     "image": image${IMAGE},
@@ -262,7 +266,7 @@ export async function getShell(lang: Lang): Promise<Shell> {
     ...Object.fromEntries(
       Object.entries(settings).filter(([, value]) => value != null),
     ),
-    socials: settings.socials ?? fallback.socials,
+    socials: withInstagram(settings.socials ?? fallback.socials),
     groups: groups.length > 0 ? groups : fallback.groups,
     topLinks: topLinks.length > 0 ? topLinks : fallback.topLinks,
     footerColumns:
@@ -282,7 +286,21 @@ export async function getShell(lang: Lang): Promise<Shell> {
           link: resolveLink(raw.cta.link, lang),
         }
       : fallback.cta,
+    pageHero: raw.pageHero?.url ? raw.pageHero : undefined,
   };
+}
+
+/*
+ * The design shows Instagram beside Facebook. Until the castle's profile is
+ * entered in the Studio (Nastavení webu → Sociální sítě), the icon points at
+ * Instagram itself as a placeholder.
+ */
+const INSTAGRAM_PLACEHOLDER = "https://www.instagram.com/";
+
+function withInstagram(socials: Shell["socials"]): Shell["socials"] {
+  return socials.some(({ network }) => network === "instagram")
+    ? socials
+    : [...socials, { network: "instagram", url: INSTAGRAM_PLACEHOLDER }];
 }
 
 /* ----------------------------------------------------------------- home -- */

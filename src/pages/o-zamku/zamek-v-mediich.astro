@@ -1,8 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
-import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
-import Heading from "@/components/typography/Heading.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import InfoListMain from "@/components/content/InfoListMain.astro";
 import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
@@ -36,13 +35,9 @@ const about = ({ outlet, date, url }: MediaMention) =>
 ---
 
 <Layout title={t.mediaTitle} alternates={alternates("media")}>
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
-    <ContentWrapper centered>
-      <Heading tag="h1" maxWidth={12}>
-        {t.mediaTitle}
-      </Heading>
-    </ContentWrapper>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={t.mediaTitle} />
   </Section>
 
   <!-- Mentions -->

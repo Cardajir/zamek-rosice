@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
@@ -95,13 +96,9 @@ const hours = hoursTable(admission.periods, admission.subjects, {
 ---
 
 <Layout title={t.admissionTitle} alternates={alternates("admission")}>
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
-    <ContentWrapper centered>
-      <Heading tag="h1" maxWidth={16}>
-        {t.admissionTitle}
-      </Heading>
-    </ContentWrapper>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={t.admissionTitle} />
   </Section>
 
   <!-- Admission -->

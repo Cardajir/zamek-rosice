@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
+import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
@@ -45,13 +46,9 @@ const address = `${shell.street}, ${shell.postalCode} ${shell.locality}`;
   description={directions.intro}
   alternates={alternates("directions")}
 >
-  <!-- Title -->
-  <Section paddingTop="small" paddingBottom="small">
-    <ContentWrapper centered>
-      <Heading tag="h1" maxWidth={12}>
-        {t.directionsTitle}
-      </Heading>
-    </ContentWrapper>
+  <!-- Photograph and title -->
+  <Section paddingTop="none" paddingBottom="none">
+    <PageHeroMain title={t.directionsTitle} />
   </Section>
 
   <!-- Address and map -->
