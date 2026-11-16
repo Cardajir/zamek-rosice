@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "defaultTarget": "all",
+  "githubAccount": "",
+  "hosting": {
+    "provider": "cloudflare-workers",
+    "accountId": "c1b31b2db5b1131aff222b828d64a939",
+    "project": "zamek-rosice"
+  },
+  "buildScript": "build",
+  "beforePublish": [],
+  "afterPublish": []
+}
