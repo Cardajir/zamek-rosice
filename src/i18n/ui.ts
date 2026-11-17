@@ -19,6 +19,8 @@ const cs = {
   nextOpening: "Otevíráme",
   lastEntry: "poslední prohlídka v",
   upcomingEvents: "Nadcházející události",
+  /** Above the pinned news item, followed by the year. */
+  lastMinute: "Last minute sezóny",
   pastEvents: "Archív již proběhlých akcí",
   allEvents: "všechny akce",
   readMore: "čtěte více",
@@ -150,6 +152,8 @@ const en: Dictionary = {
   nextOpening: "Opens",
   lastEntry: "last tour at",
   upcomingEvents: "Upcoming events",
+  /** Above the pinned news item, followed by the year. */
+  lastMinute: "Last minute of the season",
   pastEvents: "Past events",
   allEvents: "all events",
   readMore: "read more",
@@ -280,6 +284,8 @@ const de: Dictionary = {
   nextOpening: "Wir öffnen",
   lastEntry: "letzte Führung um",
   upcomingEvents: "Kommende Veranstaltungen",
+  /** Above the pinned news item, followed by the year. */
+  lastMinute: "Last Minute der Saison",
   pastEvents: "Vergangene Veranstaltungen",
   allEvents: "alle Veranstaltungen",
   readMore: "weiterlesen",

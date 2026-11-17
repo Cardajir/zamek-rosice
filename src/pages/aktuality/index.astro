@@ -5,7 +5,7 @@ import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import Ornament from "@/components/media/Ornament.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import EventsMain from "@/components/content/EventsMain.astro";
-import { DEFAULT_LANG } from "@/consts.ts";
+import { DEFAULT_LANG, SITE_TIME_ZONE } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getNews } from "@/sanity/queries.ts";
@@ -19,6 +19,12 @@ const featured = news.featured ? [news.featured] : [];
 const pinned = new Set(featured.map((post) => post.slug));
 const upcoming = news.upcoming.filter((post) => !pinned.has(post.slug));
 const archive = news.archive.filter((post) => !pinned.has(post.slug));
+/* The pinned item's heading names this year's season, as the design does. */
+const season = new Intl.DateTimeFormat("en", {
+  year: "numeric",
+  timeZone: SITE_TIME_ZONE,
+}).format(new Date());
+
 const empty = featured.length + upcoming.length + archive.length === 0;
 
 /* Six items to a page, as the design lists them, then "show more". */
@@ -44,7 +50,12 @@ const PAGE_SIZE = 6;
       size="large"
       class="padding-top-7 news_ornament"
     />
-    <EventsMain posts={featured} headingTag="h2" variant="featured" />
+    <EventsMain
+      posts={featured}
+      heading={`${t.lastMinute} ${season}!`}
+      headingTag="h3"
+      variant="featured"
+    />
   </Section>
 
   <!-- Upcoming events -->
