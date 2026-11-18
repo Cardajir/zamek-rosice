@@ -227,7 +227,8 @@
  * draws the line too, and the page you are on keeps it drawn.
  */
 .link-underline {
-  --_lift: 0.05em;
+  /* About 0.2em under the baseline on small text; large titles keep it near 6px. */
+  --_lift: max(0.05em, 0.25em - 0.3rem);
   text-decoration: none;
   background-image: linear-gradient(currentcolor, currentcolor);
   background-repeat: no-repeat;
