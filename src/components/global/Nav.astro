@@ -30,6 +30,12 @@ const current = (Astro.locals.pathname ?? Astro.url.pathname).replace(
   "",
 );
 const isCurrent = (href: string) => href.replace(/\/+$/, "") === current;
+/* A group holds the page when one of its pages is it or contains it (a detail page). */
+const holdsCurrent = (items: { href: string }[]) =>
+  items.some(({ href }) => {
+    const path = href.replace(/\/+$/, "");
+    return path !== "" && (path === current || current.startsWith(`${path}/`));
+  });
 
 const SOCIAL_ICONS = { facebook, instagram } as const;
 const socials = shell.socials.flatMap(({ network, url }) =>
@@ -89,7 +95,14 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                   aria-expanded="false"
                   aria-controls={`nav-panel-${index}`}
                 >
-                  <span class="link-underline">{group.label}</span>
+                  <span
+                    class:list={[
+                      "link-underline",
+                      holdsCurrent(group.items) && "is-current",
+                    ]}
+                  >
+                    {group.label}
+                  </span>
                   <Icon
                     class="nav_group_arrow"
                     src={arrowDown}
@@ -542,6 +555,12 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         padding-bottom: 0.12em;
         margin-bottom: -0.12em;
       }
+    }
+
+    /* The group holding the page you are on keeps its name underlined. */
+    .nav_group_button > .link-underline.is-current {
+      background-position-x: 0%;
+      background-size: 100% var(--link-underline-width);
     }
 
     /* On a phone an open group's name greys and keeps its line drawn, as the design shows. */
