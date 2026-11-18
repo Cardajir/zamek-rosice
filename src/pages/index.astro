@@ -205,15 +205,14 @@ const fullDate = new Intl.DateTimeFormat(locale, {
 
   /*
    * 61px above and below the opening line, as the design spaces it at 1920.
-   * The ornament stands two and a half times as far under the hero as the
-   * two sections alone would put it: 400px from the status bar at 1920,
-   * 220px on a phone.
+   * The ornament stands 200px under the status bar at 1920 and 107px on a
+   * phone, half of an earlier, much larger room.
    */
   .home_intro {
     --_gap: clamp(2.5rem, 3.18vw, 3.8125rem);
-    margin-top: calc(var(--section-space-small) * 3);
+    margin-top: calc(var(--section-space-small) * 0.5);
     @media (width < 48rem) {
-      margin-top: calc((var(--section-space-small) + 2.3125rem) * 1.5);
+      margin-top: calc((var(--section-space-small) + 2.3125rem) * 0.25);
     }
     & .ornament_wrap {
       margin-bottom: var(--_gap);

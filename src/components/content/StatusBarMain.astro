@@ -32,18 +32,31 @@ const price = new Intl.NumberFormat(LANG_LOCALES[lang], {
 });
 const prices = shell.prices.slice(0, 2).map((value) => price.format(value));
 const center = await slotContent(Astro.slots, "center");
+
+/*
+ * A note with a comma reads as a name and what it is, set as the design sets
+ * the organisation: the name in semibold, the rest under it in regular.
+ */
+const comma = note?.indexOf(", ") ?? -1;
+const noteLines =
+  note && comma > 0 ? [note.slice(0, comma + 1), note.slice(comma + 2)] : undefined;
 ---
 
 {render && (
   <div class:list={["status-bar_wrap", className]}>
     <p class="status-bar_item">
-      {note ? (
+      {noteLines ? (
+        <Fragment>
+          <span>{noteLines[0]}</span>
+          <span class="status-bar_detail">{noteLines[1]}</span>
+        </Fragment>
+      ) : note ? (
         <span class="status-bar_note">{note}</span>
       ) : (
         prices.length > 0 && (
           <Fragment>
             <span>{t.admissionLabel}</span>
-            <span>{prices.join(" / ")}</span>
+            <span class="status-bar_detail">{prices.join(" / ")}</span>
           </Fragment>
         )
       )}
@@ -127,6 +140,14 @@ const center = await slotContent(Astro.slots, "center");
         @media (width < 48rem) {
           display: none;
         }
+      }
+    }
+
+    /* The second line on the left: regular, its first letter a capital. */
+    .status-bar_detail {
+      font-weight: var(--primary-regular);
+      &::first-letter {
+        text-transform: uppercase;
       }
     }
 
