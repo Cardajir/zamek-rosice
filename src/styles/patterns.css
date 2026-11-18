@@ -227,7 +227,7 @@
  * draws the line too, and the page you are on keeps it drawn.
  */
 .link-underline {
-  --_lift: 0.15em;
+  --_lift: 0.05em;
   text-decoration: none;
   background-image: linear-gradient(currentcolor, currentcolor);
   background-repeat: no-repeat;

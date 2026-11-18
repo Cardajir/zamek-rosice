@@ -528,6 +528,22 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
     }
 
+    /*
+     * Labels laid out as flex items end at their tight line box, so their
+     * underline would touch the letters: a little room under them, taken
+     * back from the layout, sets the line as far below the words as elsewhere.
+     */
+    :is(.nav_group_button, .nav_top_link) > .link-underline {
+      padding-bottom: 0.12em;
+      margin-bottom: -0.12em;
+    }
+    @media (width >= 85rem) {
+      .nav_panel_link > .link-underline {
+        padding-bottom: 0.12em;
+        margin-bottom: -0.12em;
+      }
+    }
+
     /* On a phone an open group's name greys and keeps its line drawn, as the design shows. */
     .nav_group.open .nav_group_button {
       color: var(--muted-500);
