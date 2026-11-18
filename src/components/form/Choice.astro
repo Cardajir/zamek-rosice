@@ -160,7 +160,10 @@ const {
       outline-offset: var(--focus-offset);
     }
 
-    /* Round: a circle that fills like a radio, also for a checkbox. */
+    /*
+     * Round: a thin circle that takes a dark dot when chosen, like a radio,
+     * also for a checkbox. The circle itself stays clear.
+     */
     .form-choice.round {
       gap: 0.78em;
       & .form-choice_mark {
@@ -169,8 +172,12 @@ const {
         border-radius: var(--radius-round);
       }
       & .form-choice_dot {
-        width: 0.6em;
-        height: 0.6em;
+        width: 0.5em;
+        height: 0.5em;
+        background-color: currentcolor;
+      }
+      &:has(:checked) .form-choice_mark {
+        background-color: transparent;
       }
     }
 
