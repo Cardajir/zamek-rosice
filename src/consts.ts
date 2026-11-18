@@ -60,6 +60,25 @@ export const ORGANISATION = {
   longitude: 16.386256,
 } as const;
 
+/**
+ * A telephone number as the design writes it: the country code in brackets,
+ * then the nine digits in threes, "(+420) 606 683 229". A Czech or Slovak
+ * number is recognised however it was typed, and one without a code is taken
+ * as Czech. Non-breaking spaces keep it on one line. Anything else is shown
+ * as it was entered.
+ */
+export const formatPhone = (value: string): string => {
+  const typed = value.trim();
+  const digits = typed.replace(/[^\d+]/g, "").replace(/^00/, "+");
+  const match = /^(?:\+(420|421))?(\d{9})$/.exec(digits);
+  if (!match) return typed;
+  const [, code = "420", number] = match;
+  return `(+${code}) ${number.replace(/(\d{3})(?=\d)/g, "$1 ")}`.replaceAll(
+    " ",
+    " ",
+  );
+};
+
 /** Routes excluded from search and the sitemap. Surrounding slashes are ignored. */
 export const NOINDEX_ROUTES: string[] = [
   "/404",

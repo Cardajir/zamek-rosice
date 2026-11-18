@@ -25,7 +25,7 @@ const { render = true, label, intro, items, class: className } = Astro.props;
       {items.map((item) => (
         <li>
           <a
-            class="gallery-nav_link text-style-h2"
+            class="gallery-nav_link link-underline text-style-h2"
             href={item.href}
             aria-current={item.current ? "page" : undefined}
           >
@@ -40,17 +40,18 @@ const { render = true, label, intro, items, class: className } = Astro.props;
 <style is:global>
   @layer components {
     /*
-     * The triton 96px under the photograph's rule on a phone and 165px at
-     * 1920, the serif line 51px and 73px under it, the first album 58px and
-     * 75px under that. The room under the list tops up the next section's
-     * large padding to the design's 130px and 230px.
+     * The triton 220px under the photograph's rule on a phone and 400px at
+     * 1920, two and a half times the design's room, as far under the hero as
+     * the home page's ornament stands. The serif line 51px and 73px under
+     * it, the first album 58px and 75px under that. The room under the list
+     * tops up the next section's large padding to the design's 130px and 230px.
      */
     .gallery-nav_wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
       width: 100%;
-      padding-block: clamp(6rem, 4.858rem + 4.545vw, 10.3125rem)
+      padding-block: clamp(13.75rem, 10.7706rem + 11.8577vw, 25rem)
         clamp(2.1938rem, 1.8381rem + 1.4163vw, 3.5375rem);
 
       & > .gallery-nav_intro {
@@ -74,23 +75,22 @@ const { render = true, label, intro, items, class: className } = Astro.props;
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* 47px from album to album on a phone, 102px at 1920. */
-      gap: clamp(0.9875rem, 0.7261rem + 1.0408vw, 1.975rem);
+      /*
+       * 42px from album to album on a phone, 90px at 1920: a little closer
+       * than the design's 47px and 102px, as the castle asked.
+       */
+      gap: clamp(0.675rem, 0.5294rem + 0.5797vw, 1.225rem);
       text-align: center;
     }
 
+    /* The line under an album is the site's shared link underline. */
     .gallery-nav_link {
       color: inherit;
-      text-decoration: none;
       font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
 
-      /* The album on screen: red, with the thin rule the typeface itself defines. */
+      /* The album on screen: red, its line kept drawn. */
       &[aria-current] {
         color: var(--link-text);
-        text-decoration: underline;
-        text-decoration-thickness: from-font;
-        text-underline-position: from-font;
-        text-decoration-skip-ink: none;
       }
 
       @media (hover: hover) {

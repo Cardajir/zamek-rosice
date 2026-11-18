@@ -141,15 +141,21 @@ const named = {
     {...rest}
   >
     {variant === "link" && (
-      <Icon class="button_mark" src={arrow} variant="small" />
-    )}
-    {isWritten && (
-      <span class="button_text text-style-trim">
-        <Fragment set:html={content} />
+      <span class="button_marks">
+        <Icon class="button_mark" src={arrow} variant="small" />
+        <Icon class="button_mark" src={arrow} variant="small" />
       </span>
     )}
-    {variant === "link" && (
-      <Icon class="button_mark button_mark_end" src={arrow} variant="small" />
+    {isWritten && (
+      <span
+        class:list={[
+          "button_text",
+          "text-style-trim",
+          variant === "link" && "link-underline",
+        ]}
+      >
+        <Fragment set:html={content} />
+      </span>
     )}
     {variant === "play" && (
       <Fragment>
@@ -218,101 +224,61 @@ const named = {
         border: 0;
         border-radius: 0;
 
-        /* The line that grows on hover runs under the words only, not the arrow. */
+        /*
+         * The underline (the shared link-underline pattern) runs under the
+         * words only, not the arrow, a little below the trimmed baseline.
+         */
         & > .button_text {
+          --_lift: 0em;
           padding-bottom: 0.12em;
-          background-image: linear-gradient(
-            var(--link-border-hover),
-            var(--link-border-hover)
-          );
-          background-repeat: no-repeat;
-          background-position: 100% 100%;
-          background-size: 0 var(--border-width);
-          transition: background-size calc(var(--hover-duration) * 2)
-            var(--hover-ease);
         }
-        @media (hover: hover) {
-          &:hover:not(:disabled) > .button_text {
-            background-position: 0 100%;
-            background-size: 100% var(--border-width);
-          }
-        }
-      }
-      &.link .button_mark {
-        --_size: 0.8333em;
       }
 
       /*
-       * On hover the arrow runs off to the right and fades, the words slide
-       * into its place, and the arrow comes back in after them.
+       * The arrow sits in a window of its own width. On hover it runs out
+       * to the right while a second, identical arrow comes in from the left
+       * to take its place; pointing back, the whole thing is mirrored.
        */
-      &.link {
-        --_shift: calc(0.8333em + 0.54em);
-        position: relative;
+      &.link > .button_marks {
+        --_size: 0.625em;
+        flex: none;
+        display: grid;
+        width: var(--_size);
+        overflow: clip;
 
-        & > .button_mark,
-        & > .button_text {
-          transition:
-            translate calc(var(--hover-duration) * 2) var(--hover-ease),
-            opacity calc(var(--hover-duration) * 2) var(--hover-ease),
-            background-size calc(var(--hover-duration) * 2) var(--hover-ease);
+        & > .button_mark {
+          --_size: inherit;
+          grid-area: 1 / 1;
+          transition: translate var(--link-underline-duration)
+            var(--link-underline-ease);
         }
-
-        & > .button_mark_end {
-          position: absolute;
-          right: 0;
-          opacity: 0;
-          translate: calc(var(--_shift) * -0.6) 0;
-          pointer-events: none;
+        & > .button_mark + .button_mark {
+          translate: -130% 0;
         }
-
-        @media (hover: hover) {
-          &:hover:not(:disabled) {
-            & > .button_mark:not(.button_mark_end) {
-              opacity: 0;
-              translate: calc(var(--_shift) * 0.6) 0;
-            }
-            & > .button_text {
-              translate: calc(var(--_shift) * -1) 0;
-            }
-            & > .button_mark_end {
-              opacity: 1;
-              translate: none;
-            }
+      }
+      @media (hover: hover) {
+        &.link:hover:not(:disabled) > .button_marks > .button_mark {
+          translate: 130% 0;
+          & + .button_mark {
+            translate: none;
           }
         }
-
-        @media (prefers-reduced-motion: reduce) {
-          & > .button_mark,
-          & > .button_text {
-            transition-property: opacity, background-size;
-          }
+      }
+      &.link:focus-visible > .button_marks > .button_mark {
+        translate: 130% 0;
+        & + .button_mark {
+          translate: none;
         }
-
-        /* Pointing back: the arrow only leans further left on hover. */
-        &.back {
-          & > .button_mark_end {
-            display: none;
-          }
-          @media (hover: hover) {
-            &:hover:not(:disabled) {
-              & > .button_mark:not(.button_mark_end) {
-                opacity: 1;
-                translate: -0.3em 0;
-              }
-              & > .button_text {
-                translate: none;
-              }
-            }
-          }
-        }
+      }
+      &.link.back > .button_marks {
+        rotate: 180deg;
       }
       &:is(.play, .close, .arrow) {
         gap: 0;
         padding: 0.75em;
         border-radius: var(--radius-round);
       }
-      &.back .button_mark {
+      &.back > .button_mark {
         rotate: 180deg;
       }
       &.play .button_pause {

@@ -9,6 +9,8 @@ import Heading from "@/components/typography/Heading.astro";
 import Paragraph from "@/components/typography/Paragraph.astro";
 import Button from "@/components/Button.astro";
 import PortableImage from "@/components/utility/PortableImage.astro";
+import Img from "@/components/media/Img.astro";
+import castle from "@/assets/photos/castle-southwest.jpg";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
@@ -75,7 +77,9 @@ const ways = [
     class="directions_place"
     data-stacki-key="km7pivlca3c1g"
   >
-    <Ornament slot="background" variant={7} size="large" />
+    <div slot="background" class="directions_backdrop">
+      <Ornament variant={7} size="large" />
+    </div>
     <ContentWrapper>
       <Heading tag="h2" variant="h3">
         {t.directionsTitle}
@@ -125,15 +129,23 @@ const ways = [
     ))}
   </Section>
 
-  <!-- Photograph -->
+  <!-- Photograph: an editor's own, or the castle from the south-west as the design has it -->
   <Section
     containerClass="max-width-small"
-    render={Boolean(directions.image)}
     paddingTop="none"
     paddingBottom="none"
     class="directions_photo"
   >
-    <PortableImage node={directions.image ?? {}} />
+    {directions.image ? (
+      <PortableImage node={directions.image} />
+    ) : (
+      <figure class="directions_figure">
+        <Img src={castle} alt={t.directionsPhotoAlt} />
+        <figcaption class="directions_caption">
+          {t.directionsPhotoCaption}
+        </figcaption>
+      </figure>
+    )}
   </Section>
 </Layout>
 
@@ -178,6 +190,14 @@ const ways = [
     }
   }
 
+  /*
+   * The engraving under the photograph keeps the design's distance from the
+   * rule: 19px on a phone, 120px at 1920.
+   */
+  .directions_backdrop {
+    padding-top: clamp(1.1875rem, -0.4844rem + 6.653vw, 7.5rem);
+  }
+
   .directions_place {
     padding-top: clamp(3.5625rem, 0.0867rem + 13.834vw, 16.6875rem);
     padding-bottom: clamp(2.8312rem, 2.434rem + 1.581vw, 4.3312rem);
@@ -202,6 +222,34 @@ const ways = [
       & > .container {
         padding-inline: 0;
       }
+    }
+  }
+
+  /* 1312 × 633 at 1920, the caption set right under it in two lines. */
+  .directions_figure {
+    width: 100%;
+    margin: 0;
+
+    & > .image {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1312 / 633;
+      object-fit: cover;
+    }
+  }
+
+  .directions_caption {
+    margin-top: clamp(1rem, 0.8047rem + 0.7773vw, 1.7375rem);
+    font-size: clamp(0.75rem, 0.6507rem + 0.3953vw, 1.125rem);
+    font-weight: var(--primary-semibold);
+    line-height: 1.2;
+    letter-spacing: var(--letter-spacing-snug);
+    text-align: end;
+    white-space: pre-line;
+    text-box: trim-both cap alphabetic;
+    @media (width < 48rem) {
+      padding-inline: 1rem;
     }
   }
 

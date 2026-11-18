@@ -1,5 +1,5 @@
 ---
-import { DEFAULT_LANG } from "@/consts.ts";
+import { DEFAULT_LANG, formatPhone } from "@/consts.ts";
 import { ui } from "@/i18n/ui.ts";
 import type { Shell } from "@/sanity/queries.ts";
 
@@ -31,17 +31,21 @@ const shown = shell.mobile || shell.phone || shell.email;
   >
     {shell.mobile && (
       <a class="contact-lines_link" href={tel(shell.mobile)}>
-        {t.mobileShort}: {shell.mobile}
+        <span class="link-underline">
+          {t.mobileShort}: {formatPhone(shell.mobile)}
+        </span>
       </a>
     )}
     {shell.phone && (
       <a class="contact-lines_link" href={tel(shell.phone)}>
-        {t.phoneShort}: {shell.phone}
+        <span class="link-underline">
+          {t.phoneShort}: {formatPhone(shell.phone)}
+        </span>
       </a>
     )}
     {shell.email && (
       <a class="contact-lines_link" href={`mailto:${shell.email}`}>
-        {shell.email}
+        <span class="link-underline">{shell.email}</span>
       </a>
     )}
   </address>
@@ -66,13 +70,6 @@ const shown = shell.mobile || shell.phone || shell.email;
     .contact-lines_link {
       text-decoration: none;
       overflow-wrap: anywhere;
-      text-underline-offset: 0.15em;
-      text-decoration-thickness: var(--border-width);
-      @media (hover: hover) {
-        &:hover {
-          text-decoration: underline;
-        }
-      }
     }
   }
 </style>

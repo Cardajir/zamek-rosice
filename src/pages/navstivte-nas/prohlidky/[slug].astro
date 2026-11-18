@@ -47,15 +47,16 @@ const [hero, ...photos] = tour.images;
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={tour.title} image={hero}>
-      <Button
-        slot="corner"
-        element="link"
-        variant="link"
-        direction="back"
-        href={routePath("tours", lang)}
-      >
-        {t.backToTours}
-      </Button>
+      <span slot="corner" class="tour_hero-back">
+        <Button
+          element="link"
+          variant="link"
+          direction="back"
+          href={routePath("tours", lang)}
+        >
+          {t.backToTours}
+        </Button>
+      </span>
     </PageHeroMain>
   </Section>
 
@@ -74,3 +75,12 @@ const [hero, ...photos] = tour.images;
     />
   </Section>
 </Layout>
+
+<style is:global>
+  /* The phone design leaves the photograph clear: the way back is under the text. */
+  .tour_hero-back {
+    @media (width < 48rem) {
+      display: none;
+    }
+  }
+</style>

@@ -141,9 +141,13 @@ const hiddenCount = pageSize ? Math.max(posts.length - pageSize, 0) : 0;
       width: 100%;
     }
 
-    /* The italic label sits above the first rule, in line with the cards' text from 48rem. */
+    /*
+     * The italic label sits above the first rule, in line with the cards'
+     * text from 48rem: 39px from its baseline to the rule at 1920, 20px on
+     * a phone, the same over every list on the site.
+     */
     .events_heading {
-      margin: 0 0 clamp(1.2188rem, 0.6808rem + 2.141vw, 3.25rem);
+      margin: 0 0 clamp(1.25rem, 0.9355rem + 1.2516vw, 2.4375rem);
 
       @media (width >= 48rem) {
         padding-inline-start: clamp(0rem, -0.5627rem + 2.2398vw, 2.125rem);

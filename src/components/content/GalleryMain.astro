@@ -101,7 +101,9 @@ const filler = (items.length - 1) % 2 === 1;
             <span class="gallery_back-mark">
               <Icon src={arrow} variant="small" />
             </span>
-            <span class="gallery_back-text">{t.backToAlbums}</span>
+            <span class="gallery_back-text link-underline">
+              {t.backToAlbums}
+            </span>
           </a>
         )}
         {credits.length > 0 && (
@@ -287,21 +289,28 @@ const filler = (items.length - 1) % 2 === 1;
       }
     }
 
-    /* 17px and 23px between photographs on a phone, 22px and 90px at 1920. */
+    /*
+     * 17px between columns on a phone, 22px at 1920. A photograph starts
+     * 208px under the one above on a phone and 449px at 1920 (102px under
+     * it), its description or the room kept for one in between.
+     */
     .gallery_list {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(1.4375rem, 0.3285rem + 4.4137vw, 5.625rem)
+      gap: clamp(1.4375rem, 0.8582rem + 2.3057vw, 3.625rem)
         clamp(1.0625rem, 0.9797rem + 0.3294vw, 1.375rem);
       @media (width >= 64rem) {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 
-    /* The wide first photograph: 35px under its description on a phone, 88px at 1920. */
+    /*
+     * The wide first photograph: the next row starts 60px under it on a
+     * phone and 81px at 1920, closer than the rows below on a large screen.
+     */
     .gallery_item:first-child {
       grid-column: 1 / -1;
-      margin-block-end: clamp(-0.125rem, 0.9817rem - 0.9223vw, 0.75rem);
+      margin-block-end: clamp(-1.3125rem, 1.2962rem - 2.1739vw, 0.75rem);
     }
 
     .gallery_figure {
@@ -390,7 +399,10 @@ const filler = (items.length - 1) % 2 === 1;
       text-align: end;
     }
 
-    /* The serif link back up to the album list, as the design draws it. */
+    /*
+     * The serif link back up to the album list, as the design draws it; the
+     * site's shared underline runs under the words only.
+     */
     .gallery_back {
       display: inline-flex;
       align-items: center;
@@ -407,23 +419,6 @@ const filler = (items.length - 1) % 2 === 1;
       text-decoration: none;
       @media (width >= 48rem) {
         margin-inline-start: 0;
-      }
-
-      /* The line that grows on hover runs under the words only. */
-      & > .gallery_back-text {
-        padding-bottom: 0.12em;
-        background-image: linear-gradient(currentcolor, currentcolor);
-        background-repeat: no-repeat;
-        background-position: 100% 100%;
-        background-size: 0 var(--border-width);
-        transition: background-size calc(var(--hover-duration) * 2)
-          var(--hover-ease);
-      }
-      @media (hover: hover) {
-        &:hover > .gallery_back-text {
-          background-position: 0 100%;
-          background-size: 100% var(--border-width);
-        }
       }
     }
 
@@ -482,17 +477,27 @@ const filler = (items.length - 1) % 2 === 1;
       pointer-events: none;
     }
 
-    /* The photograph, whole, as large as the space between the controls allows. */
+    /*
+     * The photograph, whole, as large as the space between the controls
+     * allows. A flex box, not a grid: a grid's auto row grows with a tall
+     * photograph, so its height limit never held and portraits ran off the
+     * screen; here it is measured against the frame's own fixed height.
+     */
     .gallery_frame {
       position: absolute;
       inset: var(--_top) var(--_side) var(--_bottom);
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .gallery_photo {
+      flex: none;
+      width: auto;
+      height: auto;
       max-width: 100%;
       max-height: 100%;
+      object-fit: contain;
       pointer-events: auto;
       user-select: none;
       touch-action: pan-y;

@@ -10,10 +10,19 @@ interface Props {
     alt?: string;
     caption?: string;
     credit?: string;
+    hotspot?: { x?: number; y?: number } | null;
   };
+  /**
+   * Width divided by height to crop the photograph to. Omit to keep its own shape.
+   *
+   * @min 0
+   */
+  ratio?: number;
+  /** Responsive `sizes` value. */
+  sizes?: string;
 }
 
-const { node } = Astro.props;
+const { node, ratio, sizes = "(width >= 82rem) 82rem, 100vw" } = Astro.props;
 const url = node.url;
 const note = [node.caption, node.credit].filter(Boolean).join(" · ");
 ---
@@ -21,8 +30,9 @@ const note = [node.caption, node.credit].filter(Boolean).join(" · ");
 {url && (
   <figure class="portable-image_wrap">
     <SanityImg
-      image={{ ...node, url }}
-      sizes="(width >= 82rem) 82rem, 100vw"
+      image={{ ...node, url, focus: node.hotspot }}
+      ratio={ratio}
+      sizes={sizes}
       maxWidth={1600}
     />
     {note && <figcaption class="portable-image_caption">{note}</figcaption>}
@@ -33,10 +43,13 @@ const note = [node.caption, node.credit].filter(Boolean).join(" · ");
   @layer components {
     .portable-image_wrap {
       width: 100%;
+      margin: 0;
 
       & > .image {
+        display: block;
         width: 100%;
         height: auto;
+        background-color: var(--background-2);
       }
     }
 

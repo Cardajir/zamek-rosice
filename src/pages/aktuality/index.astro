@@ -29,6 +29,8 @@ const empty = featured.length + upcoming.length + archive.length === 0;
 
 /* Six items to a page, as the design lists them, then "show more". */
 const PAGE_SIZE = 6;
+/* The archive opens with three, as the client asked. */
+const ARCHIVE_PAGE_SIZE = 3;
 ---
 
 <Layout title={t.news} alternates={alternates("news")}>
@@ -44,12 +46,9 @@ const PAGE_SIZE = 6;
     paddingBottom="small"
     data-stacki-key="kizj46mp8m2vz"
   >
-    <Ornament
-      slot="background"
-      variant={3}
-      size="large"
-      class="padding-top-7 news_ornament"
-    />
+    <div slot="background" class="news_backdrop">
+      <Ornament variant={3} size="large" />
+    </div>
     <EventsMain
       posts={featured}
       heading={`${t.lastMinute} ${season}!`}
@@ -81,7 +80,7 @@ const PAGE_SIZE = 6;
     <EventsMain
       posts={archive}
       heading={t.pastEvents}
-      pageSize={PAGE_SIZE}
+      pageSize={ARCHIVE_PAGE_SIZE}
       shaded
     />
   </Section>
@@ -95,9 +94,13 @@ const PAGE_SIZE = 6;
 </Layout>
 
 <style is:global>
-  /* The phone design has no ornament over the pinned item. */
-  @media (width < 48rem) {
-    .news_ornament {
+  /*
+   * The engraving under the photograph keeps the design's distance from the
+   * rule, 120px at 1920. The phone design has none over the pinned item.
+   */
+  .news_backdrop {
+    padding-top: clamp(1.1875rem, -0.4844rem + 6.653vw, 7.5rem);
+    @media (width < 48rem) {
       display: none;
     }
   }

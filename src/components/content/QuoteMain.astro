@@ -33,7 +33,8 @@ const { render = true, text, author, date } = Astro.props;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--space-7);
+      /* 57px from the last baseline to the caption on a phone, 67px at 1920. */
+      gap: clamp(3.5625rem, 3.397rem + 0.6588vw, 4.1875rem);
       max-width: 76.25rem;
       margin-inline: auto;
       /* On a phone the quotation keeps 32px from the edges. */
@@ -49,21 +50,22 @@ const { render = true, text, author, date } = Astro.props;
       }
     }
 
-    /* The design's serif caption, with its old-style figures in the date. */
+    /* The design's serif caption, with its old-style figures in the date: 18px on a phone, 20px from 48rem. */
     .quote_caption {
       font-family: var(--secondary-family);
-      font-size: 1.25rem;
+      font-size: 1.125rem;
+      @media (width >= 48rem) {
+        font-size: 1.25rem;
+      }
       font-weight: var(--secondary-medium);
       line-height: 1.1;
       letter-spacing: var(--letter-spacing-snug);
       font-variant-numeric: oldstyle-nums;
     }
 
-    /* A phone puts the date on a line of its own. */
+    /* The date on a line of its own, as the design breaks it. */
     .quote_date {
-      @media (width < 48rem) {
-        display: block;
-      }
+      display: block;
     }
   }
 </style>

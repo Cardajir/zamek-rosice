@@ -28,9 +28,22 @@ const content = await slotContent(Astro.slots);
      * motion, sees the photograph still.
      */
     .parallax_wrap {
+      /*
+       * How far the photograph travels either way, and the zoom that keeps
+       * its edges out of sight while it does. A wide window shows the drift
+       * less, so there it travels twice as far.
+       */
+      --_drift: 2.5%;
+      --_zoom: 1.06;
+
       width: 100%;
       overflow: clip;
       view-timeline: --parallax block;
+
+      @media (width >= 48rem) {
+        --_drift: 5%;
+        --_zoom: 1.11;
+      }
 
       & > img,
       & > picture > img {
@@ -40,7 +53,7 @@ const content = await slotContent(Astro.slots);
 
         @supports (animation-timeline: view()) {
           @media (prefers-reduced-motion: no-preference) {
-            scale: 1.06;
+            scale: var(--_zoom);
             animation: parallax-drift linear both;
             animation-timeline: --parallax;
             animation-range: cover;
@@ -51,10 +64,10 @@ const content = await slotContent(Astro.slots);
 
     @keyframes parallax-drift {
       from {
-        translate: 0 -2.5%;
+        translate: 0 calc(var(--_drift) * -1);
       }
       to {
-        translate: 0 2.5%;
+        translate: 0 var(--_drift);
       }
     }
   }

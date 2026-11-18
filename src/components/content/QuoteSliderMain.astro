@@ -156,7 +156,8 @@ const numbered = (index: number) =>
     /*
      * As the design draws it: the quotation centred, its source under it,
      * then the dots. A phone has the arrows beside the dots; from 64rem they
-     * sit at the edges of the window, level with the quotation.
+     * sit at the edges of the window, level with the quotation. On a phone
+     * the quotation and its source are spaced and set as the home page's.
      */
     .quote-slider_wrap {
       display: grid;
@@ -169,6 +170,9 @@ const numbered = (index: number) =>
       display: grid;
       gap: var(--_source-gap);
       --_source-gap: clamp(5.2125rem, 6.0109rem + -0.6653vw, 5.8438rem);
+      @media (width < 48rem) {
+        --_source-gap: var(--space-7);
+      }
     }
 
     /*
@@ -214,6 +218,7 @@ const numbered = (index: number) =>
       font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
       @media (width < 48rem) {
         padding-inline: 1rem;
+        font-feature-settings: normal;
       }
       @media (width >= 64rem) {
         max-width: min(76.25rem, 100vw - 11rem);

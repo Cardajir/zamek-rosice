@@ -78,7 +78,7 @@ const featured = variant === "featured";
     <div class="card-event_content">
       <p class="card-event_eyebrow text-style-main">{eyebrow}</p>
       <Tag class="card-event_title text-style-h3">
-        <a class="card-event_title_link" href={href}>
+        <a class="card-event_title_link link-underline" href={href}>
           {heading}
         </a>
       </Tag>
@@ -213,18 +213,8 @@ const featured = variant === "featured";
       }
     }
 
-    /*
-     * The underline is always there, in the typeface's own thin weight, and
-     * fades in from transparent on hover instead of appearing at once.
-     */
+    /* The whole card is the title's link; its underline is the site's own. */
     .card-event_title_link {
-      text-decoration-line: underline;
-      text-decoration-color: transparent;
-      text-decoration-thickness: from-font;
-      text-underline-position: from-font;
-      text-decoration-skip-ink: none;
-      transition: text-decoration-color calc(var(--hover-duration) * 2)
-        var(--hover-ease);
       &::after {
         content: "";
         position: absolute;
@@ -274,8 +264,9 @@ const featured = variant === "featured";
         gap: var(--space-4);
         text-align: end;
 
+        /* Bottom right, with a date above it or without one. */
         & > .button_wrap {
-          margin-top: 0;
+          margin-top: auto;
         }
       }
     }
@@ -327,9 +318,12 @@ const featured = variant === "featured";
       }
     }
 
-    .card-event_wrap:hover .card-event_title_link,
-    .card-event_wrap:focus-within .card-event_title_link {
-      text-decoration-color: currentcolor;
+    /* Hovering anywhere on the card draws the title's underline. */
+    @media (hover: hover) {
+      .card-event_wrap:hover .card-event_title_link {
+        background-position-x: 0%;
+        background-size: 100% var(--link-underline-width);
+      }
     }
 
     .card-event_wrap:focus-within .card-event_aside > .button_wrap {

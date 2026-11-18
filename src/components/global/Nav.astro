@@ -89,7 +89,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                   aria-expanded="false"
                   aria-controls={`nav-panel-${index}`}
                 >
-                  <span>{group.label}</span>
+                  <span class="link-underline">{group.label}</span>
                   <Icon
                     class="nav_group_arrow"
                     src={arrowDown}
@@ -112,7 +112,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                             src={arrow}
                             variant="small"
                           />
-                          <span>{item.label}</span>
+                          <span class="link-underline">{item.label}</span>
                         </a>
                       </li>
                     ))}
@@ -130,7 +130,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                     href={item.href}
                     aria-current={isCurrent(item.href) ? "page" : undefined}
                   >
-                    {item.label}
+                    <span class="link-underline">{item.label}</span>
                   </a>
                 </li>
               ))}
@@ -144,10 +144,10 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                   aria-expanded="false"
                   aria-controls="nav-panel-lang"
                 >
-                  <span class="nav_lang_code" aria-hidden="true">
+                  <span class="nav_lang_code link-underline" aria-hidden="true">
                     {lang.toUpperCase()}
                   </span>
-                  <span class="nav_lang_name" aria-hidden="true">
+                  <span class="nav_lang_name link-underline" aria-hidden="true">
                     {LANG_NAMES[lang]}
                   </span>
                   <Icon
@@ -172,7 +172,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                             src={arrow}
                             variant="small"
                           />
-                          <span>{LANG_NAMES[item.lang]}</span>
+                          <span class="link-underline">{LANG_NAMES[item.lang]}</span>
                         </a>
                       </li>
                     ))}
@@ -463,8 +463,9 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       /* 24px above and below each 26px row, as the phone design spaces them. */
       --_row-pad: clamp(0.875rem, 2.75svh, 1.5rem);
       --_row-size: clamp(1.375rem, 3svh, 1.625rem);
+      /* Under the bar's rule, so the rule stays above the first row. */
       position: absolute;
-      top: 100%;
+      top: calc(100% + var(--border-width));
       inset-inline: calc(var(--site-margin) * -1);
       height: calc(100dvh - var(--nav-height));
       visibility: hidden;
@@ -527,11 +528,15 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
     }
 
+    /* On a phone an open group's name greys and keeps its line drawn, as the design shows. */
     .nav_group.open .nav_group_button {
       color: var(--muted-500);
-      text-decoration: underline;
-      text-underline-offset: 0.2em;
-      text-decoration-thickness: var(--border-width);
+      @media (width < 85rem) {
+        & .link-underline {
+          background-position-x: 0%;
+          background-size: 100% var(--link-underline-width);
+        }
+      }
     }
 
     .nav_panel {
@@ -547,13 +552,16 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       }
     }
 
-    /* The pages of an open group: 18px, 33px apart, tucked under its name. */
+    /*
+     * The pages of an open group: 18px, 33px apart, under its name with a
+     * little more room than the design's 24px, as asked.
+     */
     .nav_panel_list {
       overflow: hidden;
       display: flex;
       flex-direction: column;
       .nav_group.open & {
-        margin-top: -0.625rem;
+        margin-top: -0.25rem;
         padding-bottom: 0.875rem;
       }
     }
@@ -564,13 +572,6 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       font-size: 1.125rem;
       line-height: 1.4;
       text-decoration: none;
-      & > span {
-        text-underline-offset: 0.15em;
-        text-decoration-thickness: var(--border-width);
-      }
-      &[aria-current] > span {
-        text-decoration: underline;
-      }
     }
 
     .nav_panel_arrow {
@@ -583,14 +584,17 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       flex-direction: column;
     }
 
-    /* Below the desktop width the social links sit on the bar, left of the logo. */
+    /*
+     * Below the desktop width the social links sit on the bar, left of the
+     * logo, the two marks 16px apart as the design spaces them.
+     */
     .nav_bar_socials {
       grid-column: 1;
       grid-row: 1;
       justify-self: start;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 1rem;
       margin-left: 0.1875rem;
       font-size: 1.1875rem;
     }
@@ -603,11 +607,29 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       padding-block: var(--_row-pad);
     }
 
+    /*
+     * Each mark is 19px tall and as wide as it is drawn, so the Facebook "f"
+     * starts where the design puts it. The height is set outright: Safari
+     * otherwise sizes an inline SVG from its own 10 × 18 proportions, which
+     * made the "f" taller than the bar's middle on an iPhone. A larger
+     * invisible area keeps each easy to tap.
+     */
     .nav_social {
+      position: relative;
       display: flex;
       align-items: center;
       min-height: 1.5rem;
       transition: opacity var(--hover-duration) var(--hover-ease);
+      &::before {
+        content: "";
+        position: absolute;
+        inset: -0.625rem -0.4375rem;
+      }
+      & > .icon {
+        width: auto;
+        height: var(--_size);
+        aspect-ratio: auto;
+      }
       @media (hover: hover) {
         &:hover {
           opacity: 0.6;
@@ -692,15 +714,9 @@ const socials = shell.socials.flatMap(({ network, url }) =>
 
       .nav_group.open .nav_group_button {
         color: inherit;
-        text-decoration: none;
       }
 
       .nav_top_link {
-        text-underline-offset: 0.4em;
-        text-decoration-thickness: var(--border-width);
-        &[aria-current="page"] {
-          text-decoration: underline;
-        }
         @media (hover: hover) {
           &:hover {
             color: var(--muted-text);
@@ -748,33 +764,35 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         }
       }
 
+      /*
+       * A page of the open group as the design draws it at 1920: 48px words
+       * starting 120px in, a 38 × 31 arrow 11px in, rows 135px apart. On
+       * hover only the arrow steps 22px towards the words; the shared link
+       * underline draws under them.
+       */
       .nav_panel_link {
         display: flex;
         align-items: center;
-        gap: var(--space-7);
-        padding: var(--space-6) var(--space-2);
+        gap: 1.4583em;
+        padding: var(--space-6) var(--space-2) var(--space-6) 0.2292em;
         font-family: var(--secondary-family);
         font-weight: var(--secondary-medium);
-        font-size: var(--h3);
+        font-size: clamp(2.25rem, 0.4286rem + 2.1429vw, 3rem);
         line-height: var(--line-height-medium);
         letter-spacing: var(--letter-spacing-snug);
-        transition: padding-left var(--hover-duration) var(--hover-ease);
         @media (hover: hover) {
           &:hover {
-            padding-left: var(--space-5);
-            & > span {
-              text-decoration: underline;
+            & > .nav_panel_arrow {
+              translate: 0.4583em 0;
             }
           }
         }
-        &:focus-visible > span {
-          text-decoration: underline;
-        }
       }
 
-      .nav_panel_arrow {
+      .nav_panel_link > .nav_panel_arrow.icon {
         display: block;
-        --_size: 0.81em;
+        --_size: 0.7917em;
+        transition: translate var(--hover-duration) var(--hover-ease);
       }
 
       .nav_aside {
@@ -797,11 +815,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         display: flex;
         margin-top: 0;
         padding-block: 0;
-        gap: var(--space-3);
-      }
-
-      .nav_social {
-        min-width: 1.5rem;
+        gap: 1rem;
       }
     }
   }

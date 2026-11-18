@@ -150,3 +150,90 @@ export function formatPlain(value: string | undefined): Run[][][] {
       ),
     );
 }
+
+/** Photographs that follow one another in a text, set as one gallery. */
+export interface PhotoRun<T> {
+  _type: "photoRun";
+  _key: string;
+  images: T[];
+}
+
+/**
+ * The text with each run of consecutive photographs gathered into one block,
+ * a lone photograph included, so the run can be laid out as a gallery.
+ *
+ * @param type The block type of a photograph.
+ */
+export function photoRuns<T>(
+  blocks: T[],
+  type = "imageWithAlt",
+): (T | PhotoRun<T>)[] {
+  const out: (T | PhotoRun<T>)[] = [];
+  let run: T[] = [];
+  const close = () => {
+    if (run.length === 0) return;
+    const key = (run[0] as { _key?: string })._key ?? `photos-${out.length}`;
+    out.push({ _type: "photoRun", _key: key, images: run });
+    run = [];
+  };
+
+  for (const block of blocks) {
+    if (asBlock(block)._type === type) {
+      run.push(block);
+      continue;
+    }
+    close();
+    out.push(block);
+  }
+  close();
+  return out;
+}
+
+export interface PhotoPlace {
+  /** A photograph across the column, a half, or a quarter of it. */
+  size: "wide" | "half" | "quarter";
+  /** Its place in its row, from 0. */
+  column: number;
+}
+
+const CYCLE: PhotoPlace["size"][] = [
+  "wide",
+  "half",
+  "half",
+  "quarter",
+  "quarter",
+  "quarter",
+  "quarter",
+];
+
+/* What is left after whole runs of seven, laid out so every row is full. */
+const REST: Record<number, PhotoPlace["size"][]> = {
+  0: [],
+  1: ["wide"],
+  2: ["half", "half"],
+  3: ["wide", "half", "half"],
+  4: ["half", "half", "half", "half"],
+  5: ["wide", "half", "half", "half", "half"],
+  6: ["half", "half", "quarter", "quarter", "quarter", "quarter"],
+};
+
+/**
+ * Where each of `count` photographs goes, as the tour pages set theirs: one
+ * across the column, two halves, four quarters, and again. The last rows are
+ * arranged so none is left half empty.
+ */
+export function photoPlaces(count: number): PhotoPlace[] {
+  const whole = Math.floor(Math.max(0, count) / CYCLE.length);
+  const sizes = [
+    ...Array.from({ length: whole }, () => CYCLE).flat(),
+    ...REST[Math.max(0, count) % CYCLE.length]!,
+  ];
+  const perRow = { wide: 1, half: 2, quarter: 4 } as const;
+  let column = 0;
+  return sizes.map((size, index) => {
+    if (index > 0 && sizes[index - 1] !== size) column = 0;
+    const place = { size, column };
+    column = (column + 1) % perRow[size];
+    return place;
+  });
+}

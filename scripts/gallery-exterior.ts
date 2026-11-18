@@ -1,18 +1,20 @@
 /**
- * Fills the album "Zámecký exteriér" with the 33 photographs from the design
- * file and puts it first in the album list, where the gallery's front page
- * opens it. The originals are the image fills of the rectangles named DSC0…
- * on the design's canvas (4096 px on the long side), saved under their
- * camera names.
+ * Fills the album "Zámecký exteriér" with its 33 photographs and puts it
+ * first in the album list, where the gallery's front page opens it. The
+ * order is the design's (its gallery mock-up shows the first sixteen). The
+ * files are the photographer's originals, sized for the web (3000 px on the
+ * long side, sRGB, no EXIF) and saved under their camera names; they replace
+ * the image fills first taken from the design file.
  *
  *   npx sanity exec scripts/gallery-exterior.ts --with-user-token -- <folder>
  *   npx sanity exec scripts/gallery-exterior.ts --with-user-token -- <folder> --dry
  *
- * `<folder>` holds the JPEGs and defaults to `tmp/gallery-exterior`. `--dry`
- * only reports. The album keeps its fixed id `gallery-exterier` from the seed;
- * a photograph already in the dataset (same SHA-1) is not uploaded again, and
- * every photograph has a fixed key, so running it again changes nothing.
- * Photographs an editor added to the album since are kept after these.
+ * `<folder>` holds the JPEGs and defaults to `tmp/gallery-exterior-web`.
+ * `--dry` only reports. The album keeps its fixed id `gallery-exterier` from
+ * the seed; a photograph already in the dataset (same SHA-1) is not uploaded
+ * again, and every photograph has a fixed key, so a run puts the new file in
+ * its photograph's place and running it again changes nothing. Photographs
+ * an editor added to the album since are kept after these.
  *
  * Alternative texts are first drafts for the castellan's review, Czech with
  * English and German working translations.
@@ -27,7 +29,7 @@ const client = getCliClient({ apiVersion: "2026-11-01" });
 const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
 const FOLDER =
-  args.find((arg) => !arg.startsWith("--")) ?? "tmp/gallery-exterior";
+  args.find((arg) => !arg.startsWith("--")) ?? "tmp/gallery-exterior-web";
 const ID = "gallery-exterier";
 
 const L = (cs: string, en: string, de: string) => ({
@@ -37,7 +39,7 @@ const L = (cs: string, en: string, de: string) => ({
   de,
 });
 
-/* In the design's order: its gallery mock-up shows the first sixteen. */
+/* In the design's order. */
 const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
   [
     "DSC08746.jpg",
@@ -317,7 +319,7 @@ async function assetFor(file: string): Promise<string> {
   if (DRY) return `dry-${sha1hash}`;
   const asset = await client.assets.upload("image", body, {
     filename: file,
-    source: { id: file, name: "figma" },
+    source: { id: file, name: "photographer" },
   });
   return asset._id;
 }

@@ -1,6 +1,15 @@
 ---
 import Parallax from "@/components/media/Parallax.astro";
+import Img from "@/components/media/Img.astro";
 import SanityImg from "@/components/media/SanityImg.astro";
+import admission from "@/assets/heroes/admission.jpg";
+import contact from "@/assets/heroes/contact.jpg";
+import directions from "@/assets/heroes/directions.jpg";
+import gallery from "@/assets/heroes/gallery.jpg";
+import history from "@/assets/heroes/history.jpg";
+import news from "@/assets/heroes/news.jpg";
+import tours from "@/assets/heroes/tours.jpg";
+import { matchRoute, stripLang, type RouteId } from "@/i18n/routes.ts";
 import { shellFor, type Image } from "@/sanity/queries.ts";
 import { slotContent } from "@/utils/slots.ts";
 
@@ -9,7 +18,10 @@ interface Props {
   render?: boolean;
   /** The page's title, set over the photograph as its only heading 1. */
   title: string;
-  /** The photograph; by default the home page's hero, as the design has it on every subpage. */
+  /**
+   * The photograph. By default the one the design gives the page, and the
+   * home page's hero on a page the design does not draw.
+   */
   image?: Image;
   /** The rule under the photograph. Off where a status bar draws its own. */
   rule?: boolean;
@@ -18,14 +30,63 @@ interface Props {
 }
 
 const { render = true, title, rule = true, class: className } = Astro.props;
-const image = Astro.props.image ?? (await shellFor(Astro.locals)).pageHero;
+
+interface Photo {
+  src: ImageMetadata;
+  /** Where the crop sits when the frame cuts the photograph. */
+  position?: string;
+}
+
+/*
+ * The photograph each subpage has in the design, picked by the address so
+ * the pages need not pass it. A code route matches in every language and
+ * with a detail slug after it; a page-builder page by its Czech address.
+ */
+const ROUTE_PHOTOS: Partial<Record<RouteId, Photo>> = {
+  news: { src: news },
+  tours: { src: tours },
+  admission: { src: admission },
+  directions: { src: directions },
+  gallery: { src: gallery },
+  /* The design shows the arcade's balustrade, a little above the middle. */
+  contact: { src: contact, position: "50% 33%" },
+};
+const PAGE_PHOTOS: Record<string, Photo> = {
+  "/o-zamku/z-historie": { src: history },
+  "/navstivte-nas/navstevni-rad": { src: tours },
+};
+
+const pathname = Astro.locals.pathname ?? Astro.url.pathname;
+const routeId = matchRoute(pathname)?.id;
+const bare = stripLang(pathname);
+const photo = Astro.props.image
+  ? undefined
+  : ((routeId && ROUTE_PHOTOS[routeId]) ?? PAGE_PHOTOS[bare]);
+const image =
+  Astro.props.image ??
+  (photo ? undefined : (await shellFor(Astro.locals)).pageHero);
 /* A link set in the photograph’s top-left corner, such as the way back up. */
 const corner = await slotContent(Astro.slots, "corner");
 ---
 
 {render && title && (
   <div class:list={["page-hero_wrap", rule && "has-rule", className]}>
-    <div class:list={["page-hero_visual", image && "theme-dark has-image"]}>
+    <div
+      class:list={[
+        "page-hero_visual",
+        (photo || image) && "theme-dark has-image",
+      ]}
+    >
+      {photo && (
+        <Parallax>
+          <Img
+            src={photo.src}
+            loading="eager"
+            fetchPriority="high"
+            style={photo.position && `object-position: ${photo.position}`}
+          />
+        </Parallax>
+      )}
       {image && (
         <Parallax>
           <SanityImg
@@ -42,7 +103,9 @@ const corner = await slotContent(Astro.slots, "corner");
           <Fragment set:html={corner} />
         </div>
       )}
-      <h1 class="page-hero_title text-style-h1">{title}</h1>
+      <h1 class="page-hero_title text-style-h1" data-reveal-letters>
+        {title}
+      </h1>
     </div>
   </div>
 )}
@@ -99,7 +162,7 @@ const corner = await slotContent(Astro.slots, "corner");
           content: "";
           position: absolute;
           inset: 0;
-          background-color: color-mix(in lab, black 45%, transparent);
+          background-color: color-mix(in lab, black 30%, transparent);
         }
       }
     }

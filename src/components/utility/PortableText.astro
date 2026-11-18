@@ -1,10 +1,11 @@
 ---
 import { PortableText as Renderer } from "astro-portabletext";
 import Ornament from "@/components/media/Ornament.astro";
+import PortableGallery from "@/components/utility/PortableGallery.astro";
 import PortableHeading from "@/components/utility/PortableHeading.astro";
 import PortableImage from "@/components/utility/PortableImage.astro";
 import { levelHeadings } from "@/utils/headings.ts";
-import { listedSegments } from "@/utils/text-blocks.ts";
+import { listedSegments, photoRuns } from "@/utils/text-blocks.ts";
 
 interface Props {
   /** Set to `false` to omit the component. */
@@ -23,7 +24,7 @@ interface Props {
 const { render = true, value, maxWidth } = Astro.props;
 
 const components = {
-  type: { imageWithAlt: PortableImage },
+  type: { imageWithAlt: PortableImage, photoRun: PortableGallery },
   block: {
     h2: PortableHeading,
     h3: PortableHeading,
@@ -40,7 +41,7 @@ const blocks = levelHeadings(original).map((block, index) =>
     ? block
     : { ...block, look: original[index]?.style },
 );
-const segments = listedSegments(blocks);
+const segments = listedSegments(photoRuns(blocks));
 ---
 
 {render && blocks.length > 0 && (
@@ -71,15 +72,17 @@ const segments = listedSegments(blocks);
     /*
      * Text an editor wrote, spaced as the design's text pages are at 402 and
      * at 1920: 21px between paragraphs and 22px between list items at 1920,
-     * 8px and 14px on a phone, measured from line to line. On a phone the
-     * text sits 1rem in from the rules and photographs.
+     * 8px and 14px on a phone, measured from line to line; under a heading
+     * 31px on a phone and 52px at 1920, between the 51px and 53px the design
+     * draws under its H5 and H6. On a phone the text and its photographs sit
+     * 1rem in from the rules.
      */
     .portable-text_wrap {
       --_inset: 0rem;
       --_paragraph: clamp(1.2312rem, 0.935rem + 1.1792vw, 2.35rem);
       --_item: clamp(1.6062rem, 1.3927rem + 0.8498vw, 2.4125rem);
       --_after-title: clamp(3.375rem, 2.895rem + 1.9104vw, 5.1875rem);
-      --_after-heading: clamp(1.9187rem, 1.5166rem + 1.6008vw, 3.4375rem);
+      --_after-heading: clamp(1.9187rem, 1.558rem + 1.4361vw, 3.2813rem);
       --_before-heading: clamp(4.2687rem, 3.0737rem + 4.7563vw, 8.7813rem);
       --_figure: clamp(2.5rem, 1.8744rem + 2.4901vw, 4.8625rem);
       width: 100%;
@@ -97,11 +100,11 @@ const segments = listedSegments(blocks);
       & > * + * {
         margin-top: var(--_paragraph);
       }
-      & > :is(figure, .portable-text_listed) {
+      & > .portable-text_listed {
         margin-inline: calc(-1 * var(--_inset));
       }
-      & > * + figure,
-      & > figure + * {
+      & > * + :is(figure, .portable-gallery_wrap),
+      & > :is(figure, .portable-gallery_wrap) + * {
         margin-top: var(--_figure);
       }
       & > * + .portable-text_listed {

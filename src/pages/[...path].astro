@@ -114,15 +114,19 @@ const alternates =
   /*
    * As the design spaces its text pages at 402 and at 1920, from the rule
    * under the photograph to the first line: 57px and 267px, or to the
-   * ornament over the quotations, 95px and 163px; 95px and 69px from that
-   * ornament to the quotation; 85px and 149px from the dots to the text;
-   * 81px and 166px under the last line.
+   * ornament over the quotations two and a half times the design's 95px and
+   * 163px, as on the home page; 69px from that ornament to the quotation at
+   * 1920, and on a phone the home page's space; 85px and 149px from the dots
+   * to the text; 81px and 166px under the last line.
    */
   .text-page_quotes {
-    padding-top: clamp(5.9125rem, 4.7754rem + 4.5257vw, 10.2063rem);
+    padding-top: calc(2.5 * clamp(5.9125rem, 4.7754rem + 4.5257vw, 10.2063rem));
 
     & > .container {
       row-gap: clamp(4.3rem, 6.3632rem + -1.7194vw, 5.9313rem);
+      @media (width < 48rem) {
+        row-gap: var(--space-7);
+      }
     }
   }
 

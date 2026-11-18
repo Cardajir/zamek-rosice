@@ -157,19 +157,25 @@ const SLOTS = [
       }
     }
 
+    /* On a phone the title sits 1rem in, in line with the text under it. */
     .tour-detail_title {
       margin: clamp(3.75rem, 2.103rem + 6.555vw, 9.96875rem) 0
         clamp(2.1625rem, 1.368rem + 3.162vw, 5.1625rem);
       text-wrap: balance;
+      @media (width < 48rem) {
+        padding-inline: 1rem;
+      }
     }
 
     /*
-     * Seven tracks at 1920: 312 16 312 33 312 16 312. A wide photograph takes
-     * them all, a half three, a quarter one.
+     * Seven tracks: a wide photograph takes them all, a half three, a quarter
+     * one. Every gutter is the design's wide one, 33px at 1920, as the
+     * client asked; 16px on a phone.
      */
     .tour-detail_photos {
+      --_gap: clamp(1rem, 1.719vw, 2.0625rem);
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 1rem minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) var(--_gap) minmax(0, 1fr);
       row-gap: clamp(1.875rem, 1.534rem + 1.357vw, 3.1625rem);
       align-items: start;
       margin: clamp(3.125rem, 1.8125rem + 5.224vw, 8.08125rem) 0 0;
@@ -178,8 +184,8 @@ const SLOTS = [
 
       @media (width >= 48rem) {
         grid-template-columns:
-          minmax(0, 1fr) 1rem minmax(0, 1fr) clamp(1rem, 1.719vw, 2.0625rem)
-          minmax(0, 1fr) 1rem minmax(0, 1fr);
+          minmax(0, 1fr) var(--_gap) minmax(0, 1fr) var(--_gap)
+          minmax(0, 1fr) var(--_gap) minmax(0, 1fr);
       }
     }
 
@@ -233,10 +239,14 @@ const SLOTS = [
       }
     }
 
-    /* C2 semibold: 12px on a phone, 18px at 1920. */
+    /*
+     * C2 semibold: 12px on a phone, 16px at 1920 as the client asked, and
+     * 12px and 18px from the photograph to the words, a little closer than
+     * the design.
+     */
     .tour-detail_caption {
-      margin-top: clamp(1rem, 0.8rem + 0.797vw, 1.75625rem);
-      font-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
+      margin-top: clamp(0.75rem, 0.6507rem + 0.3953vw, 1.125rem);
+      font-size: clamp(0.75rem, 0.6838rem + 0.2635vw, 1rem);
       font-weight: var(--primary-semibold);
       line-height: 1.2;
       letter-spacing: -0.01em;

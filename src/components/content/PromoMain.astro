@@ -146,13 +146,14 @@ const paragraphs = (promo.text ?? "")
     }
 
     /*
-     * 29px between label, title and text at 1920. A phone draws them tighter
-     * under the label and looser under the title.
+     * 36px between label, title and text at 1920, a quarter more than the
+     * design's 29px, as the client asked. A phone draws them tighter under
+     * the label and looser under the title.
      */
     .promo_eyebrow {
       margin: 0 0 1.5rem;
       @media (width >= 48rem) {
-        margin-bottom: 1.8125rem;
+        margin-bottom: 2.2656rem;
       }
       color: var(--muted-text);
       font-size: var(--text-small);
@@ -164,7 +165,7 @@ const paragraphs = (promo.text ?? "")
     .promo_title {
       margin: 0 0 2rem;
       @media (width >= 48rem) {
-        margin-bottom: 1.8125rem;
+        margin-bottom: 2.2656rem;
       }
       text-wrap: balance;
     }
@@ -248,8 +249,9 @@ const paragraphs = (promo.text ?? "")
           }
         }
 
+        /* A tenth smaller than the design draws them, as the client asked. */
         @media (width >= 64rem) {
-          --_back: 33.23vw;
+          --_back: 29.9vw;
           --_back-ratio: 638 / 957;
           --_front: 110.35%;
           --_front-ratio: 704 / 567;
@@ -257,7 +259,7 @@ const paragraphs = (promo.text ?? "")
           --_front-y: 29%;
 
           .promo_wrap.reverse & {
-            --_back: 28.07vw;
+            --_back: 25.26vw;
             --_back-ratio: 539 / 713;
             --_front: 128.39%;
             --_front-ratio: 692 / 782;
@@ -296,12 +298,20 @@ const paragraphs = (promo.text ?? "")
       overflow-x: clip;
     }
 
+    /* Twice as far from 48rem, where the window shows it less. */
+    .promo_visual {
+      --_drift: 1rem;
+      @media (width >= 48rem) {
+        --_drift: 2rem;
+      }
+    }
+
     @keyframes promo-drift {
       from {
-        translate: 0 1rem;
+        translate: 0 var(--_drift);
       }
       to {
-        translate: 0 -1rem;
+        translate: 0 calc(var(--_drift) * -1);
       }
     }
   }

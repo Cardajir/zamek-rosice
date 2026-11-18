@@ -39,3 +39,6 @@ src/assets/fonts/romie-*.woff2
 
 # scratch
 tmp/
+
+# Photo archives handed over for processing
+*.zip

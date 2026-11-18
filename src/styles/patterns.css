@@ -217,3 +217,39 @@
     opacity: 0.5;
   }
 }
+
+/*
+ * A text link's underline: nothing at rest; on hover a hairline draws in
+ * under the words from the left, and on the way out it leaves to the right.
+ * The line is painted as a background, so it follows the words across a
+ * line break. Put the class on the inline element that holds the words (the
+ * link itself, or a span inside it); a link hovered or focused around it
+ * draws the line too, and the page you are on keeps it drawn.
+ */
+.link-underline {
+  --_lift: 0.15em;
+  text-decoration: none;
+  background-image: linear-gradient(currentcolor, currentcolor);
+  background-repeat: no-repeat;
+  background-position: 100% calc(100% - var(--_lift));
+  background-size: 0% var(--link-underline-width);
+  transition:
+    background-size var(--link-underline-duration) var(--link-underline-ease),
+    color var(--hover-duration) var(--hover-ease);
+}
+
+@media (hover: hover) {
+  .link-underline:hover,
+  :is(a, button):hover .link-underline {
+    background-position-x: 0%;
+    background-size: 100% var(--link-underline-width);
+  }
+}
+
+.link-underline:focus-visible,
+:is(a, button):focus-visible .link-underline,
+.link-underline:is([aria-current]:not([aria-current="false"])),
+a:is([aria-current]:not([aria-current="false"])) .link-underline {
+  background-position-x: 0%;
+  background-size: 100% var(--link-underline-width);
+}

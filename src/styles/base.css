@@ -45,6 +45,15 @@
   --hover-duration: 200ms;
   --hover-ease: ease;
 
+  /*
+   * Link underline: a hairline that draws in from the left on hover and
+   * leaves to the right afterwards. Half a pixel where the screen has the
+   * dots for it, otherwise the thinnest whole pixel.
+   */
+  --link-underline-width: 0.0625rem;
+  --link-underline-duration: 450ms;
+  --link-underline-ease: cubic-bezier(0.65, 0, 0.35, 1);
+
   /* Opening motion */
   --open-duration: var(--hover-duration);
   --open-ease: var(--hover-ease);
@@ -257,6 +266,12 @@
   }
 }
 
+@media (resolution >= 2dppx) {
+  :root {
+    --link-underline-width: 0.5px;
+  }
+}
+
 /* Color themes */
 :root,
 .theme-light,
@@ -402,8 +417,42 @@ a {
   text-decoration: none;
   color: inherit;
 }
+/*
+ * A link in running text (rich text, Portable Text) keeps a faint hairline
+ * so it can be told from the words around it. On hover it turns red and a
+ * red line draws in over the hairline from the left, leaving to the right
+ * afterwards, as every other link's underline does.
+ */
 a:not([class]) {
-  text-decoration: underline;
+  --_lift: 0.15em;
+  --_rest-line: color-mix(in srgb, var(--text) 35%, transparent);
+  background-image:
+    linear-gradient(currentcolor, currentcolor),
+    linear-gradient(var(--_rest-line), var(--_rest-line));
+  background-repeat: no-repeat;
+  background-position:
+    100% calc(100% - var(--_lift)),
+    0% calc(100% - var(--_lift));
+  background-size:
+    0% var(--link-underline-width),
+    100% var(--link-underline-width);
+  transition:
+    background-size var(--link-underline-duration) var(--link-underline-ease),
+    color var(--hover-duration) var(--hover-ease);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--link-text-hover);
+      background-position:
+        0% calc(100% - var(--_lift)),
+        0% calc(100% - var(--_lift));
+      background-size:
+        100% var(--link-underline-width),
+        100% var(--link-underline-width);
+    }
+  }
+  &:focus-visible {
+    color: var(--link-text-hover);
+  }
 }
 
 img,

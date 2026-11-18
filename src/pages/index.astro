@@ -58,7 +58,12 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   <Section paddingTop="small">
     <ContentWrapper centered class="home_intro">
       <Ornament variant={1} />
-      <Heading tag="h1" maxWidth={22} data-stacki-key="koa1jvho7v6wm">
+      <Heading
+        tag="h1"
+        maxWidth={22}
+        data-reveal-letters
+        data-stacki-key="koa1jvho7v6wm"
+      >
         {home.heading ?? t.siteTagline}
       </Heading>
       <ButtonWrapper>
@@ -151,7 +156,12 @@ const fullDate = new Intl.DateTimeFormat(locale, {
   </Section>
 
   <!-- Visitor's quote -->
-  <Section render={Boolean(home.quote)} gap="7" data-stacki-key="kfefupshi3d7c">
+  <Section
+    render={Boolean(home.quote)}
+    gap="7"
+    class="home_quote"
+    data-stacki-key="kfefupshi3d7c"
+  >
     <Ornament variant={2} />
     <QuoteMain
       text={home.quote?.text}
@@ -193,9 +203,18 @@ const fullDate = new Intl.DateTimeFormat(locale, {
     }
   }
 
-  /* 61px above and below the opening line, as the design spaces it at 1920. */
+  /*
+   * 61px above and below the opening line, as the design spaces it at 1920.
+   * The ornament stands two and a half times as far under the hero as the
+   * two sections alone would put it: 400px from the status bar at 1920,
+   * 220px on a phone.
+   */
   .home_intro {
     --_gap: clamp(2.5rem, 3.18vw, 3.8125rem);
+    margin-top: calc(var(--section-space-small) * 3);
+    @media (width < 48rem) {
+      margin-top: calc((var(--section-space-small) + 2.3125rem) * 1.5);
+    }
     & .ornament_wrap {
       margin-bottom: var(--_gap);
     }
@@ -211,21 +230,49 @@ const fullDate = new Intl.DateTimeFormat(locale, {
     }
   }
 
-  /* 64px from the last row of tours to the link, the arrow's line box included. */
-  /* On a phone the link lines up with the cards’ text. */
+  /*
+   * On a phone the link lines up with the cards’ text and keeps the space
+   * a card's own link keeps from the rule: 34px between letters and rule.
+   */
   .home_events .button-wrapper {
     @media (width < 48rem) {
-      margin-top: -1.3125rem;
+      margin-top: -0.25rem;
       padding-left: 1rem;
     }
   }
 
+  /*
+   * The italic label stands as far above the rule as the events' label
+   * does: 39px from its baseline at 1920, 20px on a phone. From 48rem it
+   * lines up with the cards' text, as that one does.
+   */
+  .home_tours .tours_wrap {
+    margin-top: calc(
+      clamp(1.25rem, 0.9355rem + 1.2516vw, 2.4375rem) - var(--space-4)
+    );
+  }
+  .home_tours h2 {
+    @media (width >= 48rem) {
+      padding-inline-start: clamp(0rem, -0.5627rem + 2.2398vw, 2.125rem);
+    }
+  }
+
+  /* 64px from the last row of tours to the link, the arrow's line box included. */
   .home_tours .tours_wrap + .button-wrapper {
     margin-top: calc(var(--space-8) - var(--space-4) - 0.6rem);
-    /* On a phone: 77px under the last rule, in line with the cards’ text. */
+    /* On a phone: 34px under the last rule, as above, in line with the cards’ text. */
     @media (width < 48rem) {
-      margin-top: calc(var(--space-8) - var(--space-4) - 0.6rem + 0.875rem);
+      margin-top: calc(var(--space-8) - var(--space-4) - 1.0375rem);
       padding-left: 1rem;
     }
+  }
+
+  /*
+   * The quotation as the design spaces it: 57px from the ornament to its
+   * capitals and from its last baseline to the caption on a phone, 67px at
+   * 1920.
+   */
+  .home_quote > .container {
+    row-gap: clamp(3.5625rem, 3.397rem + 0.6588vw, 4.1875rem);
   }
 </style>

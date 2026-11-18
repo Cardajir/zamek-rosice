@@ -1,32 +1,104 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
-import Heading from "@/components/typography/Heading.astro";
-import Paragraph from "@/components/typography/Paragraph.astro";
-import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
 import Button from "@/components/Button.astro";
-import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
+import Img from "@/components/media/Img.astro";
+import lilies from "@/assets/photos/water-lilies-mono.jpg";
+import { langFromPath, routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+
+/* The address that was asked for, not the one this page was rewritten to, says the language. */
+const lang = langFromPath(Astro.originPathname);
+/* The menu and footer then speak it too. */
+Astro.locals.lang = lang;
+const t = ui(lang);
 ---
 
-<Layout
-  title="Page not found"
-  description="The page you're looking for doesn't exist."
-  overlap={true}
->
-  <Section paddingTop="navoverlap" paddingBottom="navoverlap" class="flex-grow">
-    <ContentWrapper centered={true}>
-      <Heading variant="h3" tag="h1" maxWidth={17}>
-        This page doesn't exist
-      </Heading>
-      <Paragraph variant="large" maxWidth={36}>
-        The page you're looking for may have moved, or the link that brought you
-        here might be out of date.
-      </Paragraph>
-      <ButtonWrapper>
-        <Button element="link" href="/">
-          Back to home
+<Layout title={t.notFoundTitle} description={t.notFoundText} footerCta={false}>
+  <!-- Photograph, the code and the way home -->
+  <Section paddingTop="none" paddingBottom="none">
+    <div class="not-found_wrap theme-dark">
+      <Img
+        src={lilies}
+        alt=""
+        loading="eager"
+        fetchPriority="high"
+      />
+      <h1 class="not-found_title text-style-h1" data-reveal-letters>
+        <span class="not-found_line">404</span>{" "}
+        <span class="not-found_line">{t.notFoundTitle}</span>
+      </h1>
+      <div class="not-found_link">
+        <Button element="link" variant="link" href={routePath("home", lang)}>
+          {t.toHomePage}
         </Button>
-      </ButtonWrapper>
-    </ContentWrapper>
+      </div>
+    </div>
   </Section>
 </Layout>
+
+<style is:global>
+  /*
+   * As the design draws the missing page at 1920: water lilies in black and
+   * white (1645 × 705) under a light veil, "404" over "page not found"
+   * centred on them, and the way home 66px above the photograph's lower
+   * edge. Square on a phone, as every subpage's photograph is.
+   */
+  .not-found_wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 1645 / 705;
+    min-height: 16rem;
+    padding: var(--space-6) var(--space-5);
+    overflow: clip;
+    background-color: var(--background);
+    color: var(--text);
+    @media (width < 48rem) {
+      aspect-ratio: 1;
+    }
+
+    & > .image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-color: color-mix(in lab, black 20%, transparent);
+    }
+  }
+
+  .not-found_title {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* 31px from the code's baseline to the next line's caps at 1920. */
+  .not-found_line {
+    display: block;
+
+    & + & {
+      margin-top: 0.31em;
+    }
+  }
+
+  .not-found_link {
+    position: absolute;
+    z-index: 1;
+    inset-inline: 0;
+    bottom: clamp(1.5rem, 1.0326rem + 1.8595vw, 4.125rem);
+    display: flex;
+    justify-content: center;
+  }
+</style>

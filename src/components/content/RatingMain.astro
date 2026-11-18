@@ -103,9 +103,12 @@ const formatted = value === undefined ? undefined : value.toFixed(1);
       font-variant-numeric: oldstyle-nums;
     }
 
-    /* 11px under the line at 1920, 17px on a phone where the source is smaller. */
+    /*
+     * 20px under the line at 1920, more than the design's 11px as the
+     * client asked; 17px on a phone where the source is smaller.
+     */
     .rating_source {
-      margin: clamp(0.6875rem, 1.162rem - 0.3953vw, 1.0625rem) 0 0;
+      margin: clamp(1.0625rem, 1.0127rem + 0.1976vw, 1.25rem) 0 0;
       /* 18px at 1920, 12px on a phone. */
       font-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
       font-weight: var(--primary-semibold);

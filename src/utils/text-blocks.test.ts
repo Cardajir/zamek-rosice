@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { formatPlain, leadingQuotes, listedSegments } from "./text-blocks.ts";
+import {
+  formatPlain,
+  leadingQuotes,
+  listedSegments,
+  photoPlaces,
+  photoRuns,
+} from "./text-blocks.ts";
 
 const block = (text: string, style = "normal", marks: string[] = []) => ({
   _type: "block",
@@ -66,4 +72,34 @@ test("plain text keeps its paragraphs, line breaks and bold words", () => {
     [[{ text: "A", bold: false }], [{ text: "B", bold: false }]],
   ]);
   assert.deepEqual(formatPlain("  "), []);
+});
+
+test("consecutive photographs are gathered into one run, a lone one too", () => {
+  const photo = (key: string) => ({ _type: "imageWithAlt", _key: key });
+  const blocks = [
+    block("Úvod"),
+    photo("a"),
+    photo("b"),
+    block("Mezi"),
+    photo("c"),
+  ];
+  assert.deepEqual(photoRuns(blocks), [
+    blocks[0],
+    { _type: "photoRun", _key: "a", images: [blocks[1], blocks[2]] },
+    blocks[3],
+    { _type: "photoRun", _key: "c", images: [blocks[4]] },
+  ]);
+});
+
+test("photographs fill their rows as the tour pages set them", () => {
+  const sizes = (count: number) =>
+    photoPlaces(count).map((place) => `${place.size[0]}${place.column}`);
+  assert.deepEqual(sizes(1), ["w0"]);
+  assert.deepEqual(sizes(3), ["w0", "h0", "h1"]);
+  assert.deepEqual(sizes(4), ["h0", "h1", "h0", "h1"]);
+  assert.deepEqual(sizes(6), ["h0", "h1", "q0", "q1", "q2", "q3"]);
+  assert.deepEqual(sizes(8), [
+    "w0", "h0", "h1", "q0", "q1", "q2", "q3", "w0",
+  ]);
+  assert.deepEqual(sizes(0), []);
 });

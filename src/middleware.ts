@@ -24,6 +24,19 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
 };
 
+/*
+ * Some responses arrive with headers that cannot be changed (a redirect, or
+ * one passed through from fetch). Those are copied before headers are added.
+ */
+function mutable(response: Response): Response {
+  try {
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    return response;
+  } catch {
+    return new Response(response.body, response);
+  }
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname, search } = context.url;
   const method = context.request.method;
@@ -56,8 +69,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   /* English and German addresses are rendered by the Czech page file. */
   const target = isPage ? rewriteTarget(pathname) : undefined;
-  const response = await runAsPreview(preview, () =>
-    target ? next(target) : next(),
+  const response = mutable(
+    await runAsPreview(preview, () => (target ? next(target) : next())),
   );
 
   /* A copy of the site on any other host is not for search engines. */

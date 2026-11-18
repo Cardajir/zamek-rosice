@@ -1,11 +1,9 @@
 ---
 import Button from "@/components/Button.astro";
 import ButtonWrapper from "@/components/wrapper/ButtonWrapper.astro";
-import Icon from "@/components/media/Icon.astro";
 import SanityImg from "@/components/media/SanityImg.astro";
 import RichText from "@/components/typography/RichText.astro";
 import PortableText from "@/components/utility/PortableText.astro";
-import arrow from "@/assets/icons/arrow-full.svg";
 import type { Image } from "@/sanity/queries.ts";
 
 interface Props {
@@ -52,10 +50,11 @@ const hasBody = Boolean(body?.length);
 
 {render && heading && (
   <article class="news-article_wrap">
-    <a class="news-article_back" href={backHref}>
-      <Icon class="news-article_back_mark" src={arrow} variant="small" />
-      <span class="news-article_back_text text-style-trim">{backLabel}</span>
-    </a>
+    <div class="news-article_back">
+      <Button element="link" variant="link" direction="back" href={backHref}>
+        {backLabel}
+      </Button>
+    </div>
     <div class="news-article_layout">
       <div class:list={["news-article_visual", !image && "is-empty"]}>
         {image && (
@@ -106,10 +105,11 @@ const hasBody = Boolean(body?.length);
         </div>
       </div>
     </div>
-    <a class="news-article_back is-end" href={backHref}>
-      <Icon class="news-article_back_mark" src={arrow} variant="small" />
-      <span class="news-article_back_text text-style-trim">{backLabel}</span>
-    </a>
+    <div class="news-article_back is-end">
+      <Button element="link" variant="link" direction="back" href={backHref}>
+        {backLabel}
+      </Button>
+    </div>
   </article>
 )}
 
@@ -134,49 +134,9 @@ const hasBody = Boolean(body?.length);
       }
     }
 
-    /* The red italic link of the buttons, with its arrow turned back. */
-    .news-article_back {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.54em;
-      padding-block: 0.25em;
-      color: var(--link-text);
-      font-family: var(--secondary-family);
-      font-size: var(--text-button);
-      font-style: italic;
-      font-weight: var(--secondary-medium);
-      letter-spacing: var(--letter-spacing-snug);
-      line-height: 1.2;
-      text-decoration: none;
-
-      &.is-end {
-        margin-top: clamp(4rem, 1.0208rem + 11.8577vw, 15.25rem);
-      }
-    }
-
-    .news-article_wrap .news-article_back > .news-article_back_mark {
-      --_size: 0.8333em;
-      rotate: 180deg;
-    }
-
-    .news-article_back_text {
-      padding-bottom: 0.12em;
-      background-image: linear-gradient(
-        var(--link-border-hover),
-        var(--link-border-hover)
-      );
-      background-repeat: no-repeat;
-      background-position: 100% 100%;
-      background-size: 0 var(--border-width);
-      transition: background-size calc(var(--hover-duration) * 2)
-        var(--hover-ease);
-    }
-
-    @media (hover: hover) {
-      .news-article_back:hover > .news-article_back_text {
-        background-position: 0 100%;
-        background-size: 100% var(--border-width);
-      }
+    /* The way back to the list, above the article and again after it. */
+    .news-article_back.is-end {
+      margin-top: clamp(4rem, 1.0208rem + 11.8577vw, 15.25rem);
     }
 
     .news-article_layout {

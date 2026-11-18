@@ -24,9 +24,11 @@ interface Props {
     | "partners"
     | "cta"
   >;
+  /** Set to `false` to leave out the call to action on the photograph. */
+  cta?: boolean;
 }
 
-const { render = true, shell } = Astro.props;
+const { render = true, shell, cta: showCta = true } = Astro.props;
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -34,7 +36,7 @@ const year = new Date().getFullYear();
 
 /* "Správa zámku Rosice, příspěvková organizace": the name, then its legal form. */
 const [name, ...form] = shell.organisation.split(", ");
-const cta = shell.cta;
+const cta = showCta ? shell.cta : undefined;
 /*
  * The marks the design sets in the footer, shown until the Studio names
  * partners for it. Sizes are the design's at 1920; a phone stacks them.
@@ -72,12 +74,12 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
 ---
 
 {render && (
-  <footer class="footer_wrap">
+  <footer class:list={["footer_wrap", cta && "has-cta"]}>
     {cta && (
       <div class:list={["footer_cta", "theme-dark", cta.image && "has-image"]}>
         {cta.image && <SanityImg image={{ ...cta.image, alt: "" }} />}
         <div class="footer_cta_content">
-          <h2 class="footer_cta_title text-style-h1">
+          <h2 class="footer_cta_title text-style-h1" data-reveal-letters>
             {ctaLines.map((line) => (
               <span>{line}</span>
             ))}
@@ -101,7 +103,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
             <ul class="footer_links">
               {column.map((item) => (
                 <li>
-                  <a class="footer_link" href={item.href}>
+                  <a class="footer_link link-underline" href={item.href}>
                     {item.label}
                   </a>
                 </li>
@@ -200,8 +202,11 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       /* 119px under the copyright at 1920, 64px on a phone. */
       padding-bottom: clamp(4rem, 3.0896rem + 3.6232vw, 7.4375rem);
 
-      /* The rule over the photograph: 14px above it at 1920, 9px on a phone. */
-      &::before {
+      /*
+       * The rule over the photograph: 14px above it at 1920, 9px on a phone.
+       * Without the photograph the inner block's own rule is the only one.
+       */
+      &.has-cta::before {
         content: "";
         width: 100%;
         max-width: var(--max-width-main);
@@ -235,7 +240,12 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
         }
       }
 
-      /* The photograph drifts a little slower than the page; still where that is unsupported or unwanted. */
+      /*
+       * The photograph moves slower than the page, by enough to see: it is
+       * drawn a fifth larger and slides 8% up and down through that margin
+       * as the block crosses the window. Still where that is unsupported or
+       * unwanted.
+       */
       & > .image {
         position: absolute;
         inset: 0;
@@ -245,7 +255,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
 
         @supports (animation-timeline: view()) {
           @media (prefers-reduced-motion: no-preference) {
-            scale: 1.06;
+            scale: 1.2;
             animation: footer-cta-drift linear both;
             animation-timeline: --footer-cta;
             animation-range: cover;
@@ -253,20 +263,32 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
         }
       }
 
+      /* The design's 30% black over the photograph. */
       &.has-image::after {
         content: "";
         position: absolute;
         inset: 0;
-        background-color: color-mix(in lab, black 45%, transparent);
+        background-color: color-mix(in lab, black 30%, transparent);
+      }
+
+      /*
+       * The whole block is the link: the link's own area is stretched over
+       * it, and the block clips it to its edges. Pointing anywhere on the
+       * photograph plays the link's hover.
+       */
+      & .button_wrap::before {
+        content: "";
+        position: absolute;
+        inset: -200vmax;
       }
     }
 
     @keyframes footer-cta-drift {
       from {
-        translate: 0 -2.5%;
+        translate: 0 -8%;
       }
       to {
-        translate: 0 2.5%;
+        translate: 0 8%;
       }
     }
 
@@ -316,7 +338,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       display: flex;
       flex-direction: column;
       align-self: end;
-      margin: 0;
+      margin: 0 0.125rem 0 0;
       font-size: 0.75rem;
       font-weight: var(--primary-semibold);
       line-height: 1.2;
@@ -330,11 +352,15 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       }
     }
 
-    /* Three groups of links, 18px on a phone and 16px at 1920. */
+    /*
+     * Three groups of links, 18px on a phone and 16px at 1920. On a phone
+     * they start 16px in, on the line the text of the cards above keeps.
+     */
     .footer_nav {
       display: grid;
       gap: 1.8125rem;
       margin-top: 3.4375rem;
+      padding-left: 1rem;
     }
 
     .footer_links {
@@ -345,20 +371,10 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       line-height: 1.4;
     }
 
-    .footer_link {
-      text-decoration: none;
-      text-underline-offset: 0.3em;
-      text-decoration-thickness: var(--border-width);
-      @media (hover: hover) {
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-    }
-
     /*
      * On a phone the contact lines and the marks each sit between rules;
-     * the lines are set like the opening heading, in capitals.
+     * the lines are set like the opening heading, in capitals, and start on
+     * the links' line.
      */
     .footer_middle {
       margin-top: 3.25rem;
@@ -367,6 +383,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
 
       & > .contact-lines_wrap {
         @media (width < 64rem) {
+          padding-left: 1rem;
           gap: 0.5rem;
           line-height: 1.2;
           letter-spacing: var(--letter-spacing-tight);
@@ -448,12 +465,14 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       }
     }
 
+    /* On a phone the copyright stands 2px in, as the organisation does on the right. */
     .footer_bottom {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       margin-top: 2.5625rem;
       padding-top: 1rem;
+      padding-inline: 0.125rem;
       border-top: var(--border-width) solid var(--text);
       font-size: 0.75rem;
       line-height: 1.2;
@@ -480,6 +499,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
 
       .footer_organisation {
         align-self: start;
+        margin-right: 0;
         font-size: var(--text-small);
         font-weight: var(--primary-regular);
         line-height: 1.4;
@@ -496,6 +516,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
         flex: 0 0 48.8%;
         gap: var(--space-6) 0;
         margin-top: 1.25rem;
+        padding-left: 0;
       }
 
       .footer_middle {
@@ -550,6 +571,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
         gap: var(--space-2) var(--space-6);
         margin-top: 2.8125rem;
         padding-top: 1.3125rem;
+        padding-inline: 0;
         font-size: var(--text-small);
         line-height: 1.4;
         letter-spacing: var(--letter-spacing-wide);

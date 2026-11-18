@@ -1,8 +1,11 @@
 ---
 /*
  * Content below the first screen fades up into place as it is scrolled to;
- * things that arrive together follow one another. Nothing is hidden without
- * JavaScript, for a visitor who asked for less motion, or on paper.
+ * things that arrive together follow one another. A big heading marked
+ * `data-reveal-letters` is written out letter by letter instead, each letter
+ * coming up out of the white a moment after the one before it. Nothing is
+ * hidden without JavaScript, for a visitor who asked for less motion, or on
+ * paper.
  */
 interface Props {
   /** Set to `false` to omit the component. */
@@ -18,8 +21,16 @@ const { render = true } = Astro.props;
   const root = document.querySelector("[data-reveal-root]");
   const main = document.querySelector("main");
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const lettered = [
+    ...document.querySelectorAll<HTMLElement>("[data-reveal-letters]"),
+  ];
+  const able =
+    Boolean(root && main) && !calm.matches && "IntersectionObserver" in window;
 
-  if (root && main && !calm.matches && "IntersectionObserver" in window) {
+  /* Things come in once they are this far up into the window. */
+  const ROOT_MARGIN = "0px 0px -18% 0px";
+
+  if (able && main) {
     /* Wrappers whose items come in one by one instead of as a block. */
     const GROUPS = [
       ".layout",
@@ -32,14 +43,19 @@ const { render = true } = Astro.props;
       ".info-list_wrap",
       ".promo_wrap",
     ].join(", ");
-    const STEP = 80;
+    const STEP = 96;
     const MOST = 6;
 
     const targets: HTMLElement[] = [];
     const collect = (element: Element) => {
       if (element.matches(GROUPS)) {
         for (const child of element.children) collect(child);
-      } else if (element instanceof HTMLElement && !element.hidden) {
+      } else if (
+        element instanceof HTMLElement &&
+        !element.hidden &&
+        /* A lettered heading brings itself in. */
+        !element.matches("[data-reveal-letters]")
+      ) {
         targets.push(element);
       }
     };
@@ -57,7 +73,7 @@ const { render = true } = Astro.props;
       element.style.transitionDelay = `${delay}ms`;
       element.dataset.reveal = "in";
       /* Once in place the element is left exactly as its own styles have it. */
-      window.setTimeout(() => settle(element), delay + 1000);
+      window.setTimeout(() => settle(element), delay + 1200);
     };
 
     const observer = new IntersectionObserver(
@@ -74,7 +90,7 @@ const { render = true } = Astro.props;
             show(entry.target as HTMLElement, Math.min(index, MOST) * STEP);
           });
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.01 },
+      { rootMargin: ROOT_MARGIN, threshold: 0.01 },
     );
 
     /* What is already on screen stays put: no flash, and the page's first paint is not held back. */
@@ -95,6 +111,91 @@ const { render = true } = Astro.props;
       show(hidden, 0);
     });
   }
+
+  /*
+   * Lettered headings. The words are split into one span per letter inside
+   * a copy that assistive technology skips; the heading's own text is kept
+   * whole beside it for screen readers.
+   */
+  if (able) {
+    /* Each letter takes LETTER to come up; a whole heading starts within SPREAD. */
+    const LETTER = 900;
+    const STEP = 32;
+    const SPREAD = 1400;
+
+    const split = (element: HTMLElement) => {
+      const whole = document.createElement("span");
+      whole.className = "sr-only";
+      whole.textContent = element.textContent;
+
+      const visual = document.createElement("span");
+      visual.className = "reveal-letters_visual";
+      visual.setAttribute("aria-hidden", "true");
+      visual.append(...element.childNodes);
+
+      const walker = document.createTreeWalker(visual, NodeFilter.SHOW_TEXT);
+      const texts: Text[] = [];
+      while (walker.nextNode()) texts.push(walker.currentNode as Text);
+
+      let count = 0;
+      for (const text of texts) {
+        const pieces = document.createDocumentFragment();
+        /* Spaces stay plain text, so the lines break where they did before. */
+        for (const part of text.data.match(/\s+|\S+/g) ?? []) {
+          if (/^\s+$/.test(part)) {
+            pieces.append(part);
+            continue;
+          }
+          for (const letter of Array.from(part)) {
+            const span = document.createElement("span");
+            span.className = "reveal-letters_letter";
+            span.style.setProperty("--_i", String(count++));
+            span.textContent = letter;
+            pieces.append(span);
+          }
+        }
+        text.replaceWith(pieces);
+      }
+
+      element.replaceChildren(whole, visual);
+      const step = Math.min(STEP, SPREAD / Math.max(count, 1));
+      element.style.setProperty("--_letter-step", `${step}ms`);
+      element.style.setProperty("--_letter-duration", `${LETTER}ms`);
+      return count * step + LETTER;
+    };
+
+    const lengths = new Map<Element, number>();
+
+    const write = (element: HTMLElement) => {
+      if (element.dataset.letters !== "out") return;
+      element.dataset.letters = "in";
+      window.setTimeout(
+        () => {
+          element.dataset.letters = "done";
+        },
+        (lengths.get(element) ?? 0) + 100,
+      );
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.unobserve(entry.target);
+          write(entry.target as HTMLElement);
+        }
+      },
+      { rootMargin: ROOT_MARGIN, threshold: 0 },
+    );
+
+    for (const element of lettered) {
+      lengths.set(element, split(element));
+      element.dataset.letters = "out";
+      observer.observe(element);
+    }
+  } else {
+    for (const element of lettered) element.dataset.letters = "off";
+  }
 </script>
 
 <style is:global>
@@ -108,14 +209,58 @@ const { render = true } = Astro.props;
     [data-reveal="in"] {
       --_reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
       transition:
-        opacity 700ms var(--_reveal-ease),
-        translate 900ms var(--_reveal-ease);
+        opacity 840ms var(--_reveal-ease),
+        translate 1080ms var(--_reveal-ease);
+    }
+
+    /*
+     * A lettered heading waits unseen for the script to split it. Should the
+     * script never come, it shows itself after a moment all the same.
+     */
+    @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+      [data-reveal-letters]:not([data-letters]) {
+        animation: reveal-letters-late 400ms 2.5s both;
+      }
+    }
+
+    [data-letters="out"] .reveal-letters_letter {
+      opacity: 0;
+    }
+
+    /* Each letter fades up on its own, so a soft edge of white runs along the line. */
+    [data-letters="in"] .reveal-letters_letter {
+      animation: reveal-letter var(--_letter-duration, 900ms)
+        cubic-bezier(0.33, 0, 0.2, 1) both;
+      animation-delay: calc(var(--_i, 0) * var(--_letter-step, 32ms));
+    }
+
+    @keyframes reveal-letter {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes reveal-letters-late {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     @media print {
       [data-reveal] {
         opacity: 1;
         translate: none;
+      }
+      [data-reveal-letters]:not([data-letters]),
+      [data-reveal-letters] .reveal-letters_letter {
+        opacity: 1;
+        animation: none;
       }
     }
   }

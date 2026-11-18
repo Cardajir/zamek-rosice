@@ -2,7 +2,7 @@
 import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import PageHeroMain from "@/components/content/PageHeroMain.astro";
-import Ornament from "@/components/media/Ornament.astro";
+import Img from "@/components/media/Img.astro";
 import ContentWrapper from "@/components/wrapper/ContentWrapper.astro";
 import Heading from "@/components/typography/Heading.astro";
 import Button from "@/components/Button.astro";
@@ -12,7 +12,9 @@ import Textarea from "@/components/form/Textarea.astro";
 import Choice from "@/components/form/Choice.astro";
 import ContactLinesMain from "@/components/content/ContactLinesMain.astro";
 import StatusBarMain from "@/components/content/StatusBarMain.astro";
-import { DEFAULT_LANG } from "@/consts.ts";
+import arcade from "@/assets/photos/arcade-balustrade.jpg";
+import hornsOfPlenty from "@/assets/ornaments/ornament-3.svg";
+import { DEFAULT_LANG, formatPhone } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getPeople } from "@/sanity/page-queries.ts";
@@ -33,7 +35,11 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
   string | undefined;
 ---
 
-<Layout title={t.contactTitle} alternates={alternates("contact")}>
+<Layout
+  title={t.contactTitle}
+  alternates={alternates("contact")}
+  footerCta={false}
+>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={t.contactTitle} rule={false} />
@@ -59,7 +65,7 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
                 {person.phone && (
                   <Fragment>
                     {", "}
-                    <a href={tel(person.phone)}>{person.phone}</a>
+                    <a href={tel(person.phone)}>{formatPhone(person.phone)}</a>
                   </Fragment>
                 )}
                 {person.email && (
@@ -153,11 +159,27 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
         </Form>
       </div>
     </ContentWrapper>
-  </Section>
 
-  <!-- Ornament -->
-  <Section paddingTop="none">
-    <Ornament variant={3} size="large" align="start" />
+    <!-- The arcades under the form, the horns of plenty beside them -->
+    <div class="contact_closing">
+      <div class="contact_photo">
+        <Img
+          src={arcade}
+          alt={t.contactPhotoAlt}
+          variant="constrained"
+          sizes="(width >= 48rem) 41rem, 100vw"
+        />
+      </div>
+      <img
+        class="contact_ornament"
+        src={hornsOfPlenty.src}
+        width="147"
+        height="92"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
   </Section>
 
   <style is:global>
@@ -187,6 +209,57 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
       width: 100%;
       max-width: 39.8125rem;
       align-self: end;
+    }
+
+    /*
+     * As the design closes the page at 1920: the arcades (641 × 893) under
+     * the form, 158px below its link and 258px above the footer's rule, and
+     * the pale horns of plenty at the left, reaching 48px below the
+     * photograph. The client asked for the
+     * engraving a little smaller than the design's 596px: 520px.
+     */
+    .contact_closing {
+      display: grid;
+      width: 100%;
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-6);
+      margin-block: 4rem clamp(2.5rem, 0.8118rem + 6.719vw, 8.875rem);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: var(--site-gutter);
+      }
+    }
+
+    .contact_photo {
+      width: 100%;
+      @media (width >= 48rem) {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+        max-width: 40.0625rem;
+      }
+
+      & > .image {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 641 / 893;
+        object-fit: cover;
+      }
+    }
+
+    .contact_ornament {
+      width: clamp(14rem, 27.0833vw, 32.5rem);
+      height: auto;
+      opacity: 0.08;
+      user-select: none;
+      pointer-events: none;
+      @media (width >= 48rem) {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: end;
+        margin-bottom: calc(-1 * clamp(1rem, 2.5vw, 3rem));
+      }
     }
   </style>
 

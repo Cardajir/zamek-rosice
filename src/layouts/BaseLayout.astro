@@ -19,9 +19,16 @@ type Props = SeoProps & {
    * `paddingTop="navoverlap"` to clear the bar.
    */
   overlap?: boolean;
+  /** Set to `false` to leave out the footer's call to action, on a page that is itself the destination. */
+  footerCta?: boolean;
 };
 
-const { theme = "inherit", overlap = false, ...seo } = Astro.props;
+const {
+  theme = "inherit",
+  overlap = false,
+  footerCta = true,
+  ...seo
+} = Astro.props;
 
 const shell = await shellFor(Astro.locals);
 
@@ -50,7 +57,7 @@ const languages = LANGS.map(
     <main id="main" tabindex="-1">
       <slot />
     </main>
-    <Footer shell={shell} />
+    <Footer shell={shell} cta={footerCta} />
     <Reveal />
   </body>
 </html>

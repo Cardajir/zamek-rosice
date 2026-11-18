@@ -40,7 +40,7 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
         <dt class="info-list_label text-style-large">
           {row.href ? (
             <a
-              class="info-list_link"
+              class="info-list_link link-underline"
               href={row.href}
               rel={row.external ? "noopener" : undefined}
             >
@@ -57,7 +57,7 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
             {line.value &&
               (line.href ? (
                 <a
-                  class="info-list_value info-list_link text-style-large"
+                  class="info-list_value info-list_link link-underline text-style-large"
                   href={line.href}
                 >
                   {line.value}
@@ -179,11 +179,9 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
       }
     }
 
+    /* The shared underline draws in on hover, as the words turn red. */
     .info-list_link {
       color: inherit;
-      text-decoration: underline;
-      text-decoration-thickness: var(--border-width);
-      text-underline-offset: 0.2em;
       @media (hover: hover) {
         &:hover {
           color: var(--link-text);
