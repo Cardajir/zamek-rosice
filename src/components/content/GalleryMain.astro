@@ -14,11 +14,13 @@ interface Props {
   photos: Image[];
   /** Address of the album list, for the link back to it under the photographs. */
   back?: string;
+  /** Anchor the album links scroll to, landing on the first photograph. */
+  id?: string;
   /** Class names for utilities. */
   class?: string;
 }
 
-const { render = true, photos, back, class: className } = Astro.props;
+const { render = true, photos, back, id, class: className } = Astro.props;
 
 const t = ui(Astro.locals.lang ?? DEFAULT_LANG);
 
@@ -51,7 +53,7 @@ const filler = (items.length - 1) % 2 === 1;
 ---
 
 {render && items.length > 0 && (
-  <div class:list={["gallery_wrap", className]}>
+  <div class:list={["gallery_wrap", className]} id={id}>
     <ul class="gallery_list">
       {items.map(({ photo, name, size }, index) => (
         <li class="gallery_item">
@@ -277,6 +279,8 @@ const filler = (items.length - 1) % 2 === 1;
      * from the page edge, like the cards elsewhere.
      */
     .gallery_wrap {
+      /* An album link lands here, the first photograph just under the bar. */
+      scroll-margin-top: calc(var(--nav-height) + var(--space-5));
       --_note-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
       --_note-gap: clamp(0.6875rem, 0.4889rem + 0.7905vw, 1.4375rem);
 

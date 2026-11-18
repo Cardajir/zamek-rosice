@@ -25,11 +25,11 @@ const { render = true, label, intro, items, class: className } = Astro.props;
       {items.map((item) => (
         <li>
           <a
-            class="gallery-nav_link link-underline text-style-h2"
+            class="gallery-nav_link text-style-h2"
             href={item.href}
             aria-current={item.current ? "page" : undefined}
           >
-            {item.label}
+            <span class="link-underline">{item.label}</span>
           </a>
         </li>
       ))}
@@ -40,9 +40,8 @@ const { render = true, label, intro, items, class: className } = Astro.props;
 <style is:global>
   @layer components {
     /*
-     * The triton 220px under the photograph's rule on a phone and 400px at
-     * 1920, two and a half times the design's room, as far under the hero as
-     * the home page's ornament stands. The serif line 51px and 73px under
+     * The triton 73px under the photograph's rule on a phone and 133px at
+     * 1920, a third of the earlier, much larger room. The serif line 51px and 73px under
      * it, the first album 58px and 75px under that. The room under the list
      * tops up the next section's large padding to the design's 130px and 230px.
      */
@@ -51,7 +50,7 @@ const { render = true, label, intro, items, class: className } = Astro.props;
       flex-direction: column;
       align-items: center;
       width: 100%;
-      padding-block: clamp(13.75rem, 10.7706rem + 11.8577vw, 25rem)
+      padding-block: clamp(4.5833rem, 3.59rem + 3.953vw, 8.3333rem)
         clamp(2.1938rem, 1.8381rem + 1.4163vw, 3.5375rem);
 
       & > .gallery-nav_intro {
@@ -83,7 +82,10 @@ const { render = true, label, intro, items, class: className } = Astro.props;
       text-align: center;
     }
 
-    /* The line under an album is the site's shared link underline. */
+    /*
+     * The line under an album is the site's shared link underline, on an
+     * inner span: the heading style trims the link's own box to the baseline.
+     */
     .gallery-nav_link {
       color: inherit;
       font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";

@@ -44,9 +44,11 @@ const photos = album?.images ?? [];
       items={albums.map((item, index) => ({
         label: item.title,
         href:
-          index === 0
-            ? routePath("gallery", lang)
-            : routePath("gallery", lang, item.slug),
+          `${
+            index === 0
+              ? routePath("gallery", lang)
+              : routePath("gallery", lang, item.slug)
+          }#fotky`,
         current: index === 0,
       }))}
       data-stacki-key="kvtlgmjf0room"
@@ -64,6 +66,6 @@ const photos = album?.images ?? [];
     <Heading tag="h2" class="sr-only">
       {album?.title}
     </Heading>
-    <GalleryMain photos={photos} back="#alba" />
+    <GalleryMain photos={photos} back="#alba" id="fotky" />
   </Section>
 </Layout>

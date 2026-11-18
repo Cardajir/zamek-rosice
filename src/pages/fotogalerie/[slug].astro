@@ -45,9 +45,11 @@ const cover = album.images[0];
       items={albums.map((item, index) => ({
         label: item.title,
         href:
-          index === 0
-            ? routePath("gallery", lang)
-            : routePath("gallery", lang, item.slug),
+          `${
+            index === 0
+              ? routePath("gallery", lang)
+              : routePath("gallery", lang, item.slug)
+          }#fotky`,
         current: item.slug === album.slug,
       }))}
     />
@@ -58,6 +60,6 @@ const cover = album.images[0];
     <Heading tag="h2" class="sr-only">
       {album.title}
     </Heading>
-    <GalleryMain photos={album.images} back="#alba" />
+    <GalleryMain photos={album.images} back="#alba" id="fotky" />
   </Section>
 </Layout>
