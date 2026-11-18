@@ -739,24 +739,9 @@ const socials = shell.socials.flatMap(({ network, url }) =>
         transition: color var(--hover-duration) var(--hover-ease);
       }
 
-      .nav_inner:has(.nav_group.open) {
-        & .nav_group:not(.open) .nav_group_button,
-        & .nav_top_link,
-        & .nav_social {
-          color: var(--muted-text);
-        }
-      }
-
+      /* The bar keeps one colour; hover and the open group show by their underline only. */
       .nav_group.open .nav_group_button {
         color: inherit;
-      }
-
-      .nav_top_link {
-        @media (hover: hover) {
-          &:hover {
-            color: var(--muted-text);
-          }
-        }
       }
 
       .nav_panel {
