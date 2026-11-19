@@ -7,6 +7,7 @@ import TourDetailMain from "@/components/content/TourDetailMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
+import { anchor } from "@/utils/slug.ts";
 import { getTour } from "@/sanity/queries.ts";
 import { sanitySocialImage } from "@/utils/seo.ts";
 
@@ -30,7 +31,12 @@ const eyebrow = tour.free
 const links = [
   ...(tour.free
     ? []
-    : [{ label: t.admissionLink, href: routePath("admission", lang) }]),
+    : [
+        {
+          label: t.admissionLink,
+          href: `${routePath("admission", lang)}${tour.priceList ? `#${anchor(tour.priceList)}` : ""}`,
+        },
+      ]),
   { label: t.galleryLink, href: routePath("gallery", lang, tour.gallery) },
 ];
 

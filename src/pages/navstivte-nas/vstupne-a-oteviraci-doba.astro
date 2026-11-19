@@ -18,6 +18,7 @@ import {
 import { shellFor } from "@/sanity/queries.ts";
 import { hoursTable } from "@/utils/hours.ts";
 import { pragueNow } from "@/utils/opening.ts";
+import { anchor } from "@/utils/slug.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -121,7 +122,7 @@ const hours = hoursTable(admission.periods, admission.subjects, {
       {t.admissionHeading}
     </Heading>
     {admission.lists.map((list) => (
-      <ContentWrapper>
+      <ContentWrapper id={anchor(list.title)} class="visit_list">
         <Heading render={!isOwnHeading(list)} tag="h3" variant="h6">
           {list.title}
         </Heading>
@@ -193,6 +194,11 @@ const hours = hoursTable(admission.periods, admission.subjects, {
    * The engraving under the photograph keeps the design's distance from the
    * rule: 19px on a phone, 120px at 1920.
    */
+  /* A tour's admission link lands on its own list, just under the bar. */
+  .visit_list {
+    scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+  }
+
   .visit_backdrop {
     padding-top: clamp(1.1875rem, -0.4844rem + 6.653vw, 7.5rem);
   }

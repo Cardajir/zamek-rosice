@@ -6,6 +6,7 @@ import TourListMain from "@/components/content/TourListMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
+import { anchor } from "@/utils/slug.ts";
 import { getTours, type TourCard } from "@/sanity/queries.ts";
 import { fillIn, listOf } from "@/utils/seo.ts";
 
@@ -28,7 +29,12 @@ const links = (tour: TourCard) => [
   { label: t.readMore, href: routePath("tours", lang, tour.slug) },
   ...(tour.free
     ? []
-    : [{ label: t.admissionLink, href: routePath("admission", lang) }]),
+    : [
+        {
+          label: t.admissionLink,
+          href: `${routePath("admission", lang)}${tour.priceList ? `#${anchor(tour.priceList)}` : ""}`,
+        },
+      ]),
   { label: t.galleryLink, href: routePath("gallery", lang, tour.gallery) },
 ];
 

@@ -320,6 +320,8 @@ export interface TourCard {
   image?: Image;
   /** Slug of the album linked to the tour, in the requested language. */
   gallery?: string;
+  /** Title of the price list that covers the tour, for a link straight to it. */
+  priceList?: string;
 }
 
 export interface Promo {
@@ -589,7 +591,10 @@ const TOUR_FIELDS = `
   "perex": ${text("perex")},
   kind, duration, free,
   "image": images[0]${IMAGE},
-  "gallery": coalesce(gallery->slug[$lang].current, gallery->slug.cs.current)`;
+  "gallery": coalesce(gallery->slug[$lang].current, gallery->slug.cs.current),
+  "priceList": *[_type == "ticketList" && references(^._id)] | order(order asc)[0]{
+    "title": ${text("title")}
+  }.title`;
 
 const TOURS = `*[_type == "tour"] | order(order asc){${TOUR_FIELDS}}`;
 
