@@ -44,9 +44,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     (method === "GET" || method === "HEAD") && !KEEP_AS_IS.test(pathname);
 
   if (isPage) {
-    /* Doubled slashes ("//kontakt/") would be a second address for a page. */
-    if (pathname.includes("//")) {
-      return context.redirect(`${pathname.replace(/\/{2,}/g, "/")}${search}`, 301);
+    /*
+     * Doubled slashes ("//kontakt/") would be a second address for a page.
+     * Read from the raw request: Astro has already collapsed them in context.url.
+     */
+    const raw = new URL(context.request.url).pathname;
+    if (raw.includes("//")) {
+      return context.redirect(`${raw.replace(/\/{2,}/g, "/")}${search}`, 301);
     }
 
     /* A retired address answers with where its content went. */
