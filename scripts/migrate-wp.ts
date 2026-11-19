@@ -6,6 +6,11 @@
  *
  *   npm run migrate              read the old site, write to Sanity
  *   npm run migrate -- --dry     read and convert only, report what would be written
+ *   npm run migrate -- --only-posts=slug-a,slug-b
+ *                                write only those news items, nothing else (for
+ *                                posts published on the old site after the move;
+ *                                delete tmp/wp/posts.json and media.json first so
+ *                                they are read again)
  *
  * Every document has a fixed id, so running it again replaces what it wrote.
  * Downloaded JSON and the list of uploaded files are kept in `tmp/wp`, so a
@@ -23,6 +28,12 @@ import { REDIRECTS } from "../src/redirects.ts";
 const ORIGIN = "https://zamek-rosice.cz";
 const CACHE = "tmp/wp";
 const DRY = process.argv.includes("--dry");
+/* Slugs of the only news items to write; everything else is left as it is in Sanity. */
+const ONLY_POSTS = process.argv
+  .find((arg) => arg.startsWith("--only-posts="))
+  ?.slice("--only-posts=".length)
+  .split(",")
+  .filter(Boolean);
 
 const client = getCliClient({ apiVersion: "2026-11-01" });
 
@@ -686,6 +697,7 @@ const EVENTS: Record<string, { start: string; end?: string }> = {
     start: "2026-12-05T08:00:00.000Z",
   },
   "last-minute-sezony-2026": { start: "2026-10-31T08:00:00.000Z" },
+  "vanocni-jarmark-5-12-26": { start: "2026-12-05T08:00:00.000Z" },
 };
 
 const skipped: string[] = [];
@@ -894,6 +906,29 @@ const SAMPLE_POSTS = [
   "post-kryt-co-uzavren",
   "post-virtuozove-2026",
 ];
+
+if (ONLY_POSTS) {
+  const chosen = documents.filter(
+    (document) =>
+      document._type === "post" &&
+      ONLY_POSTS.includes((document.slug as { current: string }).current),
+  );
+  const missing = ONLY_POSTS.filter(
+    (slug) =>
+      !chosen.some(
+        (document) => (document.slug as { current: string }).current === slug,
+      ),
+  );
+  if (missing.length > 0) console.log(`Not found on the old site: ${missing.join(", ")}`);
+  for (const document of chosen)
+    console.log(`${DRY ? "would write" : "writing"} ${document._id} "${document.title}"`);
+  if (!DRY && chosen.length > 0) {
+    const transaction = client.transaction();
+    for (const document of chosen) transaction.createOrReplace(document);
+    await transaction.commit();
+  }
+  process.exit(0);
+}
 
 if (!DRY) {
   const transaction = client.transaction();
