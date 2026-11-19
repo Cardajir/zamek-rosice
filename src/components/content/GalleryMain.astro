@@ -54,7 +54,7 @@ const filler = (items.length - 1) % 2 === 1;
 
 {render && items.length > 0 && (
   <div class:list={["gallery_wrap", className]} id={id}>
-    <ul class="gallery_list">
+    <ul class="gallery_list" role="list">
       {items.map(({ photo, name, size }, index) => (
         <li class="gallery_item">
           <figure class:list={["gallery_figure", !photo.caption && "is-bare"]}>
@@ -298,7 +298,13 @@ const filler = (items.length - 1) % 2 === 1;
      * 208px under the one above on a phone and 449px at 1920 (102px under
      * it), its description or the room kept for one in between.
      */
+    /*
+     * No list marker at all: Safari lays the reset's empty marker on a line of
+     * its own above a flex or grid item and pushes it down. role="list" keeps
+     * the list for VoiceOver.
+     */
     .gallery_list {
+      list-style: none;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: clamp(1.4375rem, 0.8582rem + 2.3057vw, 3.625rem)

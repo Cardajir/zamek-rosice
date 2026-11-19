@@ -115,7 +115,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       <div class="footer_middle">
         <ContactLinesMain shell={shell} />
         {shell.partners.length === 0 && (
-          <ul class="footer_partners is-design">
+          <ul class="footer_partners is-design" role="list">
             {DESIGN_LOGOS.map((logo) => (
               <li class={`footer_logo is-${logo.key}`}>
                 {logo.url ? (
@@ -149,7 +149,7 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
           </ul>
         )}
         {shell.partners.length > 0 && (
-          <ul class="footer_partners">
+          <ul class="footer_partners" role="list">
             {shell.partners.map((partner) => (
               <li>
                 {partner.url ? (
@@ -393,7 +393,13 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
       }
     }
 
+    /*
+     * No list marker at all: Safari lays the reset's empty marker on a line of
+     * its own above a flex or grid item and pushes it down. role="list" keeps
+     * the list for VoiceOver.
+     */
     .footer_partners {
+      list-style: none;
       display: flex;
       flex-wrap: wrap;
       align-items: center;

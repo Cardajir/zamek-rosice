@@ -55,7 +55,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
   <header class:list={["nav_wrap", overlap && "overlap"]}>
     <div class="nav_inner">
       {socials.length > 0 && (
-        <ul class="nav_bar_socials">
+        <ul class="nav_bar_socials" role="list">
           {socials.map((social) => (
             <li>
               <a
@@ -110,7 +110,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                   />
                 </button>
                 <div class="nav_panel" id={`nav-panel-${index}`}>
-                  <ul class="nav_panel_list">
+                  <ul class="nav_panel_list" role="list">
                     {group.items.map((item, itemIndex) => (
                       <li style={`--_i: ${itemIndex}`}>
                         <a
@@ -170,7 +170,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                   />
                 </button>
                 <div class="nav_panel" id="nav-panel-lang">
-                  <ul class="nav_panel_list">
+                  <ul class="nav_panel_list" role="list">
                     {languages.map((item) => (
                       <li>
                         <a
@@ -194,7 +194,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
               </div>
             )}
             {socials.length > 0 && (
-              <ul class="nav_socials">
+              <ul class="nav_socials" role="list">
                 {socials.map((social) => (
                   <li>
                     <a
@@ -632,6 +632,15 @@ const socials = shell.socials.flatMap(({ network, url }) =>
       gap: 1rem;
       margin-left: 0.1875rem;
       font-size: 1.1875rem;
+    }
+
+    /*
+     * No list marker at all: Safari lays the reset's empty marker on a line of
+     * its own above a flex or grid item and pushes it down. role="list" keeps
+     * the list for VoiceOver.
+     */
+    :is(.nav_bar_socials, .nav_socials, .nav_panel_list) {
+      list-style: none;
     }
 
     .nav_socials {
