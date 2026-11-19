@@ -180,8 +180,11 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
     }
 
     /* The shared underline draws in on hover, as the words turn red. */
+    /* A name that leads somewhere is underlined from the start; hover turns it red. */
     .info-list_link {
       color: inherit;
+      background-position-x: 0%;
+      background-size: 100% var(--link-underline-width);
       @media (hover: hover) {
         &:hover {
           color: var(--link-text);
