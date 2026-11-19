@@ -16,6 +16,7 @@ import {
   type FileDocument,
 } from "@/sanity/page-queries.ts";
 import { shellFor } from "@/sanity/queries.ts";
+import { fillIn } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -65,7 +66,11 @@ const groups = CATEGORIES.map(({ id, heading }) => ({
 })).filter((group) => group.documents.length > 0);
 ---
 
-<Layout title={t.statutoryTitle} alternates={alternates("statutory")}>
+<Layout
+  title={t.statutoryTitle}
+  description={fillIn(t.metaStatutory, { organisation: shell.organisation })}
+  alternates={alternates("statutory")}
+>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={t.statutoryTitle} />

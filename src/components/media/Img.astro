@@ -201,7 +201,12 @@ const classes = [
 const shared = {
   src,
   alt,
-  quality: quality === "high" ? undefined : quality,
+  /*
+   * "high" is the q=75 the Sanity photographs are served at. Left unset, the
+   * Worker's image binding encodes at 85, a third heavier for no difference
+   * anyone sees.
+   */
+  quality: quality === "high" ? 75 : quality,
   loading,
   format: resolvedFormat,
   ...(fetchPriority !== "auto" ? { fetchpriority: fetchPriority } : {}),

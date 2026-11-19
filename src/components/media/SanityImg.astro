@@ -54,7 +54,12 @@ const {
   ...rest
 } = Astro.props;
 
-const STEPS = [480, 800, 1200, 1600, 2000, 2400];
+/*
+ * Close enough together that a browser rarely fetches much more than it
+ * shows: the small steps serve the event and tour cards, which sit at
+ * 11–17rem.
+ */
+const STEPS = [320, 480, 640, 800, 1000, 1200, 1600, 2000, 2400];
 
 const limit = Math.min(maxWidth, image?.width ?? maxWidth);
 const widths = [...STEPS.filter((step) => step < limit), limit];

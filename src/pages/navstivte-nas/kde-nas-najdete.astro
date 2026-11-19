@@ -16,11 +16,16 @@ import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getDirections } from "@/sanity/page-queries.ts";
 import { formatPlain } from "@/utils/text-blocks.ts";
+import { fillIn } from "@/utils/seo.ts";
+import { shellFor } from "@/sanity/queries.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 
-const directions = await getDirections(lang);
+const [shell, directions] = await Promise.all([
+  shellFor(Astro.locals),
+  getDirections(lang),
+]);
 
 /* An editor's own map link wins; otherwise the castle's coordinates on Mapy.com. */
 const { location } = directions;
@@ -31,10 +36,7 @@ const mapUrl =
 
 /* The Studio's plain text: its paragraphs, line breaks and bold words. */
 const escape = (value: string) =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const paragraphs = (value?: string) =>
   formatPlain(value).map((lines) =>
     lines
@@ -61,7 +63,9 @@ const ways = [
 
 <Layout
   title={t.directionsTitle}
-  description={directions.intro?.replace(/\*\*/g, "")}
+  description={fillIn(t.metaDirections, {
+    address: `${shell.street}, ${shell.postalCode} ${shell.locality}`,
+  })}
   alternates={alternates("directions")}
 >
   <!-- Photograph and title -->

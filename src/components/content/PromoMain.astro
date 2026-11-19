@@ -74,7 +74,11 @@ const paragraphs = (promo.text ?? "")
         {images.map((image) => (
           <SanityImg
             image={image}
-            sizes="(width >= 64rem) 45vw, 100vw"
+            sizes={
+              images.length > 1
+                ? "(width >= 64rem) 30vw, 100vw"
+                : "(width >= 64rem) 45vw, 100vw"
+            }
             maxWidth={1600}
           />
         ))}

@@ -8,6 +8,7 @@ import Reveal from "@/components/utility/Reveal.astro";
 import type { SeoProps } from "@/types.ts";
 import { DEFAULT_LANG, LANGS, LANG_LOCALES } from "@/consts.ts";
 import { routePath } from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
 import { shellFor } from "@/sanity/queries.ts";
 
 type Props = SeoProps & {
@@ -52,7 +53,7 @@ const languages = LANGS.map(
     <slot name="head" />
   </head>
   <body>
-    <SkipLink />
+    <SkipLink label={ui(Astro.locals.lang ?? DEFAULT_LANG).skipToContent} />
     <Nav shell={shell} languages={languages} overlap={overlap} />
     <main id="main" tabindex="-1">
       <slot />

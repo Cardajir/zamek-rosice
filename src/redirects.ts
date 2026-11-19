@@ -43,6 +43,17 @@ export const REDIRECTS: Record<string, string> = {
     "/fotogalerie/meda-a-jan-mladek",
   "/fotogalerie/vystava-rosickeho-skla": "/fotogalerie/rosicke-sklo",
   "/fotogalerie/zamecky-okruh": "/fotogalerie/zamecke-okruhy",
+
+  /* Old posts that live on as a page rather than as a news item. */
+  "/2020/06/vitejte-na-rosickem-zamku": "/o-zamku/z-historie",
+  "/2024/05/meda-a-jan-mladek-zivot-exil-umeni":
+    "/navstivte-nas/prohlidky/meda-a-jan-mladek",
+
+  /* WordPress's category archives and its feed. */
+  "/category/akce": "/aktuality",
+  "/category/aktuality": "/aktuality",
+  "/category/homepage": "/",
+  "/feed": "/aktuality",
 };
 
 /** Old WordPress posts lived at `/2024/05/slug/`; they are news items now. */
@@ -53,5 +64,6 @@ export function redirectFor(pathname: string): string | undefined {
   const bare = `/${pathname.replace(/^\/+|\/+$/g, "")}`;
   const post = bare.match(OLD_POST)?.[1];
   const target = REDIRECTS[bare] ?? (post ? `/aktuality/${post}` : undefined);
-  return target && target !== bare ? `${target}/` : undefined;
+  if (!target || target === bare) return undefined;
+  return target === "/" ? target : `${target}/`;
 }

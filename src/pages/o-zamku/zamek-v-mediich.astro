@@ -7,6 +7,7 @@ import { DEFAULT_LANG, LANG_LOCALES } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getMedia, type MediaMention } from "@/sanity/page-queries.ts";
+import { fillIn, listOf } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -34,7 +35,18 @@ const about = ({ outlet, date, url }: MediaMention) =>
     .join(" · ") || new URL(url).hostname.replace(/^www\./, "");
 ---
 
-<Layout title={t.mediaTitle} alternates={alternates("media")}>
+<Layout
+  title={t.mediaTitle}
+  description={fillIn(t.metaMedia, {
+    list: listOf(
+      mentions.map(
+        ({ outlet, url }) =>
+          outlet ?? new URL(url).hostname.replace(/^www\./, ""),
+      ),
+    ),
+  })}
+  alternates={alternates("media")}
+>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={t.mediaTitle} />

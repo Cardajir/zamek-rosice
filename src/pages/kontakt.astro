@@ -19,6 +19,7 @@ import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getPeople } from "@/sanity/page-queries.ts";
 import { shellFor } from "@/sanity/queries.ts";
+import { fillIn } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -37,6 +38,11 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
 
 <Layout
   title={t.contactTitle}
+  description={fillIn(t.metaContact, {
+    address: `${shell.street}, ${shell.postalCode} ${shell.locality}`,
+    phone: shell.phone && formatPhone(shell.phone),
+  })}
+  pageType="ContactPage"
   alternates={alternates("contact")}
   footerCta={false}
 >
@@ -46,10 +52,13 @@ const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as
   </Section>
 
   <!-- Status bar -->
-  <Section paddingTop="none" paddingBottom="small" data-stacki-key="kz7cqta7kuy00">
+  <Section
+    paddingTop="none"
+    paddingBottom="small"
+    data-stacki-key="kz7cqta7kuy00"
+  >
     <StatusBarMain shell={shell} note={shell.organisation} />
   </Section>
-
 
   <!-- Contacts and form -->
   <Section paddingTop="small">

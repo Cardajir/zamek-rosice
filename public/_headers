@@ -1,0 +1,18 @@
+# Headers for the files Cloudflare serves straight from dist/, without the
+# Worker. Pages get theirs from src/middleware.ts; the build adds a year's
+# immutable cache for the hashed files in /_astro/ to this file.
+
+/*
+  X-Content-Type-Options: nosniff
+
+# Unhashed, so kept for a while rather than for ever.
+/favicon.ico
+  Cache-Control: public, max-age=86400
+/favicon.svg
+  Cache-Control: public, max-age=86400
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400
+
+# The Studio's copy of Manrope.
+/fonts/*
+  Cache-Control: public, max-age=604800

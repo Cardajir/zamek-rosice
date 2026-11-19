@@ -1,33 +1,158 @@
 ---
 import { Font } from "astro:assets";
+import StructuredData from "@/components/utility/StructuredData.astro";
+import { DEFAULT_LANG, LANGS, LANG_LOCALES, SITE_NAME } from "@/consts.ts";
+import { STATUS_SUBJECTS } from "@/data/opening-2026.ts";
 import {
-  DEFAULT_LANG,
-  LANG_LOCALES,
-  SITE_NAME,
-  SITE_DESCRIPTION,
-} from "@/consts.ts";
-import { isNoindexRoute } from "@/utils/seo.ts";
+  matchRoute,
+  routePath,
+  stripLang,
+  type RouteId,
+} from "@/i18n/routes.ts";
+import { ui } from "@/i18n/ui.ts";
+import { shellFor } from "@/sanity/queries.ts";
+import {
+  DEFAULT_SOCIAL_IMAGE,
+  SCHEMA_IDS,
+  SOCIAL_HEIGHT,
+  SOCIAL_WIDTH,
+  breadcrumbNode,
+  businessOf,
+  castleNode,
+  describe,
+  isNoindexRoute,
+  meaningfulAlt,
+  openingHours,
+  organisationNode,
+  webPageNode,
+  websiteNode,
+  withSiteName,
+  type SocialImage,
+} from "@/utils/seo.ts";
 import type { SeoProps } from "@/types.ts";
 
 type Props = SeoProps;
 
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+const pathname = Astro.locals.pathname ?? Astro.url.pathname;
+
 const {
   title,
-  description = SITE_DESCRIPTION,
-  image = "/og-image.jpg",
+  description: given,
   type = "website",
+  publishedTime,
+  modifiedTime,
   noindex,
   alternates = [],
+  pageType = "WebPage",
+  breadcrumbs = [],
+  schema = [],
 } = Astro.props;
 
-const lang = Astro.locals.lang ?? DEFAULT_LANG;
-const pathname = Astro.locals.pathname ?? Astro.url.pathname;
-const isNoindex = noindex ?? isNoindexRoute(pathname);
+/* A draft seen through the Studio's preview is never for search engines. */
+const isNoindex =
+  (noindex ?? isNoindexRoute(pathname)) || Boolean(Astro.locals.preview);
 
-const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
-const canonical = new URL(pathname, Astro.site);
-const socialImage = new URL(image, Astro.site);
+const homePath = routePath("home", lang);
+const isHome = pathname === homePath;
+const pageTitle = title ? withSiteName(title, t.siteName) : t.homeTitle;
+const description = describe(given) ?? t.metaHome;
+const canonical = new URL(pathname, Astro.site).href;
+const absolute = (path: string) => new URL(path, Astro.site).href;
 const defaultAlternate = alternates.find((item) => item.lang === DEFAULT_LANG);
+
+/*
+ * The photograph each subpage opens with, cut to 1200 × 630 in `public/og`,
+ * so a shared link shows the same picture as the page. Mirrors the choice
+ * in PageHeroMain; a page that passes its own image wins.
+ */
+const ROUTE_IMAGES: Partial<Record<RouteId, string>> = {
+  news: "/og/news.jpg",
+  tours: "/og/tours.jpg",
+  admission: "/og/admission.jpg",
+  directions: "/og/directions.jpg",
+  gallery: "/og/gallery.jpg",
+  contact: "/og/contact.jpg",
+};
+const PAGE_IMAGES: Record<string, string> = {
+  "/o-zamku/z-historie": "/og/history.jpg",
+  "/navstivte-nas/navstevni-rad": "/og/tours.jpg",
+};
+const routeId = matchRoute(pathname)?.id;
+const heroImage =
+  (routeId && ROUTE_IMAGES[routeId]) ?? PAGE_IMAGES[stripLang(pathname)];
+const image: SocialImage =
+  Astro.props.image ??
+  (heroImage
+    ? {
+        src: heroImage,
+        width: SOCIAL_WIDTH,
+        height: SOCIAL_HEIGHT,
+        alt: title ? `${title} – ${t.siteName}` : t.ogImageAlt,
+      }
+    : { ...DEFAULT_SOCIAL_IMAGE, alt: t.ogImageAlt });
+const socialImage = { ...image, src: absolute(image.src) };
+const imageAlt = meaningfulAlt(image.alt) ?? title ?? t.ogImageAlt;
+
+const ogLocale = (value: string) => value.replace("-", "_");
+const otherLocales = alternates
+  .filter((item) => item.lang !== lang)
+  .map((item) => ogLocale(LANG_LOCALES[item.lang]));
+
+/*
+ * Structured data: the organisation, the castle and the site on every page,
+ * then this page, its breadcrumb and whatever it shows. Pages kept out of
+ * search carry none.
+ */
+const shell = await shellFor(Astro.locals);
+const business = businessOf(shell);
+const crumbs = isHome
+  ? []
+  : [
+      { name: t.homePage, url: absolute(homePath) },
+      ...breadcrumbs.map((item) => ({
+        name: item.name,
+        url: absolute(item.path),
+      })),
+      { name: title ?? t.siteName, url: canonical },
+    ];
+const nodes = isNoindex
+  ? []
+  : [
+      organisationNode(business, {
+        brand: SITE_NAME,
+        logo: "/apple-touch-icon.png",
+      }),
+      castleNode(business, {
+        name: t.siteName,
+        description: t.metaHome,
+        url: absolute(homePath),
+        image: absolute(DEFAULT_SOCIAL_IMAGE.src),
+        hours: openingHours(shell.opening, STATUS_SUBJECTS, shell.closures),
+      }),
+      websiteNode({
+        name: SITE_NAME,
+        alternateName: LANGS.filter((item) => item !== DEFAULT_LANG).map(
+          (item) => ui(item).siteName,
+        ),
+        languages: LANGS.map((item) => LANG_LOCALES[item]),
+      }),
+      webPageNode({
+        url: canonical,
+        type: pageType,
+        name: title ?? t.homeTitle,
+        description,
+        language: LANG_LOCALES[lang],
+        image: socialImage,
+        breadcrumb: crumbs.length > 1,
+        about: isHome ? SCHEMA_IDS.castle : undefined,
+        datePublished: publishedTime,
+        dateModified: modifiedTime,
+      }),
+      crumbs.length > 1 ? breadcrumbNode(canonical, crumbs) : undefined,
+      ...schema,
+    ];
 
 /*
  * Romie is configured only when its files are present, so its variable is
@@ -43,43 +168,67 @@ const romie = { cssVariable: "--font-romie" } as unknown as {
   @layer base, patterns, components, utilities;
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<Font cssVariable="--font-manrope" preload />
-{import.meta.env.HAS_ROMIE && <Font {...romie} preload />}
+{/* Only the faces the first screen is set in are fetched ahead; the rest load when text uses them. */}
+<Font
+  cssVariable="--font-manrope"
+  preload={[{ weight: 400 }, { weight: 600 }]}
+/>
+{import.meta.env.HAS_ROMIE && (
+  <Font {...romie} preload={[{ style: "normal" }]} />
+)}
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={canonical} />
-{isNoindex && <meta name="robots" content="noindex, nofollow" />}
+{isNoindex ? (
+  <meta name="robots" content="noindex, nofollow" />
+) : (
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+)}
+{!isNoindex && <link rel="canonical" href={canonical} />}
 {!isNoindex &&
   alternates.map((item) => (
-    <link
-      rel="alternate"
-      hreflang={item.lang}
-      href={new URL(item.path, Astro.site)}
-    />
+    <link rel="alternate" hreflang={item.lang} href={absolute(item.path)} />
   ))}
 {!isNoindex && defaultAlternate && (
   <link
     rel="alternate"
     hreflang="x-default"
-    href={new URL(defaultAlternate.path, Astro.site)}
+    href={absolute(defaultAlternate.path)}
   />
 )}
 
 <meta property="og:type" content={type} />
-<meta property="og:site_name" content={SITE_NAME} />
-<meta property="og:locale" content={LANG_LOCALES[lang].replace("-", "_")} />
+<meta property="og:site_name" content={t.siteName} />
+<meta property="og:locale" content={ogLocale(LANG_LOCALES[lang])} />
+{otherLocales.map((locale) => (
+  <meta property="og:locale:alternate" content={locale} />
+))}
 <meta property="og:title" content={pageTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
-<meta property="og:image" content={socialImage} />
+<meta property="og:image" content={socialImage.src} />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content={String(socialImage.width)} />
+<meta property="og:image:height" content={String(socialImage.height)} />
+<meta property="og:image:alt" content={imageAlt} />
+{type === "article" && publishedTime && (
+  <meta property="article:published_time" content={publishedTime} />
+)}
+{type === "article" && (modifiedTime ?? publishedTime) && (
+  <meta
+    property="article:modified_time"
+    content={modifiedTime ?? publishedTime}
+  />
+)}
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={socialImage} />
+<meta name="twitter:image" content={socialImage.src} />
+<meta name="twitter:image:alt" content={imageAlt} />
 
 <!-- The RZ monogram from the design: SVG where supported, a 16/32/48 ICO otherwise, a white square for the home screen. -->
 <link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta name="generator" content={Astro.generator} />
+<StructuredData nodes={nodes} />

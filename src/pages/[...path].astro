@@ -12,6 +12,7 @@ import { matchPage, pagePath } from "@/i18n/pages.ts";
 import { stripLang } from "@/i18n/routes.ts";
 import { getPage, getPageSections } from "@/sanity/queries.ts";
 import { leadingQuotes } from "@/utils/text-blocks.ts";
+import { blocksToText, describe } from "@/utils/seo.ts";
 
 /*
  * Text pages from the page builder. Everything that is not a page in code
@@ -49,13 +50,18 @@ const translations = page.translations.flatMap((item) =>
     ? [{ lang: item.lang, path: pagePath(item.parent, item.slug, item.lang) }]
     : [],
 );
+/* The perex, or else the page's opening words. */
+const description =
+  describe(page.perex) ??
+  describe(blocksToText(texts.flatMap((section) => section.body)));
+
 const alternates =
   translations.length > 0
     ? translations
     : [{ lang, path: pagePath(page.parent, page.slug, lang) }];
 ---
 
-<Layout title={page.title} description={page.perex} alternates={alternates}>
+<Layout title={page.title} description={description} alternates={alternates}>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={page.title} />
@@ -120,7 +126,9 @@ const alternates =
    * to the text; 81px and 166px under the last line.
    */
   .text-page_quotes {
-    padding-top: calc(2.5 / 3 * clamp(5.9125rem, 4.7754rem + 4.5257vw, 10.2063rem));
+    padding-top: calc(
+      2.5 / 3 * clamp(5.9125rem, 4.7754rem + 4.5257vw, 10.2063rem)
+    );
 
     & > .container {
       row-gap: clamp(4.3rem, 6.3632rem + -1.7194vw, 5.9313rem);

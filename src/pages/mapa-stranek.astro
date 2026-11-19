@@ -36,7 +36,11 @@ const sections = [
 ].filter((section) => section.label && section.items.length > 0);
 ---
 
-<Layout title={t.siteMapTitle} alternates={alternates("siteMap")}>
+<Layout
+  title={t.siteMapTitle}
+  description={t.metaSiteMap}
+  alternates={alternates("siteMap")}
+>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={t.siteMapTitle} />

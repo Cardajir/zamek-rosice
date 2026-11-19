@@ -110,6 +110,10 @@ export interface Shell {
   mobile?: string;
   email?: string;
   socials: { network: string; url: string }[];
+  /** The organisation's company number (IČ), for structured data. */
+  companyId?: string;
+  /** The castle's coordinates, for structured data. */
+  location?: { lat?: number; lng?: number };
   rating?: { value: number; source?: string; url?: string; label?: string };
   groups: { label: string; items: NavLink[] }[];
   topLinks: NavLink[];
@@ -198,7 +202,8 @@ interface RawShell {
 const SHELL = `{
   "settings": *[_id == "siteSettings"][0]{
     "organisation": ${text("organisation")},
-    street, postalCode, locality, phone, mobile, email,
+    street, postalCode, locality, phone, mobile, email, companyId,
+    location{ lat, lng },
     socials[]{ network, url },
     rating{ value, source, url, "label": ${text("label")} }
   },
@@ -532,6 +537,8 @@ export async function getNews(lang: Lang): Promise<News> {
 
 export interface PostDetail extends Post {
   body?: unknown[];
+  /** When the item was last edited, for `dateModified`. */
+  updatedAt?: string;
   eventTimeNote?: string;
   eventPlace?: string;
   eventTicketUrl?: string;
@@ -541,7 +548,7 @@ export interface PostDetail extends Post {
 }
 
 const POST_DETAIL = `*[_type == "post" && language == $lang && slug.current == $slug][0]{
-  title, "slug": slug.current, kind, perex, publishedAt,
+  title, "slug": slug.current, kind, perex, publishedAt, "updatedAt": _updatedAt,
   eventStart, eventEnd, eventPrice, eventTimeNote, eventPlace, eventTicketUrl, eventStatus,
   "image": image${IMAGE},
   "body": body${BODY},
@@ -613,5 +620,129 @@ export async function getTour(
     ...tour,
     image: tour.image?.url ? tour.image : undefined,
     images: (tour.images ?? []).filter((image) => image?.url),
+  };
+}
+
+/* ------------------------------------------------------------- search -- */
+
+const NEWS_LANGUAGES = `array::unique(*[_type == "post"].language)`;
+
+/** The languages that have news items, so an empty list is kept out of search. */
+export async function getNewsLanguages(): Promise<Lang[]> {
+  const langs = await query<(string | null)[]>(NEWS_LANGUAGES, {}, ["cs"]);
+  return (["cs", "en", "de"] as const).filter((lang) => langs.includes(lang));
+}
+
+/** Slugs per language, and when the document last changed. */
+export interface SitemapDocuments {
+  tours: { slugs: Partial<Record<Lang, string>>; updatedAt?: string }[];
+  albums: { slugs: Partial<Record<Lang, string>>; updatedAt?: string }[];
+  posts: {
+    lang: string;
+    slug: string;
+    updatedAt?: string;
+    translations?: { lang: string; slug?: string }[] | null;
+  }[];
+  pages: {
+    lang: string;
+    slug: string;
+    parent?: string;
+    updatedAt?: string;
+    translations?: { lang: string; slug?: string; parent?: string }[] | null;
+  }[];
+}
+
+const SLUGS = `{ "cs": slug.cs.current, "en": slug.en.current, "de": slug.de.current }`;
+
+const SITEMAP = `{
+  "tours": *[_type == "tour" && defined(slug.cs.current)] | order(order asc){
+    "slugs": ${SLUGS}, "updatedAt": _updatedAt
+  },
+  "albums": *[_type == "gallery" && count(images) > 0] | order(order asc){
+    "slugs": ${SLUGS}, "updatedAt": _updatedAt
+  },
+  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc){
+    "lang": language, "slug": slug.current, "updatedAt": _updatedAt,
+    "translations": *[_type == "translation.metadata" && references(^._id)][0]
+      .translations[]{ "lang": _key, "slug": value->slug.current }
+  },
+  "pages": *[_type == "page" && defined(slug.current)]{
+    "lang": language, "slug": slug.current, parent, "updatedAt": _updatedAt,
+    "translations": *[_type == "translation.metadata" && references(^._id)][0]
+      .translations[]{ "lang": _key, "slug": value->slug.current, "parent": value->parent }
+  }
+}`;
+
+/** Every published tour, album, news item and text page, for the sitemap. */
+export async function getSitemapDocuments(): Promise<SitemapDocuments> {
+  const raw = await query<Partial<SitemapDocuments>>(SITEMAP, {}, {});
+  return {
+    tours: raw.tours ?? [],
+    albums: raw.albums ?? [],
+    posts: raw.posts ?? [],
+    pages: raw.pages ?? [],
+  };
+}
+
+/** What the plain-text summaries for AI assistants are written from. */
+export interface LlmsContent {
+  pages: {
+    title: string;
+    perex?: string;
+    parent?: string;
+    slug: string;
+    sections?: { body?: unknown[] }[] | null;
+  }[];
+  tours: {
+    title: string;
+    titleEn?: string;
+    perex?: string;
+    perexEn?: string;
+    slug: string;
+    slugEn?: string;
+    kind?: TourCard["kind"];
+    duration?: TourCard["duration"];
+    free?: boolean;
+    body?: unknown[];
+    bodyEn?: unknown[];
+  }[];
+  posts: Pick<
+    Post,
+    | "title"
+    | "slug"
+    | "kind"
+    | "perex"
+    | "publishedAt"
+    | "eventStart"
+    | "eventEnd"
+  >[];
+}
+
+const LLMS = `{
+  "pages": *[_type == "page" && language == "cs" && defined(slug.current)]
+    | order(parent asc, title asc){
+    title, perex, parent, "slug": slug.current,
+    "sections": sections[_type == "sectionRichText"]{ body }
+  },
+  "tours": *[_type == "tour" && defined(slug.cs.current)] | order(order asc){
+    "title": title.cs, "titleEn": title.en,
+    "perex": perex.cs, "perexEn": perex.en,
+    "slug": slug.cs.current, "slugEn": slug.en.current,
+    kind, duration, free,
+    "body": body.cs, "bodyEn": body.en
+  },
+  "posts": *[_type == "post" && language == "cs" && defined(slug.current)]
+    | order(publishedAt desc)[0...20]{
+    title, "slug": slug.current, kind, perex, publishedAt, eventStart, eventEnd
+  }
+}`;
+
+/** Text pages, tours and recent news in the words editors wrote them. */
+export async function getLlmsContent(): Promise<LlmsContent> {
+  const raw = await query<Partial<LlmsContent>>(LLMS, {}, {});
+  return {
+    pages: (raw.pages ?? []).filter((page) => page.title && page.slug),
+    tours: (raw.tours ?? []).filter((tour) => tour.title && tour.slug),
+    posts: (raw.posts ?? []).filter((post) => post.title && post.slug),
   };
 }

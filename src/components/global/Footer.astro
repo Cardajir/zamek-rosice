@@ -80,8 +80,12 @@ const ctaLines = cta?.title?.split(/(?<=[?!.])\s+/) ?? [];
         {cta.image && <SanityImg image={{ ...cta.image, alt: "" }} />}
         <div class="footer_cta_content">
           <h2 class="footer_cta_title text-style-h1" data-reveal-letters>
-            {ctaLines.map((line) => (
-              <span>{line}</span>
+            {/* A space between the lines, so the heading reads as two sentences. */}
+            {ctaLines.map((line, index) => (
+              <Fragment>
+                {index > 0 && " "}
+                <span>{line}</span>
+              </Fragment>
             ))}
           </h2>
           {cta.link && (

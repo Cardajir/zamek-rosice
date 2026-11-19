@@ -9,6 +9,7 @@ import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getAlbum, getAlbums } from "@/sanity/page-queries.ts";
+import { fillIn, listOf } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -23,7 +24,10 @@ const photos = album?.images ?? [];
 
 <Layout
   title={t.galleryTitle}
-  description={t.galleryIntro}
+  description={fillIn(t.metaGallery, {
+    list: listOf(albums.map((item) => item.title)),
+  })}
+  pageType="ImageGallery"
   alternates={alternates("gallery")}
 >
   <!-- Photograph and title -->
@@ -43,12 +47,11 @@ const photos = album?.images ?? [];
       intro={t.galleryIntro}
       items={albums.map((item, index) => ({
         label: item.title,
-        href:
-          `${
-            index === 0
-              ? routePath("gallery", lang)
-              : routePath("gallery", lang, item.slug)
-          }#fotky`,
+        href: `${
+          index === 0
+            ? routePath("gallery", lang)
+            : routePath("gallery", lang, item.slug)
+        }#fotky`,
         current: index === 0,
       }))}
       data-stacki-key="kvtlgmjf0room"

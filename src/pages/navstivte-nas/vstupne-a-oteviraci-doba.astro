@@ -95,7 +95,11 @@ const hours = hoursTable(admission.periods, admission.subjects, {
 });
 ---
 
-<Layout title={t.admissionTitle} alternates={alternates("admission")}>
+<Layout
+  title={t.admissionTitle}
+  description={t.metaAdmission}
+  alternates={alternates("admission")}
+>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={t.admissionTitle} />

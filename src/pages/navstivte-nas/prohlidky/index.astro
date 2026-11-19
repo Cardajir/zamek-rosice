@@ -7,6 +7,7 @@ import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getTours, type TourCard } from "@/sanity/queries.ts";
+import { fillIn, listOf } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -34,7 +35,14 @@ const links = (tour: TourCard) => [
 const title = t.toursPageTitle;
 ---
 
-<Layout title={title} alternates={alternates("tours")}>
+<Layout
+  title={title}
+  description={fillIn(t.metaTours, {
+    list: listOf(tours.map((tour) => tour.title)),
+  })}
+  pageType="CollectionPage"
+  alternates={alternates("tours")}
+>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={title} />

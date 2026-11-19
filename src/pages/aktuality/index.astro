@@ -8,12 +8,15 @@ import EventsMain from "@/components/content/EventsMain.astro";
 import { DEFAULT_LANG, SITE_TIME_ZONE } from "@/consts.ts";
 import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
-import { getNews } from "@/sanity/queries.ts";
+import { getNews, getNewsLanguages } from "@/sanity/queries.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 
-const news = await getNews(lang);
+const [news, languages] = await Promise.all([
+  getNews(lang),
+  getNewsLanguages(),
+]);
 
 const featured = news.featured ? [news.featured] : [];
 const pinned = new Set(featured.map((post) => post.slug));
@@ -27,13 +30,27 @@ const season = new Intl.DateTimeFormat("en", {
 
 const empty = featured.length + upcoming.length + archive.length === 0;
 
+/*
+ * News is written per language. A language with none yet shows only a note,
+ * so it stays out of search and the others do not point to it.
+ */
+const versions = alternates("news").filter((item) =>
+  languages.includes(item.lang),
+);
+
 /* Six items to a page, as the design lists them, then "show more". */
 const PAGE_SIZE = 6;
 /* The archive opens with three, as the client asked. */
 const ARCHIVE_PAGE_SIZE = 3;
 ---
 
-<Layout title={t.news} alternates={alternates("news")}>
+<Layout
+  title={t.news}
+  description={t.metaNews}
+  pageType="CollectionPage"
+  noindex={empty || undefined}
+  alternates={versions}
+>
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
     <PageHeroMain title={t.news} />

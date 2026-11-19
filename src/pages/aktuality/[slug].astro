@@ -11,8 +11,16 @@ import {
 } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
-import { getPost } from "@/sanity/queries.ts";
-import { sized } from "@/utils/image.ts";
+import { getPost, shellFor } from "@/sanity/queries.ts";
+import {
+  DEFAULT_SOCIAL_IMAGE,
+  articleNode,
+  blocksToText,
+  businessOf,
+  describe,
+  eventNode,
+  sanitySocialImage,
+} from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -36,6 +44,42 @@ const date = new Intl.DateTimeFormat(LANG_LOCALES[lang], {
   timeZone: SITE_TIME_ZONE,
 });
 const isEvent = post.kind === "event";
+
+/* What search and sharing show: the poster, the perex, and the item as an event or an article. */
+const socialImage = sanitySocialImage(post.image);
+const description = describe(post.perex) ?? describe(blocksToText(post.body));
+const url = new URL(Astro.locals.pathname ?? Astro.url.pathname, Astro.site)
+  .href;
+const shell = await shellFor(Astro.locals);
+const schema =
+  isEvent && post.eventStart
+    ? eventNode({
+        url,
+        name: post.title,
+        description,
+        image: socialImage,
+        start: post.eventStart,
+        end: post.eventEnd,
+        status: post.eventStatus,
+        place: post.eventPlace ?? t.siteName,
+        ticketUrl: post.eventTicketUrl,
+        price: post.eventPrice,
+        language: LANG_LOCALES[lang],
+        business: businessOf(shell),
+      })
+    : articleNode({
+        url,
+        headline: post.title,
+        description,
+        /* An article needs a picture; the castle's front stands in for a missing one. */
+        image: socialImage ?? {
+          ...DEFAULT_SOCIAL_IMAGE,
+          src: new URL(DEFAULT_SOCIAL_IMAGE.src, Astro.site).href,
+        },
+        datePublished: post.publishedAt,
+        dateModified: post.updatedAt,
+        language: LANG_LOCALES[lang],
+      });
 const when = [
   post.eventStart && date.format(new Date(post.eventStart)),
   post.eventEnd && date.format(new Date(post.eventEnd)),
@@ -53,10 +97,14 @@ const facts = isEvent
 
 <Layout
   title={post.title}
-  description={post.perex}
+  description={description}
   type="article"
-  image={post.image && sized(post.image.url, 1200)}
+  publishedTime={post.publishedAt}
+  modifiedTime={post.updatedAt}
+  image={socialImage}
   alternates={versions}
+  breadcrumbs={[{ name: t.news, path: routePath("news", lang) }]}
+  schema={[schema]}
 >
   <!-- Poster, title and text -->
   <Section paddingTop="none" class="padding-bottom-6">

@@ -8,7 +8,7 @@ import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getTour } from "@/sanity/queries.ts";
-import { sized } from "@/utils/image.ts";
+import { sanitySocialImage } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -41,8 +41,9 @@ const [hero, ...photos] = tour.images;
 <Layout
   title={tour.title}
   description={tour.perex}
-  image={tour.image && sized(tour.image.url, 1200)}
+  image={sanitySocialImage(tour.image)}
   alternates={alternates("tours", tour.slugs)}
+  breadcrumbs={[{ name: t.toursPageTitle, path: routePath("tours", lang) }]}
 >
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">

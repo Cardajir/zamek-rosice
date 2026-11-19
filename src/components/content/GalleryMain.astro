@@ -24,7 +24,8 @@ const { render = true, photos, back, id, class: className } = Astro.props;
 
 const t = ui(Astro.locals.lang ?? DEFAULT_LANG);
 
-const THUMB_WIDTHS = [480, 800, 1200];
+/* Phone thumbnails are about 164px wide, so the small steps matter there. */
+const THUMB_WIDTHS = [320, 480, 640, 800, 1200];
 const FULL_WIDTHS = [800, 1200, 1600, 2400];
 
 const srcset = (photo: Image, widths: number[]) =>
@@ -74,12 +75,12 @@ const filler = (items.length - 1) % 2 === 1;
                 sizes={
                   index === 0
                     ? "(width >= 82rem) 82rem, 100vw"
-                    : "(width >= 64rem) 27rem, 50vw"
+                    : "(width >= 64rem) 27rem, calc(50vw - 2.5rem)"
                 }
                 width={size.width}
                 height={size.height}
                 alt={photo.alt ?? photo.caption ?? ""}
-                loading={index === 0 ? "eager" : "lazy"}
+                loading="lazy"
                 decoding="async"
               />
             </a>

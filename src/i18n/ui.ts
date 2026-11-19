@@ -19,6 +19,7 @@ const cs = {
   nextOpening: "Otevíráme",
   lastEntry: "poslední prohlídka v",
   upcomingEvents: "Nadcházející události",
+  skipToContent: "Přejít na obsah",
   /** Above the pinned news item, followed by the year. */
   lastMinute: "Last minute sezóny",
   pastEvents: "Archív již proběhlých akcí",
@@ -140,6 +141,32 @@ const cs = {
   previousQuote: "Předchozí citace",
   nextQuote: "Další citace",
   quoteOf: "Citace {n} z {total}",
+  /* Search and sharing. `{list}` and the like are filled in from the page's content. */
+  siteName: "Zámek Rosice",
+  homeTitle: "Zámek Rosice – renesanční zámek nedaleko Brna",
+  ogImageAlt: "Průčelí zámku Rosice",
+  metaHome:
+    "Žerotínská renesanční perla nedaleko Brna. Prohlídkové okruhy, stálé výstavy, zámecká zahrada, svatby a pronájmy na zámku Rosice.",
+  metaTours:
+    "Prohlídkové okruhy a stálé výstavy na zámku Rosice u Brna: {list}.",
+  metaAdmission:
+    "Vstupné a otevírací doba zámku Rosice: ceny prohlídkových okruhů a výstav, rodinné a skupinové vstupné, otevírací doba v sezóně a mimořádné uzavírky.",
+  metaDirections:
+    "Kde najdete zámek Rosice, asi 20 km západně od Brna: {address}. Jak k nám dojet autem, vlakem nebo autobusem a GPS souřadnice zámku.",
+  metaNews:
+    "Aktuality a akce zámku Rosice u Brna: nadcházející akce a výstavy, novinky ze zámku, informace pro návštěvníky a archiv již proběhlých akcí.",
+  metaGallery: "Fotogalerie zámku Rosice u Brna: {list}.",
+  metaAlbum:
+    "{album}: fotografie ve fotogalerii zámku Rosice u Brna. Prohlédněte si zámek, jeho expozice, výstavy a zahradu na snímcích.",
+  metaContact:
+    "Kontakty na zámek Rosice: {address}, telefon {phone}, e-mail, kontaktní osoby správy zámku a kontaktní formulář.",
+  metaPartners: "Partneři zámku Rosice: {list}.",
+  metaMedia:
+    "Zámek Rosice v médiích – co o zámku napsali, natočili nebo řekli: {list}.",
+  metaStatutory:
+    "Povinné a statutární informace – {organisation}: sídlo, IČ, bankovní spojení, rozpočty, závěrečné zprávy a další dokumenty.",
+  metaSiteMap:
+    "Mapa stránek webu zámku Rosice: prohlídkové okruhy, vstupné a otevírací doba, akce a pronájmy, historie zámku, fotogalerie, kontakty a povinné informace.",
 };
 
 export type Dictionary = typeof cs;
@@ -158,6 +185,7 @@ const en: Dictionary = {
   nextOpening: "Opens",
   lastEntry: "last tour at",
   upcomingEvents: "Upcoming events",
+  skipToContent: "Skip to main content",
   /** Above the pinned news item, followed by the year. */
   lastMinute: "Last minute of the season",
   pastEvents: "Past events",
@@ -280,6 +308,31 @@ const en: Dictionary = {
   previousQuote: "Previous quotation",
   nextQuote: "Next quotation",
   quoteOf: "Quotation {n} of {total}",
+  siteName: "Rosice Castle",
+  homeTitle: "Rosice Castle – a Renaissance castle near Brno",
+  ogImageAlt: "The front of Rosice Castle",
+  metaHome:
+    "A Renaissance jewel of the Žerotín family near Brno. Guided tours, permanent exhibitions, the castle garden, weddings and venue hire at Rosice Castle.",
+  metaTours:
+    "Guided tours and permanent exhibitions at Rosice Castle near Brno: {list}.",
+  metaAdmission:
+    "Admission and opening hours of Rosice Castle: prices of the guided tours and exhibitions, family and group tickets, seasonal opening hours and closures.",
+  metaDirections:
+    "Where to find Rosice Castle, about 20 km west of Brno: {address}. Getting here by car, train or bus, and the castle's GPS coordinates.",
+  metaNews:
+    "News and events at Rosice Castle near Brno: upcoming events and exhibitions, news from the castle, visitor information and an archive of past events.",
+  metaGallery: "Photo gallery of Rosice Castle near Brno: {list}.",
+  metaAlbum:
+    "{album}: photographs in the photo gallery of Rosice Castle near Brno. See the castle, its exhibitions and its garden in pictures.",
+  metaContact:
+    "Contact Rosice Castle: {address}, telephone {phone}, e-mail, the castle administration's contact persons and a contact form.",
+  metaPartners: "Partners of Rosice Castle: {list}.",
+  metaMedia:
+    "Rosice Castle in the media – what has been written, filmed and said about the castle: {list}.",
+  metaStatutory:
+    "Statutory information – {organisation}: registered office, company ID, bank account, budgets and annual reports.",
+  metaSiteMap:
+    "Site map of the Rosice Castle website: guided tours, admission and opening hours, events and venue hire, the castle's history, photo gallery and contacts.",
 };
 
 const de: Dictionary = {
@@ -296,6 +349,7 @@ const de: Dictionary = {
   nextOpening: "Wir öffnen",
   lastEntry: "letzte Führung um",
   upcomingEvents: "Kommende Veranstaltungen",
+  skipToContent: "Zum Inhalt springen",
   /** Above the pinned news item, followed by the year. */
   lastMinute: "Last Minute der Saison",
   pastEvents: "Vergangene Veranstaltungen",
@@ -420,6 +474,31 @@ const de: Dictionary = {
   previousQuote: "Vorheriges Zitat",
   nextQuote: "Nächstes Zitat",
   quoteOf: "Zitat {n} von {total}",
+  siteName: "Schloss Rosice",
+  homeTitle: "Schloss Rosice – Renaissanceschloss bei Brünn",
+  ogImageAlt: "Die Vorderseite von Schloss Rosice",
+  metaHome:
+    "Eine Renaissance-Perle der Familie Žerotín bei Brünn. Führungen, Dauerausstellungen, Schlossgarten, Hochzeiten und Raumvermietung auf Schloss Rosice.",
+  metaTours:
+    "Führungen und Dauerausstellungen auf Schloss Rosice bei Brünn: {list}.",
+  metaAdmission:
+    "Eintritt und Öffnungszeiten von Schloss Rosice: Preise der Führungen und Ausstellungen, Familien- und Gruppenkarten, Öffnungszeiten der Saison und Schließtage.",
+  metaDirections:
+    "Schloss Rosice, etwa 20 km westlich von Brünn: {address}. Anfahrt mit Auto, Zug oder Bus und die GPS-Koordinaten des Schlosses.",
+  metaNews:
+    "Aktuelles und Veranstaltungen auf Schloss Rosice bei Brünn: kommende Veranstaltungen und Ausstellungen, Neuigkeiten aus dem Schloss und vergangene Termine.",
+  metaGallery: "Fotogalerie von Schloss Rosice bei Brünn: {list}.",
+  metaAlbum:
+    "{album}: Fotos aus der Fotogalerie von Schloss Rosice bei Brünn. Das Schloss, seine Ausstellungen und der Schlossgarten in Bildern.",
+  metaContact:
+    "Kontakt zu Schloss Rosice: {address}, Telefon {phone}, E-Mail, Ansprechpartner der Schlossverwaltung und Kontaktformular.",
+  metaPartners: "Partner von Schloss Rosice: {list}.",
+  metaMedia:
+    "Schloss Rosice in den Medien – was über das Schloss geschrieben, gefilmt und gesagt wurde: {list}.",
+  metaStatutory:
+    "Pflichtinformationen – {organisation}: Sitz, IČ, Bankverbindung, Haushaltspläne, Jahresberichte und weitere Dokumente.",
+  metaSiteMap:
+    "Seitenübersicht der Website von Schloss Rosice: Führungen, Eintritt und Öffnungszeiten, Veranstaltungen und Vermietung, Geschichte, Fotogalerie und Kontakt.",
 };
 
 const DICTIONARIES: Record<Lang, Dictionary> = { cs, en, de };

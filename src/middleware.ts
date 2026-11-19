@@ -44,6 +44,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     (method === "GET" || method === "HEAD") && !KEEP_AS_IS.test(pathname);
 
   if (isPage) {
+    /* Doubled slashes ("//kontakt/") would be a second address for a page. */
+    if (pathname.includes("//")) {
+      return context.redirect(`${pathname.replace(/\/{2,}/g, "/")}${search}`, 301);
+    }
+
     /* A retired address answers with where its content went. */
     const retired = redirectFor(pathname);
     if (retired) return context.redirect(`${retired}${search}`, 301);
@@ -75,6 +80,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   /* A copy of the site on any other host is not for search engines. */
   if (!isLiveHost(context.url.hostname)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
+  /* Nor are the Studio and the endpoints, on the live host either. */
+  if (/^\/(studio|api)(\/|$)/.test(pathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
 

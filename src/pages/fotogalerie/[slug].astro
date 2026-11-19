@@ -9,7 +9,7 @@ import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getAlbum, getAlbums } from "@/sanity/page-queries.ts";
-import { sized } from "@/utils/image.ts";
+import { fillIn, sanitySocialImage } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
@@ -29,8 +29,11 @@ const cover = album.images[0];
 
 <Layout
   title={`${album.title} – ${t.galleryTitle}`}
-  image={cover && sized(cover.url, 1200)}
+  description={fillIn(t.metaAlbum, { album: album.title })}
+  image={sanitySocialImage(cover)}
+  pageType="ImageGallery"
   alternates={alternates("gallery", album.slugs)}
+  breadcrumbs={[{ name: t.galleryTitle, path: routePath("gallery", lang) }]}
 >
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
@@ -44,12 +47,11 @@ const cover = album.images[0];
       intro={t.galleryIntro}
       items={albums.map((item, index) => ({
         label: item.title,
-        href:
-          `${
-            index === 0
-              ? routePath("gallery", lang)
-              : routePath("gallery", lang, item.slug)
-          }#fotky`,
+        href: `${
+          index === 0
+            ? routePath("gallery", lang)
+            : routePath("gallery", lang, item.slug)
+        }#fotky`,
         current: item.slug === album.slug,
       }))}
     />

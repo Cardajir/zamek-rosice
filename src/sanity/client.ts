@@ -19,7 +19,8 @@ export function sanityClient(): SanityClient | undefined {
     projectId,
     dataset,
     apiVersion,
-    useCdn: false,
+    /* Published content through Sanity's API CDN, which a publish refreshes. */
+    useCdn: true,
     perspective: "published",
     stega: { enabled: false, studioUrl: "/studio" },
   });

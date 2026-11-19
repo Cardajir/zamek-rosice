@@ -4,10 +4,8 @@ import { existsSync } from "node:fs";
 import { loadEnv } from "vite";
 import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
-import sitemap from "@astrojs/sitemap";
 import sanity from "@sanity/astro";
 import { SITE_URL, sanityProjectId } from "./src/consts.ts";
-import { isNoindexRoute } from "./src/utils/seo.ts";
 
 /*
  * The config runs before Vite fills `import.meta.env`, so the Sanity project
@@ -87,9 +85,10 @@ export default defineConfig({
           react(),
         ]
       : []),
-    sitemap({
-      filter: (page) => !isNoindexRoute(new URL(page).pathname),
-    }),
+    /*
+     * No sitemap integration: rendered on request, the build knows only the
+     * pages in code. `src/pages/sitemap.xml.ts` lists every page from Sanity.
+     */
   ],
   fonts: [
     {

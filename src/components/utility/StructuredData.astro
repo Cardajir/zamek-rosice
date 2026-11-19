@@ -1,0 +1,18 @@
+---
+import { jsonForScript, schemaGraph, type Node } from "@/utils/seo.ts";
+
+interface Props {
+  /** The nodes of the page's graph. Empty fields are left out. */
+  nodes: (Node | undefined | false)[];
+}
+
+const nodes = Astro.props.nodes.filter((node): node is Node => Boolean(node));
+---
+
+{nodes.length > 0 && (
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={jsonForScript(schemaGraph(nodes))}
+  />
+)}
