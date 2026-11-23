@@ -45,7 +45,7 @@ const about = ({ description, url }: Partner) =>
         label: partner.name,
         href: isWeb(partner.url) ? partner.url : undefined,
         external: true,
-        lines: [{ text: about(partner) }],
+        lines: [{ text: about(partner), logo: partner.logo }],
       }))}
     />
   </Section>

@@ -8,7 +8,14 @@ interface Line {
   href?: string;
   /** A word set at the far right in the line's own type: "Video", "Podcast". */
   aside?: string;
+  /** A logo at the far right, from Sanity; decorative, as the label names it. */
+  logo?: { url: string; width: number; height: number };
 }
+
+/* Logos stand 48px tall at most; the file is asked for at twice that. */
+const LOGO_HEIGHT = 48;
+const logoSrc = (url: string) =>
+  `${url}?h=${LOGO_HEIGHT * 2}&fit=max&auto=format`;
 
 interface Row {
   label: string;
@@ -54,6 +61,19 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
           <dd class="info-list_line">
             <span class="info-list_text">{line.text}</span>
             {line.aside && <span class="info-list_aside">{line.aside}</span>}
+            {line.logo && (
+              <img
+                class="info-list_logo"
+                src={logoSrc(line.logo.url)}
+                width={Math.round(
+                  (line.logo.width / line.logo.height) * LOGO_HEIGHT,
+                )}
+                height={LOGO_HEIGHT}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            )}
             {line.value &&
               (line.href ? (
                 <a
@@ -168,6 +188,21 @@ const shown = rows.filter((row) => row.label && row.lines.length > 0);
       flex: none;
       margin-inline-start: auto;
       text-align: end;
+    }
+
+    /*
+     * A partner's logo at the end of its line: 36px tall on a phone, 48px at
+     * 1920, never wider than 128px. The height is set outright so the row
+     * keeps its room before the file arrives.
+     */
+    .info-list_logo {
+      flex: none;
+      margin-inline-start: auto;
+      width: auto;
+      height: clamp(2.25rem, 2.05rem + 0.8vw, 3rem);
+      max-width: clamp(5.5rem, 4.9rem + 2.4vw, 8rem);
+      object-fit: contain;
+      object-position: right center;
     }
 
     /* A price: plain on a phone, bold beside the wider table. */
