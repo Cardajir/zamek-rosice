@@ -149,6 +149,7 @@ def describe(doc) -> tuple[str, str, list]:
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")  # Czech names in a Windows console
     out_root = Path(sys.argv[1] if len(sys.argv) > 1 else "tmp/alt-texty")
     stamp = date.today().isoformat()
     name = f"Alt texty – Zámek Rosice {stamp}"

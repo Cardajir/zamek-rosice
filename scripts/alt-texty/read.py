@@ -24,6 +24,7 @@ def text(value) -> str:
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")  # Czech names in a Windows console
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     src = Path(sys.argv[1])
