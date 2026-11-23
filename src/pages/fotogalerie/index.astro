@@ -6,9 +6,10 @@ import Heading from "@/components/typography/Heading.astro";
 import GalleryMain from "@/components/content/GalleryMain.astro";
 import GalleryNavMain from "@/components/content/GalleryNavMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
-import { alternates, routePath } from "@/i18n/routes.ts";
+import { alternates } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getAlbum, getAlbums } from "@/sanity/page-queries.ts";
+import { galleryNav } from "@/utils/gallery.ts";
 import { fillIn, listOf } from "@/utils/seo.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
@@ -36,24 +37,11 @@ const photos = album?.images ?? [];
   </Section>
 
   <!-- Albums -->
-  <Section
-    id="alba"
-    render={albums.length > 0}
-    paddingTop="none"
-    paddingBottom="none"
-  >
+  <Section id="alba" paddingTop="none" paddingBottom="none">
     <GalleryNavMain
       label={t.galleryAlbums}
       intro={t.galleryIntro}
-      items={albums.map((item, index) => ({
-        label: item.title,
-        href: `${
-          index === 0
-            ? routePath("gallery", lang)
-            : routePath("gallery", lang, item.slug)
-        }#fotky`,
-        current: index === 0,
-      }))}
+      items={galleryNav(albums, lang, first?.slug)}
       data-stacki-key="kvtlgmjf0room"
     />
   </Section>

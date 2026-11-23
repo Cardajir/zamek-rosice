@@ -2,6 +2,7 @@ import type { Lang } from "@/consts.ts";
 import { OPENING_2026 } from "@/data/opening-2026.ts";
 import { pagePath } from "@/i18n/pages.ts";
 import type { LabelledPeriod } from "@/utils/hours.ts";
+import { parseVideo } from "@/utils/video.ts";
 import { query } from "./client.ts";
 import { IMAGE, text, type Image, type NavLink } from "./queries.ts";
 
@@ -138,12 +139,33 @@ export interface Album {
   images: Image[];
 }
 
+export interface AlbumVideo {
+  url: string;
+  title?: string;
+}
+
 export interface AlbumDetail {
   title: string;
   slug: string;
+  /** `castle` albums are chosen from the gallery's list, `events` have a listing of their own. */
+  category: "castle" | "events";
+  /** The day of the event, `YYYY-MM-DD`. */
+  eventDate?: string;
   images: Image[];
+  /** YouTube and Vimeo links the site can play. */
+  videos: AlbumVideo[];
   /** The album's slug in every language, for `hreflang`. */
   slugs: Partial<Record<Lang, string>>;
+}
+
+export interface EventAlbum {
+  title: string;
+  slug: string;
+  eventDate?: string;
+  /** The first photograph. */
+  cover?: Image;
+  /** The first video's link, for its still when there are no photographs. */
+  video?: string;
 }
 
 /* A photograph with no author of its own carries the album's. */
@@ -156,7 +178,10 @@ const PHOTO = `{
   "credit": coalesce(credit, ^.defaultCredit)
 }`;
 
-const ALBUMS = `*[_type == "gallery" && count(images) > 0] | order(order asc){
+/* An album without a category is the castle's: they all were before events had their own. */
+const CASTLE = `coalesce(category, "castle") == "castle"`;
+
+const ALBUMS = `*[_type == "gallery" && ${CASTLE} && count(images) > 0] | order(order asc){
   "title": ${text("title")},
   "slug": coalesce(slug[$lang].current, slug.cs.current),
   "count": count(images),
@@ -166,7 +191,10 @@ const ALBUMS = `*[_type == "gallery" && count(images) > 0] | order(order asc){
 const photos = (images: Image[] | null | undefined) =>
   (images ?? []).filter((image) => image?.url).map(clean);
 
-/** Every album that has photographs, in the order an editor set. */
+const playable = (videos: AlbumVideo[] | null | undefined) =>
+  (videos ?? []).filter((video) => parseVideo(video?.url)).map(clean);
+
+/** Every castle album that has photographs, in the order an editor set. */
 export async function getAlbums(lang: Lang): Promise<Album[]> {
   const albums = await query<Album[]>(ALBUMS, { lang }, []);
   return albums
@@ -178,7 +206,10 @@ const ALBUM = `*[_type == "gallery"
     && coalesce(slug[$lang].current, slug.cs.current) == $slug][0]{
   "title": ${text("title")},
   "slug": coalesce(slug[$lang].current, slug.cs.current),
+  "category": coalesce(category, "castle"),
+  eventDate,
   "images": images[]${PHOTO},
+  "videos": videos[]{ url, "title": ${text("title")} },
   "slugs": { "cs": slug.cs.current, "en": slug.en.current, "de": slug.de.current }
 }`;
 
@@ -190,10 +221,35 @@ export async function getAlbum(
   const album = await query<AlbumDetail | null>(ALBUM, { lang, slug }, null);
   if (!album) return undefined;
   return {
-    ...album,
+    ...clean(album),
     images: photos(album.images),
+    videos: playable(album.videos),
     slugs: clean(album.slugs ?? {}),
   };
+}
+
+/* Newest first; an album with no date counts from when it was created. */
+const EVENT_ALBUMS = `*[_type == "gallery" && category == "events"
+    && (count(images) > 0 || count(videos) > 0)]
+  | order(coalesce(eventDate, _createdAt) desc){
+  "title": ${text("title")},
+  "slug": coalesce(slug[$lang].current, slug.cs.current),
+  eventDate,
+  "cover": images[0]${PHOTO},
+  "videos": videos[].url
+}`;
+
+/** Every album from an event that has something to show, newest first. */
+export async function getEventAlbums(lang: Lang): Promise<EventAlbum[]> {
+  const albums = await query<
+    (Omit<EventAlbum, "video"> & { videos?: (string | null)[] | null })[]
+  >(EVENT_ALBUMS, { lang }, []);
+  return albums.flatMap(({ videos, cover, ...album }) => {
+    const [image] = photos(cover ? [cover] : []);
+    const video = (videos ?? []).find((url) => url && parseVideo(url));
+    if (!album.title || !album.slug || (!image && !video)) return [];
+    return [clean({ ...album, cover: image, video: video ?? undefined })];
+  });
 }
 
 /* -------------------------------------------------------------- contact -- */

@@ -34,6 +34,7 @@ const PAGES: { id: RouteId; title: (lang: Lang) => string }[] = [
   { id: "directions", title: (lang) => ui(lang).directionsTitle },
   { id: "news", title: (lang) => ui(lang).news },
   { id: "gallery", title: (lang) => ui(lang).galleryTitle },
+  { id: "galleryEvents", title: (lang) => ui(lang).galleryEvents },
   { id: "contact", title: (lang) => ui(lang).contactTitle },
   { id: "media", title: (lang) => ui(lang).mediaTitle },
   { id: "partners", title: (lang) => ui(lang).partnersTitle },

@@ -41,6 +41,30 @@ test("an address is matched in the language of its prefix only", () => {
   assert.equal(matchRoute("/kontakt/extra/"), undefined);
 });
 
+test("the events listing wins over an album slug that spells the same", () => {
+  assert.deepEqual(matchRoute("/fotogalerie/z-akci/"), {
+    id: "galleryEvents",
+    lang: "cs",
+  });
+  assert.deepEqual(matchRoute("/fotogalerie/vanocni-jarmark/"), {
+    id: "gallery",
+    lang: "cs",
+    slug: "vanocni-jarmark",
+  });
+  assert.equal(
+    rewriteTarget("/de/fotogalerie/veranstaltungen/"),
+    "/fotogalerie/z-akci/",
+  );
+  assert.equal(
+    rewriteTarget("/en/photo-gallery/events/"),
+    "/fotogalerie/z-akci/",
+  );
+  assert.equal(
+    rewriteTarget("/en/photo-gallery/christmas-fair/"),
+    "/fotogalerie/christmas-fair/",
+  );
+});
+
 test("English and German are rendered by the Czech page file", () => {
   assert.equal(rewriteTarget("/en/"), "/");
   assert.equal(

@@ -116,6 +116,8 @@ export interface Shell {
   location?: { lat?: number; lng?: number };
   rating?: { value: number; source?: string; url?: string; label?: string };
   groups: { label: string; items: NavLink[] }[];
+  /** Single links on the left, after the groups. */
+  mainLinks: NavLink[];
   topLinks: NavLink[];
   footerColumns: NavLink[][];
   partners: { name: string; url?: string; logo?: string }[];
@@ -188,6 +190,7 @@ interface RawShell {
   settings?: Partial<Shell> | null;
   navigation?: {
     groups?: { label?: string; items?: RawLink[] }[];
+    mainLinks?: RawLink[];
     topLinks?: RawLink[];
     footerColumns?: { items?: RawLink[] }[];
   } | null;
@@ -209,6 +212,7 @@ const SHELL = `{
   },
   "navigation": *[_id == "navigation"][0]{
     groups[]{ "label": ${text("label")}, items[]${LINK} },
+    mainLinks[]${LINK},
     topLinks[]${LINK},
     footerColumns[]{ items[]${LINK} }
   },
@@ -256,6 +260,7 @@ export async function getShell(lang: Lang): Promise<Shell> {
       items: links(group.items, lang),
     }))
     .filter((group) => group.label && group.items.length > 0);
+  const mainLinks = links(raw.navigation?.mainLinks, lang);
   const topLinks = links(raw.navigation?.topLinks, lang);
   const footerColumns = (raw.navigation?.footerColumns ?? [])
     .map((column) => links(column.items, lang))
@@ -273,6 +278,7 @@ export async function getShell(lang: Lang): Promise<Shell> {
     ),
     socials: withInstagram(settings.socials ?? fallback.socials),
     groups: groups.length > 0 ? groups : fallback.groups,
+    mainLinks,
     topLinks: topLinks.length > 0 ? topLinks : fallback.topLinks,
     footerColumns:
       footerColumns.length > 0 ? footerColumns : fallback.footerColumns,
@@ -641,7 +647,12 @@ export async function getNewsLanguages(): Promise<Lang[]> {
 /** Slugs per language, and when the document last changed. */
 export interface SitemapDocuments {
   tours: { slugs: Partial<Record<Lang, string>>; updatedAt?: string }[];
-  albums: { slugs: Partial<Record<Lang, string>>; updatedAt?: string }[];
+  albums: {
+    slugs: Partial<Record<Lang, string>>;
+    updatedAt?: string;
+    /** `events` albums are not in the gallery's list, so none is its front page. */
+    category?: "castle" | "events";
+  }[];
   posts: {
     lang: string;
     slug: string;
@@ -663,8 +674,10 @@ const SITEMAP = `{
   "tours": *[_type == "tour" && defined(slug.cs.current)] | order(order asc){
     "slugs": ${SLUGS}, "updatedAt": _updatedAt
   },
-  "albums": *[_type == "gallery" && count(images) > 0] | order(order asc){
-    "slugs": ${SLUGS}, "updatedAt": _updatedAt
+  "albums": *[_type == "gallery" && (count(images) > 0
+      || (category == "events" && count(videos) > 0))] | order(order asc){
+    "slugs": ${SLUGS}, "updatedAt": _updatedAt,
+    "category": coalesce(category, "castle")
   },
   "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc){
     "lang": language, "slug": slug.current, "updatedAt": _updatedAt,

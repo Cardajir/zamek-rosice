@@ -1,0 +1,253 @@
+---
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/arrow-full.svg";
+import { DEFAULT_LANG, LANG_LOCALES, SITE_TIME_ZONE } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+import { embedUrl, parseVideo } from "@/utils/video.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** The album's name, set as the section's heading. Omit to show the videos alone. */
+  title?: string;
+  /** The day of the event, `YYYY-MM-DD`, under the name. */
+  date?: string;
+  /** YouTube and Vimeo videos, in the order they are shown. */
+  videos?: { url: string; title?: string }[];
+  /**
+   * Address of the album list, for a link back to it under the videos. Only
+   * for an album with no photographs, which carry their own.
+   */
+  back?: string;
+  /** Anchor the album links scroll to, landing on the name. */
+  id?: string;
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const {
+  render = true,
+  title,
+  date,
+  videos = [],
+  back,
+  id,
+  class: className,
+} = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const playable = videos.filter((video) => parseVideo(video.url));
+const players = playable.map((video, index) => ({
+  src: embedUrl(parseVideo(video.url)!),
+  caption: video.title,
+  /* A player needs a name for screen readers, even when the editor gave none. */
+  name:
+    video.title ||
+    [title ?? t.video, playable.length > 1 && index + 1]
+      .filter(Boolean)
+      .join(" "),
+}));
+
+const day =
+  date &&
+  new Intl.DateTimeFormat(LANG_LOCALES[lang], {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: SITE_TIME_ZONE,
+  }).format(new Date(`${date}T12:00:00Z`));
+---
+
+{render && (title || players.length > 0) && (
+  <div class:list={["gallery-event_wrap", className]} id={id}>
+    {title && (
+      <header class="gallery-event_head">
+        <h2 class="gallery-event_title text-style-h3">{title}</h2>
+        {day && (
+          <p class="gallery-event_date">
+            <time datetime={date}>{day}</time>
+          </p>
+        )}
+      </header>
+    )}
+    {players.length > 0 && (
+      <ul class="gallery-event_list" role="list">
+        {players.map((player) => (
+          <li>
+            <figure class="gallery-event_figure">
+              <div class="gallery-event_frame">
+                <iframe
+                  class="gallery-event_player"
+                  src={player.src}
+                  title={player.name}
+                  loading="lazy"
+                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                />
+              </div>
+              {player.caption && (
+                <figcaption class="gallery-event_note">
+                  {player.caption}
+                </figcaption>
+              )}
+            </figure>
+          </li>
+        ))}
+      </ul>
+    )}
+    {back && (
+      <div class="gallery-event_end">
+        <a class="gallery-event_back" href={back}>
+          <span class="gallery-event_back-mark">
+            <Icon src={arrow} variant="small" />
+          </span>
+          <span class="link-underline">{t.backToAlbums}</span>
+        </a>
+      </div>
+    )}
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    /*
+     * The top of an album from an event: its name and day, centred, and its
+     * videos above the photographs, as wide as the gallery.
+     */
+    .gallery-event_wrap {
+      /* An album link lands here, the name just under the bar. */
+      scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+      --_note-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
+      --_note-gap: clamp(0.6875rem, 0.4889rem + 0.7905vw, 1.4375rem);
+
+      display: flex;
+      flex-direction: column;
+      gap: clamp(2.5rem, 1.9207rem + 2.3057vw, 4.6875rem);
+      width: 100%;
+      max-width: var(--max-width-small);
+      margin-inline: auto;
+      /* As far above the first photograph as the gallery's rows are apart. */
+      margin-block-end: clamp(1.4375rem, 0.8582rem + 2.3057vw, 3.625rem);
+      padding-inline: 1.0625rem;
+      @media (width >= 48rem) {
+        padding-inline: 0;
+      }
+    }
+
+    .gallery-event_head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(1.25rem, 1.0844rem + 0.6588vw, 1.875rem);
+      text-align: center;
+    }
+
+    .gallery-event_title {
+      max-width: 24ch;
+      text-wrap: balance;
+      font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
+    }
+
+    /* The day in the gallery's serif line. */
+    .gallery-event_date {
+      font-family: var(--secondary-family);
+      font-size: var(--text-large);
+      font-weight: var(--secondary-medium);
+      line-height: 1.1;
+      letter-spacing: var(--letter-spacing-snug);
+      font-variant-numeric: oldstyle-nums;
+    }
+
+    /*
+     * The first video as wide as the gallery, the rest two to a row from a
+     * tablet; the gallery's gaps between them.
+     */
+    .gallery-event_list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: clamp(1.4375rem, 0.8582rem + 2.3057vw, 3.625rem)
+        clamp(1.0625rem, 0.9797rem + 0.3294vw, 1.375rem);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        & > :first-child {
+          grid-column: 1 / -1;
+        }
+      }
+    }
+
+    .gallery-event_figure {
+      display: flex;
+      flex-direction: column;
+      gap: var(--_note-gap);
+      margin: 0;
+    }
+
+    .gallery-event_frame {
+      aspect-ratio: 16 / 9;
+      background-color: var(--background-2);
+    }
+
+    .gallery-event_player {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /*
+     * The link back up to the album list, as under the gallery's photographs;
+     * the room under it replaces the gap to the photographs there are none of.
+     */
+    .gallery-event_end {
+      display: flex;
+      margin-block-start: calc(
+        clamp(6.9125rem, 7.3077rem - 0.3294vw, 7.225rem) -
+          clamp(2.5rem, 1.9207rem + 2.3057vw, 4.6875rem)
+      );
+      padding-block-end: clamp(1.65rem, 2.4089rem - 0.6324vw, 2.25rem);
+    }
+
+    .gallery-event_wrap:has(> .gallery-event_end) {
+      margin-block-end: 0;
+    }
+
+    .gallery-event_back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.54em;
+      margin-inline-start: -1.0625rem;
+      padding-block: 0.4em;
+      color: var(--link-text);
+      font-family: var(--secondary-family);
+      font-size: var(--text-button);
+      font-style: italic;
+      font-weight: var(--secondary-medium);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      text-decoration: none;
+      @media (width >= 48rem) {
+        margin-inline-start: 0;
+      }
+    }
+
+    .gallery-event_back-mark {
+      display: flex;
+      font-size: 0.8333em;
+      rotate: -90deg;
+    }
+
+    /* The video's name in the gallery's small print. */
+    .gallery-event_note {
+      color: var(--text);
+      font-size: var(--_note-size);
+      font-weight: var(--primary-semibold);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      text-align: end;
+    }
+  }
+</style>

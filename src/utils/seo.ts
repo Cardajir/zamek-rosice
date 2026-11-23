@@ -802,8 +802,9 @@ const isLang = (value: string): value is Lang =>
 /**
  * Every indexable address: the code pages in each language (news only where
  * there is news), each tour and album under the slugs it has, and each news
- * item and text page with its translations. The first album is the
- * gallery's front page and has no address of its own.
+ * item and text page with its translations. The first castle album is the
+ * gallery's front page and has no address of its own; albums from events
+ * all have theirs.
  */
 export function sitemapEntries(
   documents: SitemapDocuments,
@@ -826,11 +827,12 @@ export function sitemapEntries(
   for (const tour of documents.tours) {
     if (tour.slugs.cs) add(alternates("tours", tour.slugs), tour.updatedAt);
   }
-  documents.albums.forEach((album, index) => {
-    if (index > 0 && album.slugs.cs) {
+  const front = documents.albums.find((album) => album.category !== "events");
+  for (const album of documents.albums) {
+    if (album !== front && album.slugs.cs) {
       add(alternates("gallery", album.slugs), album.updatedAt);
     }
-  });
+  }
   for (const post of documents.posts) {
     if (!isLang(post.lang)) continue;
     const others = (post.translations ?? []).flatMap((item) =>

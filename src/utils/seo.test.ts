@@ -195,7 +195,8 @@ test("the sitemap lists every language once, with hreflang, and leaves out the f
     {
       tours: [{ slugs: { cs: "zerotinsky-okruh", en: "zerotin-tour" } }],
       albums: [
-        { slugs: { cs: "zamecky-exterier" } },
+        { slugs: { cs: "koncert", en: "concert" }, category: "events" },
+        { slugs: { cs: "zamecky-exterier" }, category: "castle" },
         { slugs: { cs: "kryt" } },
       ],
       posts: [
@@ -218,6 +219,10 @@ test("the sitemap lists every language once, with hreflang, and leaves out the f
   assert.ok(!paths.includes("/de/besuch/fuehrungen/zerotinsky-okruh/"));
   assert.ok(paths.includes("/fotogalerie/kryt/"));
   assert.ok(!paths.includes("/fotogalerie/zamecky-exterier/"));
+  assert.ok(paths.includes("/fotogalerie/koncert/"));
+  assert.ok(paths.includes("/en/photo-gallery/concert/"));
+  assert.ok(paths.includes("/fotogalerie/z-akci/"));
+  assert.ok(paths.includes("/de/fotogalerie/veranstaltungen/"));
   assert.ok(paths.includes("/aktuality/"));
   assert.ok(!paths.includes("/en/news/"));
   assert.ok(paths.includes("/akce-a-moznosti/svatby/"));

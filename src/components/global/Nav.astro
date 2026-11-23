@@ -14,7 +14,7 @@ interface Props {
   /** Set to `false` to omit the component. */
   render?: boolean;
   /** Menu groups, top links and social profiles. */
-  shell: Pick<Shell, "groups" | "topLinks" | "socials">;
+  shell: Pick<Shell, "groups" | "mainLinks" | "topLinks" | "socials">;
   /** This page in each language it exists in, for the language switcher. */
   languages?: { lang: Lang; path: string }[];
   /** Fix the nav over the page. */
@@ -131,6 +131,24 @@ const socials = shell.socials.flatMap(({ network, url }) =>
                     ))}
                   </ul>
                 </div>
+              </li>
+            ))}
+            {shell.mainLinks.map((item) => (
+              <li class="nav_group nav_main">
+                <a
+                  class="nav_top_link"
+                  href={item.href}
+                  aria-current={isCurrent(item.href) ? "page" : undefined}
+                >
+                  <span
+                    class:list={[
+                      "link-underline",
+                      holdsCurrent([item]) && "is-current",
+                    ]}
+                  >
+                    {item.label}
+                  </span>
+                </a>
               </li>
             ))}
           </ul>
@@ -558,7 +576,7 @@ const socials = shell.socials.flatMap(({ network, url }) =>
     }
 
     /* The group holding the page you are on keeps its name underlined. */
-    .nav_group_button > .link-underline.is-current {
+    :is(.nav_group_button, .nav_top_link) > .link-underline.is-current {
       background-position-x: 0%;
       background-size: 100% var(--link-underline-width);
     }

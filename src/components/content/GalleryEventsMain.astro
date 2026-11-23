@@ -1,0 +1,319 @@
+---
+import Icon from "@/components/media/Icon.astro";
+import arrow from "@/assets/icons/arrow-full.svg";
+import { DEFAULT_LANG, LANG_LOCALES, SITE_TIME_ZONE } from "@/consts.ts";
+import { ui } from "@/i18n/ui.ts";
+import type { Image } from "@/sanity/queries.ts";
+import { scaled, sized } from "@/utils/image.ts";
+
+interface Props {
+  /** Set to `false` to omit the component. */
+  render?: boolean;
+  /** Albums from events, newest first. */
+  items: {
+    title: string;
+    href: string;
+    /** The day of the event, `YYYY-MM-DD`. */
+    date?: string;
+    /** The album's first photograph. */
+    image?: Image;
+    /** A still from the album's first video, when it has no photographs. */
+    poster?: string;
+  }[];
+  /** Shown in place of the albums while there are none. */
+  empty: string;
+  /** Address of the album list, for the link back to it under the albums. */
+  back?: string;
+  /** Anchor the album links scroll to, landing on the first album. */
+  id?: string;
+  /** Class names for utilities. */
+  class?: string;
+}
+
+const {
+  render = true,
+  items,
+  empty,
+  back,
+  id,
+  class: className,
+} = Astro.props;
+
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const t = ui(lang);
+
+const THUMB_WIDTHS = [320, 480, 640, 800, 1200];
+
+const srcset = (photo: Image) =>
+  THUMB_WIDTHS.filter(
+    (width, index) => index === 0 || width <= (photo.width || Infinity),
+  )
+    .map((width) => `${sized(photo.url, width)} ${width}w`)
+    .join(", ");
+
+const day = new Intl.DateTimeFormat(LANG_LOCALES[lang], {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: SITE_TIME_ZONE,
+});
+const formatDate = (date: string) => day.format(new Date(`${date}T12:00:00Z`));
+
+/* The photograph is cropped around the subject an editor marked. */
+const focus = (photo: Image) =>
+  typeof photo.focus?.x === "number" && typeof photo.focus?.y === "number"
+    ? `object-position: ${photo.focus.x * 100}% ${photo.focus.y * 100}%`
+    : undefined;
+---
+
+{render && (
+  <div class:list={["gallery-events_wrap", className]} id={id}>
+    {items.length > 0 ? (
+      <ul class="gallery-events_list" role="list">
+        {items.map((item) => (
+          <li>
+            <a class="gallery-events_link" href={item.href}>
+              <span
+                class:list={[
+                  "gallery-events_visual",
+                  !item.image && "is-video",
+                ]}
+              >
+                {item.image ? (
+                  <img
+                    class="gallery-events_thumb"
+                    src={sized(item.image.url, 800)}
+                    srcset={srcset(item.image)}
+                    sizes="(width >= 64rem) 27rem, (width >= 48rem) calc(50vw - 2.5rem), calc(100vw - 4rem)"
+                    width={scaled(item.image, 800).width}
+                    height={scaled(item.image, 800).height}
+                    style={focus(item.image)}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  item.poster && (
+                    <img
+                      class="gallery-events_thumb"
+                      src={item.poster}
+                      width="480"
+                      height="360"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )
+                )}
+                {!item.image && (
+                  <svg
+                    class="gallery-events_play"
+                    viewBox="0 0 48 48"
+                    aria-hidden="true"
+                  >
+                    <circle cx="24" cy="24" r="24" fill="currentColor" />
+                    <path d="M19 15.5v17L32.5 24 19 15.5Z" fill="#fff" />
+                  </svg>
+                )}
+              </span>
+              <span class="gallery-events_note">
+                <span class="gallery-events_title text-style-h6">
+                  <span class="link-underline">{item.title}</span>
+                </span>
+                {item.date && (
+                  <time class="gallery-events_date" datetime={item.date}>
+                    {formatDate(item.date)}
+                  </time>
+                )}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="gallery-events_empty">{empty}</p>
+    )}
+
+    {back && items.length > 0 && (
+      <div class="gallery-events_end">
+        <a class="gallery-events_back" href={back}>
+          <span class="gallery-events_back-mark">
+            <Icon src={arrow} variant="small" />
+          </span>
+          <span class="link-underline">{t.backToAlbums}</span>
+        </a>
+      </div>
+    )}
+  </div>
+)}
+
+<style is:global>
+  @layer components {
+    /*
+     * The gallery's grid, a card to each event: its first photograph, or a
+     * still from its video, and under it the name and the day in the
+     * gallery's small print.
+     */
+    .gallery-events_wrap {
+      /* An album link lands here, the first event just under the bar. */
+      scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+      --_note-size: clamp(0.75rem, 0.6506rem + 0.3953vw, 1.125rem);
+      --_note-gap: clamp(0.6875rem, 0.4889rem + 0.7905vw, 1.4375rem);
+
+      width: 100%;
+      max-width: var(--max-width-small);
+      margin-inline: auto;
+      padding-inline: 1.0625rem;
+      @media (width >= 48rem) {
+        padding-inline: 0;
+      }
+    }
+
+    /* No list marker: Safari would push a grid item down to make room for one. */
+    .gallery-events_list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: clamp(2.5rem, 1.9207rem + 2.3057vw, 4.6875rem)
+        clamp(1.0625rem, 0.9797rem + 0.3294vw, 1.375rem);
+      @media (width >= 48rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (width >= 64rem) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .gallery-events_link {
+      display: flex;
+      flex-direction: column;
+      gap: var(--_note-gap);
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .gallery-events_visual {
+      position: relative;
+      display: grid;
+      place-items: center;
+      aspect-ratio: 337 / 241;
+      overflow: clip;
+      background-color: var(--background-2);
+      @media (width >= 48rem) {
+        aspect-ratio: 423 / 347;
+      }
+    }
+
+    /*
+     * A YouTube still is 4:3 with black bands above and below a wide video;
+     * it is drawn a third larger so the frame shows the picture only.
+     */
+    .gallery-events_thumb {
+      --_zoom: 1;
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      scale: var(--_zoom);
+      transition: scale var(--hover-duration) var(--hover-ease);
+
+      .is-video > & {
+        --_zoom: 1.34;
+      }
+
+      @media (hover: hover) {
+        .gallery-events_link:hover & {
+          scale: calc(var(--_zoom) * 1.03);
+        }
+      }
+    }
+
+    .gallery-events_play {
+      position: relative;
+      width: clamp(2.5rem, 2.1688rem + 1.3175vw, 3.75rem);
+      height: auto;
+      color: rgb(0 0 0 / 0.55);
+      transition: color var(--hover-duration) var(--hover-ease);
+
+      @media (hover: hover) {
+        .gallery-events_link:hover & {
+          color: var(--link-text);
+        }
+      }
+    }
+
+    /* The name, and the day under it in the gallery's small print. */
+    .gallery-events_note {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.625rem, 0.5422rem + 0.3294vw, 0.9375rem);
+    }
+
+    .gallery-events_title {
+      font-feature-settings: "ordn", "ss05", "ss06", "ss07", "ss08", "ss09";
+
+      @media (hover: hover) {
+        .gallery-events_link:hover & {
+          color: var(--link-text);
+        }
+      }
+    }
+
+    .gallery-events_date {
+      color: var(--text);
+      font-size: var(--_note-size);
+      font-weight: var(--primary-semibold);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      white-space: nowrap;
+    }
+
+    /*
+     * The serif line, as the gallery's introduction sets it, with the room
+     * the link back would leave above the footer.
+     */
+    .gallery-events_empty {
+      padding-block-end: clamp(4rem, 3.3376rem + 2.6351vw, 6.5rem);
+      font-family: var(--secondary-family);
+      font-size: var(--text-large);
+      font-weight: var(--secondary-medium);
+      line-height: 1.1;
+      letter-spacing: var(--letter-spacing-snug);
+      text-align: center;
+    }
+
+    /* The link back up to the album list, as under the gallery's photographs. */
+    .gallery-events_end {
+      display: flex;
+      margin-block-start: clamp(6.9125rem, 7.3077rem - 0.3294vw, 7.225rem);
+      padding-block-end: clamp(1.65rem, 2.4089rem - 0.6324vw, 2.25rem);
+    }
+
+    .gallery-events_back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.54em;
+      margin-inline-start: -1.0625rem;
+      padding-block: 0.4em;
+      color: var(--link-text);
+      font-family: var(--secondary-family);
+      font-size: var(--text-button);
+      font-style: italic;
+      font-weight: var(--secondary-medium);
+      line-height: 1.2;
+      letter-spacing: var(--letter-spacing-snug);
+      text-decoration: none;
+      @media (width >= 48rem) {
+        margin-inline-start: 0;
+      }
+    }
+
+    .gallery-events_back-mark {
+      display: flex;
+      font-size: 0.8333em;
+      rotate: -90deg;
+    }
+  }
+</style>

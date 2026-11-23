@@ -27,14 +27,14 @@ const eyebrow = tour.free
       ? `${t.tourLength}: ${span} ${t.minutesLong}`
       : undefined;
 
-/* Admission unless entry is free, and the tour's album (the gallery until one is linked). */
+/* Its own price list when one covers it (none for free entry), and the tour's album (the gallery until one is linked). */
 const links = [
-  ...(tour.free
+  ...(tour.free || !tour.priceList
     ? []
     : [
         {
           label: t.admissionLink,
-          href: `${routePath("admission", lang)}${tour.priceList ? `#${anchor(tour.priceList)}` : ""}`,
+          href: `${routePath("admission", lang)}#${anchor(tour.priceList)}`,
         },
       ]),
   { label: t.galleryLink, href: routePath("gallery", lang, tour.gallery) },

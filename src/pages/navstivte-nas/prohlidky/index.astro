@@ -24,15 +24,15 @@ const eyebrow = ({ duration, free }: TourCard) => {
   return `${t.tourLength}: ${span} ${t.minutesLong}`;
 };
 
-/* The tour's page, its admission unless entry is free, and its album (the gallery until one is linked). */
+/* The tour's page, its own price list when one covers it (none for free entry), and its album (the gallery until one is linked). */
 const links = (tour: TourCard) => [
   { label: t.readMore, href: routePath("tours", lang, tour.slug) },
-  ...(tour.free
+  ...(tour.free || !tour.priceList
     ? []
     : [
         {
           label: t.admissionLink,
-          href: `${routePath("admission", lang)}${tour.priceList ? `#${anchor(tour.priceList)}` : ""}`,
+          href: `${routePath("admission", lang)}#${anchor(tour.priceList)}`,
         },
       ]),
   { label: t.galleryLink, href: routePath("gallery", lang, tour.gallery) },

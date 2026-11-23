@@ -16,6 +16,11 @@ const ROUTE_LABELS: Record<Exclude<RouteId, "siteMap">, Labels> = {
   directions: { cs: "Kde nás najdete", en: "Getting here", de: "Anfahrt" },
   news: { cs: "Aktuality", en: "News", de: "Aktuelles" },
   gallery: { cs: "Fotogalerie", en: "Photo gallery", de: "Fotogalerie" },
+  galleryEvents: {
+    cs: "Z akcí na zámku",
+    en: "Events at the castle",
+    de: "Veranstaltungen im Schloss",
+  },
   media: { cs: "Zámek v médiích", en: "In the media", de: "In den Medien" },
   partners: { cs: "Partneři zámku", en: "Partners", de: "Partner" },
   contact: { cs: "Kontakty", en: "Contact", de: "Kontakt" },
@@ -67,6 +72,7 @@ export function fallbackShell(
       label: GROUP_LABELS[index]![lang],
       items: routes.map(link),
     })),
+    mainLinks: [],
     topLinks: [link("contact"), link("statutory")],
     footerColumns: [
       [link("home"), link("news"), link("contact")],

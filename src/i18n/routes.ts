@@ -27,6 +27,11 @@ export const ROUTES = {
   },
   news: { cs: "/aktuality", en: "/news", de: "/aktuelles" },
   gallery: { cs: "/fotogalerie", en: "/photo-gallery", de: "/fotogalerie" },
+  galleryEvents: {
+    cs: "/fotogalerie/z-akci",
+    en: "/photo-gallery/events",
+    de: "/fotogalerie/veranstaltungen",
+  },
   media: {
     cs: "/o-zamku/zamek-v-mediich",
     en: "/about/in-the-media",
@@ -100,10 +105,14 @@ export interface RouteMatch {
 export function matchRoute(pathname: string): RouteMatch | undefined {
   const lang = langFromPath(pathname);
   const bare = stripLang(pathname);
+  const ids = Object.keys(ROUTES) as RouteId[];
 
-  for (const id of Object.keys(ROUTES) as RouteId[]) {
+  /* A route's own address wins over a detail slug that spells the same. */
+  const exact = ids.find((id) => ROUTES[id][lang] === bare);
+  if (exact) return { id: exact, lang };
+
+  for (const id of ids) {
     const base = ROUTES[id][lang];
-    if (bare === base) return { id, lang };
     if (WITH_DETAIL.has(id) && bare.startsWith(`${base}/`)) {
       const slug = bare.slice(base.length + 1);
       if (slug && !slug.includes("/")) return { id, lang, slug };

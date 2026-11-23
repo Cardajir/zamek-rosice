@@ -203,6 +203,7 @@ export const link = defineType({
           { title: "Kde nás najdete", value: "directions" },
           { title: "Aktuality", value: "news" },
           { title: "Fotogalerie", value: "gallery" },
+          { title: "Fotogalerie – Z akcí na zámku", value: "galleryEvents" },
           { title: "Zámek v médiích", value: "media" },
           { title: "Partneři zámku", value: "partners" },
           { title: "Kontakty", value: "contact" },

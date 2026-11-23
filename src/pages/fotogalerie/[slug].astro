@@ -3,37 +3,60 @@ import Layout from "@/layouts/BaseLayout.astro";
 import Section from "@/components/wrapper/Section.astro";
 import PageHeroMain from "@/components/content/PageHeroMain.astro";
 import Heading from "@/components/typography/Heading.astro";
+import GalleryEventMain from "@/components/content/GalleryEventMain.astro";
 import GalleryMain from "@/components/content/GalleryMain.astro";
 import GalleryNavMain from "@/components/content/GalleryNavMain.astro";
 import { DEFAULT_LANG } from "@/consts.ts";
 import { alternates, routePath } from "@/i18n/routes.ts";
 import { ui } from "@/i18n/ui.ts";
 import { getAlbum, getAlbums } from "@/sanity/page-queries.ts";
+import { EVENTS, galleryNav } from "@/utils/gallery.ts";
 import { fillIn, sanitySocialImage } from "@/utils/seo.ts";
+import { parseVideo, youtubeThumbnail } from "@/utils/video.ts";
 
 const lang = Astro.locals.lang ?? DEFAULT_LANG;
 const t = ui(lang);
 const album = await getAlbum(lang, Astro.params.slug ?? "");
 
-if (!album || album.images.length === 0) return Astro.rewrite("/404/");
+const isEvent = album?.category === "events";
+if (
+  !album ||
+  (album.images.length === 0 && !(isEvent && album.videos.length > 0))
+) {
+  return Astro.rewrite("/404/");
+}
 
 const albums = await getAlbums(lang);
 
 /* The first album is the gallery's front page; its own address leads there. */
-if (albums[0]?.slug === album.slug) {
+if (!isEvent && albums[0]?.slug === album.slug) {
   return Astro.redirect(routePath("gallery", lang), 301);
 }
 
-const cover = album.images[0];
+/* Shared as its first photograph, or a still from its first video. */
+const still = album.videos
+  .map((video) => parseVideo(video.url))
+  .map((video) => video && youtubeThumbnail(video))
+  .find(Boolean);
+const image =
+  sanitySocialImage(album.images[0]) ??
+  (still ? { src: still, width: 480, height: 360 } : undefined);
+
+const events = routePath("galleryEvents", lang);
 ---
 
 <Layout
   title={`${album.title} – ${t.galleryTitle}`}
-  description={fillIn(t.metaAlbum, { album: album.title })}
-  image={sanitySocialImage(cover)}
+  description={fillIn(isEvent ? t.metaEventAlbum : t.metaAlbum, {
+    album: album.title,
+  })}
+  image={image}
   pageType="ImageGallery"
   alternates={alternates("gallery", album.slugs)}
-  breadcrumbs={[{ name: t.galleryTitle, path: routePath("gallery", lang) }]}
+  breadcrumbs={[
+    { name: t.galleryTitle, path: routePath("gallery", lang) },
+    ...(isEvent ? [{ name: t.galleryEvents, path: events }] : []),
+  ]}
 >
   <!-- Photograph and title -->
   <Section paddingTop="none" paddingBottom="none">
@@ -45,23 +68,26 @@ const cover = album.images[0];
     <GalleryNavMain
       label={t.galleryAlbums}
       intro={t.galleryIntro}
-      items={albums.map((item, index) => ({
-        label: item.title,
-        href: `${
-          index === 0
-            ? routePath("gallery", lang)
-            : routePath("gallery", lang, item.slug)
-        }#fotky`,
-        current: item.slug === album.slug,
-      }))}
+      items={galleryNav(albums, lang, isEvent ? EVENTS : album.slug)}
     />
   </Section>
 
-  <!-- Photographs -->
+  <!-- Name, day and videos of an event, then the photographs -->
   <Section paddingTop="large" paddingBottom="none" gap="0">
-    <Heading tag="h2" class="sr-only">
+    <Heading tag="h2" class="sr-only" render={!isEvent}>
       {album.title}
     </Heading>
-    <GalleryMain photos={album.images} back="#alba" id="fotky" />
+    <GalleryEventMain
+      title={isEvent ? album.title : undefined}
+      date={isEvent ? album.eventDate : undefined}
+      videos={album.videos}
+      back={album.images.length === 0 ? `${events}#fotky` : undefined}
+      id={isEvent ? "fotky" : undefined}
+    />
+    <GalleryMain
+      photos={album.images}
+      back={isEvent ? `${events}#fotky` : "#alba"}
+      id={isEvent ? undefined : "fotky"}
+    />
   </Section>
 </Layout>

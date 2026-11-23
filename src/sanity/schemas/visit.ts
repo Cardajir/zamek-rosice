@@ -1,5 +1,14 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { byOrder, localized, orderField } from "./helpers.ts";
+import { ROUTES } from "../../i18n/routes.ts";
+import { parseVideo } from "../../utils/video.ts";
+import {
+  LANGUAGES,
+  byOrder,
+  localized,
+  orderField,
+  requireAll,
+  type LanguageId,
+} from "./helpers.ts";
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const timeField = (name: string, title: string, description?: string) =>
@@ -412,14 +421,77 @@ export const venue = defineType({
   },
 });
 
+/*
+ * The address of the events listing, the last part of it in each language.
+ * An album may not take it, or its page could never be reached.
+ */
+const RESERVED_ALBUM_SLUGS = Object.fromEntries(
+  LANGUAGES.map(({ id }) => [
+    id,
+    ROUTES.galleryEvents[id].slice(ROUTES.gallery[id].length + 1),
+  ]),
+) as Record<LanguageId, string>;
+
+const isEvents = (document: unknown) =>
+  (document as { category?: string } | undefined)?.category === "events";
+
 export const gallery = defineType({
   name: "gallery",
   title: "Fotogalerie (album)",
   type: "document",
-  orderings: byOrder,
+  orderings: [
+    ...byOrder,
+    {
+      title: "Datum akce, nejnovější",
+      name: "eventDate",
+      by: [{ field: "eventDate", direction: "desc" as const }],
+    },
+  ],
   fields: [
     localized("title", "Název", "localizedString"),
-    localized("slug", "Adresa", "localizedSlug"),
+    defineField({
+      name: "slug",
+      title: "Adresa",
+      type: "localizedSlug",
+      validation: (rule) =>
+        rule.custom((value) => {
+          const slugs = (value ?? {}) as Partial<
+            Record<LanguageId, { current?: string }>
+          >;
+          const taken = LANGUAGES.find(
+            ({ id }) => slugs[id]?.current === RESERVED_ALBUM_SLUGS[id],
+          );
+          if (taken) {
+            return `Adresa „${RESERVED_ALBUM_SLUGS[taken.id]}“ patří stránce Z akcí na zámku. Zvolte jinou.`;
+          }
+          return requireAll(value);
+        }),
+    }),
+    defineField({
+      name: "category",
+      title: "Rubrika",
+      type: "string",
+      description:
+        "Alba zámku jsou ve výběru na stránce Fotogalerie. Alba z akcí mají vlastní stránku Z akcí na zámku, nejnovější nahoře.",
+      options: {
+        list: [
+          { title: "Zámek", value: "castle" },
+          { title: "Z akcí na zámku", value: "events" },
+        ],
+        layout: "radio",
+        direction: "horizontal",
+      },
+      initialValue: "castle",
+    }),
+    defineField({
+      name: "eventDate",
+      title: "Datum akce",
+      type: "date",
+      description:
+        "Zobrazí se pod názvem alba. Podle něj se alba z akcí řadí; bez data podle toho, kdy bylo album založeno.",
+      options: { dateFormat: "D. M. YYYY" },
+      hidden: ({ document }) => !isEvents(document),
+    }),
     defineField({
       name: "defaultCredit",
       title: "Výchozí autor",
@@ -430,12 +502,91 @@ export const gallery = defineType({
       name: "images",
       title: "Fotky",
       type: "array",
+      description: "Album z akce může mít místo fotek jen videa.",
       options: { layout: "grid" },
       of: [defineArrayMember({ type: "imageWithAlt" })],
+      validation: (rule) =>
+        rule
+          .custom((images, { document }) => {
+            const videos = (document as { videos?: unknown[] } | undefined)
+              ?.videos;
+            if (images?.length || (isEvents(document) && videos?.length)) {
+              return true;
+            }
+            return isEvents(document)
+              ? "Přidejte aspoň jednu fotku nebo video, jinak se album na webu nezobrazí."
+              : "Přidejte aspoň jednu fotku, jinak se album na webu nezobrazí.";
+          })
+          .warning(),
     }),
-    orderField,
+    defineField({
+      name: "videos",
+      title: "Videa",
+      type: "array",
+      description:
+        "Odkazy na YouTube nebo Vimeo. Na stránce alba jsou nad fotkami.",
+      hidden: ({ document, value }) => !isEvents(document) && !value?.length,
+      of: [
+        defineArrayMember({
+          name: "video",
+          title: "Video",
+          type: "object",
+          fields: [
+            defineField({
+              name: "url",
+              title: "Odkaz",
+              type: "url",
+              description:
+                "Adresa videa z prohlížeče, např. https://www.youtube.com/watch?v=… nebo https://vimeo.com/…",
+              validation: (rule) =>
+                rule
+                  .required()
+                  .custom((url) =>
+                    !url || parseVideo(url)
+                      ? true
+                      : "Tohle není odkaz na video na YouTube ani na Vimeu.",
+                  ),
+            }),
+            localized("title", "Název", "localizedString", {
+              required: "cs",
+              description:
+                "Zobrazí se pod videem a přečte ho čtečka obrazovky.",
+            }),
+          ],
+          preview: { select: { title: "title.cs", subtitle: "url" } },
+        }),
+      ],
+    }),
+    defineField({
+      ...orderField,
+      description: "Nižší číslo je výš. Alba z akcí se řadí podle data.",
+      hidden: ({ document }) => isEvents(document),
+    }),
   ],
-  preview: { select: { title: "title.cs", media: "images.0" } },
+  preview: {
+    select: {
+      title: "title.cs",
+      media: "images.0",
+      category: "category",
+      eventDate: "eventDate",
+    },
+    prepare: ({ title, media, category, eventDate }) => ({
+      title,
+      media,
+      subtitle:
+        category === "events"
+          ? [
+              "Z akcí na zámku",
+              eventDate &&
+                new Intl.DateTimeFormat("cs-CZ", { dateStyle: "medium" }).format(
+                  new Date(`${eventDate}T12:00:00Z`),
+                ),
+            ]
+              .filter(Boolean)
+              .join(" · ")
+          : "Zámek",
+    }),
+  },
 });
 
 export const visitTypes = [tour, ticketList, openingPeriod, venue, gallery];

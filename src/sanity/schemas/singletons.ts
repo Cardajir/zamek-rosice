@@ -187,6 +187,15 @@ export const navigation = defineType({
       ],
     }),
     defineField({
+      name: "mainLinks",
+      title: "Odkazy v hlavním menu",
+      description:
+        "Samostatné odkazy vlevo od loga, hned za rozbalovacími skupinami (například Aktuality).",
+      type: "array",
+      validation: (rule) => rule.max(2),
+      of: [navItem],
+    }),
+    defineField({
       name: "topLinks",
       title: "Odkazy vpravo v liště",
       type: "array",

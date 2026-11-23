@@ -101,6 +101,9 @@ const cs = {
   nextPhoto: "Další fotografie",
   closeViewer: "Zavřít prohlížeč",
   backToAlbums: "zpět na výběr galerií",
+  galleryEvents: "Z akcí na zámku",
+  galleryEventsEmpty: "Fotky z akcí na zámku tu brzy přibudou.",
+  video: "Video",
   contactTitle: "Kontakty",
   contactPeople: "Kontaktní osoby",
   contactForm: "Kontaktní formulář",
@@ -158,6 +161,9 @@ const cs = {
   metaGallery: "Fotogalerie zámku Rosice u Brna: {list}.",
   metaAlbum:
     "{album}: fotografie ve fotogalerii zámku Rosice u Brna. Prohlédněte si zámek, jeho expozice, výstavy a zahradu na snímcích.",
+  metaGalleryEvents:
+    "Fotografie a videa z koncertů, výstav a dalších akcí na zámku Rosice u Brna.",
+  metaEventAlbum: "{album}: fotografie a videa z akce na zámku Rosice u Brna.",
   metaContact:
     "Kontakty na zámek Rosice: {address}, telefon {phone}, e-mail, kontaktní osoby správy zámku a kontaktní formulář.",
   metaPartners: "Partneři zámku Rosice: {list}.",
@@ -268,6 +274,9 @@ const en: Dictionary = {
   nextPhoto: "Next photograph",
   closeViewer: "Close viewer",
   backToAlbums: "back to the albums",
+  galleryEvents: "Events at the castle",
+  galleryEventsEmpty: "Photographs from events at the castle are coming soon.",
+  video: "Video",
   contactTitle: "Contacts",
   contactPeople: "Contact persons",
   contactForm: "Contact form",
@@ -324,6 +333,10 @@ const en: Dictionary = {
   metaGallery: "Photo gallery of Rosice Castle near Brno: {list}.",
   metaAlbum:
     "{album}: photographs in the photo gallery of Rosice Castle near Brno. See the castle, its exhibitions and its garden in pictures.",
+  metaGalleryEvents:
+    "Photographs and videos from concerts, exhibitions and other events at Rosice Castle near Brno.",
+  metaEventAlbum:
+    "{album}: photographs and videos from an event at Rosice Castle near Brno.",
   metaContact:
     "Contact Rosice Castle: {address}, telephone {phone}, e-mail, the castle administration's contact persons and a contact form.",
   metaPartners: "Partners of Rosice Castle: {list}.",
@@ -432,6 +445,9 @@ const de: Dictionary = {
   nextPhoto: "Nächstes Foto",
   closeViewer: "Betrachter schließen",
   backToAlbums: "zurück zur Galerieauswahl",
+  galleryEvents: "Veranstaltungen im Schloss",
+  galleryEventsEmpty: "Fotos von Veranstaltungen im Schloss folgen in Kürze.",
+  video: "Video",
   contactTitle: "Kontakt",
   contactPeople: "Ansprechpartner",
   contactForm: "Kontaktformular",
@@ -490,6 +506,10 @@ const de: Dictionary = {
   metaGallery: "Fotogalerie von Schloss Rosice bei Brünn: {list}.",
   metaAlbum:
     "{album}: Fotos aus der Fotogalerie von Schloss Rosice bei Brünn. Das Schloss, seine Ausstellungen und der Schlossgarten in Bildern.",
+  metaGalleryEvents:
+    "Fotos und Videos von Konzerten, Ausstellungen und anderen Veranstaltungen im Schloss Rosice bei Brünn.",
+  metaEventAlbum:
+    "{album}: Fotos und Videos von einer Veranstaltung im Schloss Rosice bei Brünn.",
   metaContact:
     "Kontakt zu Schloss Rosice: {address}, Telefon {phone}, E-Mail, Ansprechpartner der Schlossverwaltung und Kontaktformular.",
   metaPartners: "Partner von Schloss Rosice: {list}.",
