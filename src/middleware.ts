@@ -53,6 +53,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect(`${raw.replace(/\/{2,}/g, "/")}${search}`, 301);
     }
 
+    /* The German version was retired before launch; its addresses go home. */
+    if (pathname === "/de" || pathname.startsWith("/de/")) {
+      return context.redirect("/", 301);
+    }
+
     /* A retired address answers with where its content went. */
     const retired = redirectFor(pathname);
     if (retired) return context.redirect(`${retired}${search}`, 301);
@@ -76,7 +81,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   );
   context.locals.preview = preview;
 
-  /* English and German addresses are rendered by the Czech page file. */
+  /* English addresses are rendered by the Czech page file. */
   const target = isPage ? rewriteTarget(pathname) : undefined;
   const response = mutable(
     await runAsPreview(preview, () => (target ? next(target) : next())),

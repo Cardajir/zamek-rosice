@@ -6,39 +6,35 @@ import type { NavLink, Shell } from "../sanity/queries.ts";
 type Labels = Record<Lang, string>;
 
 const ROUTE_LABELS: Record<Exclude<RouteId, "siteMap">, Labels> = {
-  home: { cs: "Úvodní stránka", en: "Home", de: "Startseite" },
-  tours: { cs: "Prohlídkové okruhy", en: "Tours", de: "Führungen" },
+  home: { cs: "Úvodní stránka", en: "Home" },
+  tours: { cs: "Prohlídkové okruhy", en: "Tours" },
   admission: {
     cs: "Vstupné a provozní doba",
     en: "Admission and opening hours",
-    de: "Eintritt und Öffnungszeiten",
   },
-  directions: { cs: "Kde nás najdete", en: "Getting here", de: "Anfahrt" },
-  news: { cs: "Aktuality", en: "News", de: "Aktuelles" },
-  gallery: { cs: "Fotogalerie", en: "Photo gallery", de: "Fotogalerie" },
+  directions: { cs: "Kde nás najdete", en: "Getting here" },
+  news: { cs: "Aktuality", en: "News" },
+  gallery: { cs: "Fotogalerie", en: "Photo gallery" },
   galleryEvents: {
     cs: "Z akcí na zámku",
     en: "Events at the castle",
-    de: "Veranstaltungen im Schloss",
   },
-  media: { cs: "Zámek v médiích", en: "In the media", de: "In den Medien" },
-  partners: { cs: "Partneři zámku", en: "Partners", de: "Partner" },
-  contact: { cs: "Kontakty", en: "Contact", de: "Kontakt" },
+  media: { cs: "Zámek v médiích", en: "In the media" },
+  partners: { cs: "Partneři zámku", en: "Partners" },
+  contact: { cs: "Kontakty", en: "Contact" },
   statutory: {
     cs: "Povinné a statutární informace",
     en: "Statutory information",
-    de: "Pflichtinformationen",
   },
 };
 
 const GROUP_LABELS: Labels[] = [
-  { cs: "Pro návštěvníky", en: "For visitors", de: "Für Besucher" },
+  { cs: "Pro návštěvníky", en: "For visitors" },
   {
     cs: "Akce a pronájmy",
     en: "Events and venue hire",
-    de: "Veranstaltungen und Vermietung",
   },
-  { cs: "O zámku", en: "About the castle", de: "Über das Schloss" },
+  { cs: "O zámku", en: "About the castle" },
 ];
 
 const GROUP_ROUTES: Exclude<RouteId, "siteMap">[][] = [

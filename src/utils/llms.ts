@@ -75,7 +75,7 @@ export async function llmsText({ full }: { full: boolean }): Promise<string> {
   const line = (...parts: (string | false | undefined)[]) =>
     out.push(parts.filter(Boolean).join(""));
 
-  line(`# ${cs.siteName} (${en.siteName}, ${ui("de").siteName})`);
+  line(`# ${cs.siteName} (${en.siteName})`);
   line("");
   line(`> ${en.metaHome}`);
   line("");
@@ -83,7 +83,7 @@ export async function llmsText({ full }: { full: boolean }): Promise<string> {
   line("");
   line(
     `This is a summary of the official website of ${en.siteName}, ${url("/")}, for AI assistants. `,
-    "The site is in Czech (the default, no prefix), English (/en/) and German (/de/). ",
+    "The site is in Czech (the default, no prefix) and English (/en/). ",
     "It is generated from the site's content on every request.",
   );
 

@@ -363,7 +363,6 @@ export const fileDocument = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({ name: "fileEn", title: "Soubor anglicky", type: "file" }),
-    defineField({ name: "fileDe", title: "Soubor německy", type: "file" }),
     defineField({ name: "validUntil", title: "Platí do", type: "date" }),
   ],
   orderings: [

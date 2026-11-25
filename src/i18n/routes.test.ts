@@ -14,8 +14,9 @@ test("language comes from the prefix, Czech has none", () => {
   assert.equal(langFromPath("/"), "cs");
   assert.equal(langFromPath("/kontakt/"), "cs");
   assert.equal(langFromPath("/en/"), "en");
-  assert.equal(langFromPath("/de/kontakt/"), "de");
-  assert.equal(stripLang("/de/kontakt/"), "/kontakt");
+  assert.equal(langFromPath("/en/contact/"), "en");
+  assert.equal(langFromPath("/de/kontakt/"), "cs");
+  assert.equal(stripLang("/en/contact/"), "/contact");
   assert.equal(stripLang("/en"), "/");
 });
 
@@ -24,8 +25,8 @@ test("a route has its own address in each language", () => {
   assert.equal(routePath("home", "en"), "/en/");
   assert.equal(routePath("tours", "cs"), "/navstivte-nas/prohlidky/");
   assert.equal(
-    routePath("tours", "de", "hausperger-rundgang"),
-    "/de/besuch/fuehrungen/hausperger-rundgang/",
+    routePath("tours", "en", "hausperger-tour"),
+    "/en/visit/tours/hausperger-tour/",
   );
 });
 
@@ -52,10 +53,6 @@ test("the events listing wins over an album slug that spells the same", () => {
     slug: "vanocni-jarmark",
   });
   assert.equal(
-    rewriteTarget("/de/fotogalerie/veranstaltungen/"),
-    "/fotogalerie/z-akci/",
-  );
-  assert.equal(
     rewriteTarget("/en/photo-gallery/events/"),
     "/fotogalerie/z-akci/",
   );
@@ -65,19 +62,16 @@ test("the events listing wins over an album slug that spells the same", () => {
   );
 });
 
-test("English and German are rendered by the Czech page file", () => {
+test("English is rendered by the Czech page file", () => {
   assert.equal(rewriteTarget("/en/"), "/");
-  assert.equal(
-    rewriteTarget("/de/besuch/anfahrt/"),
-    "/navstivte-nas/kde-nas-najdete/",
-  );
+  assert.equal(rewriteTarget("/de/besuch/anfahrt/"), undefined);
   assert.equal(rewriteTarget("/en/news/concert/"), "/aktuality/concert/");
   assert.equal(rewriteTarget("/kontakt/"), undefined);
   assert.equal(rewriteTarget("/en/nothing-here/"), undefined);
 });
 
 test("alternates leave out a language a detail page does not exist in", () => {
-  assert.equal(alternates("contact").length, 3);
+  assert.equal(alternates("contact").length, 2);
   assert.deepEqual(alternates("news", { cs: "koncert", en: "concert" }), [
     { lang: "cs", path: "/aktuality/koncert/" },
     { lang: "en", path: "/en/news/concert/" },

@@ -2,53 +2,46 @@ import { DEFAULT_LANG, LANGS, type Lang } from "../consts.ts";
 
 /**
  * Every page that lives in code, with its address in each language. Czech is
- * the path of the `.astro` file; English and German are rewritten onto it by
- * the middleware, so one file serves all three.
+ * the path of the `.astro` file; English is rewritten onto it by the
+ * middleware, so one file serves both.
  *
  * A route ending in a detail (`tours`, `news`, `gallery`) also serves
  * `<path>/<slug>`, where the slug comes from Sanity.
  */
 export const ROUTES = {
-  home: { cs: "/", en: "/", de: "/" },
+  home: { cs: "/", en: "/" },
   tours: {
     cs: "/navstivte-nas/prohlidky",
     en: "/visit/tours",
-    de: "/besuch/fuehrungen",
   },
   admission: {
     cs: "/navstivte-nas/vstupne-a-oteviraci-doba",
     en: "/visit/admission-and-opening-hours",
-    de: "/besuch/eintritt-und-oeffnungszeiten",
   },
   directions: {
     cs: "/navstivte-nas/kde-nas-najdete",
     en: "/visit/getting-here",
-    de: "/besuch/anfahrt",
   },
-  news: { cs: "/aktuality", en: "/news", de: "/aktuelles" },
-  gallery: { cs: "/fotogalerie", en: "/photo-gallery", de: "/fotogalerie" },
+  news: { cs: "/aktuality", en: "/news" },
+  gallery: { cs: "/fotogalerie", en: "/photo-gallery" },
   galleryEvents: {
     cs: "/fotogalerie/z-akci",
     en: "/photo-gallery/events",
-    de: "/fotogalerie/veranstaltungen",
   },
   media: {
     cs: "/o-zamku/zamek-v-mediich",
     en: "/about/in-the-media",
-    de: "/ueber-das-schloss/in-den-medien",
   },
   partners: {
     cs: "/o-zamku/partneri-zamku",
     en: "/about/partners",
-    de: "/ueber-das-schloss/partner",
   },
-  contact: { cs: "/kontakt", en: "/contact", de: "/kontakt" },
+  contact: { cs: "/kontakt", en: "/contact" },
   statutory: {
     cs: "/statutarni-a-povinne-informace",
     en: "/statutory-information",
-    de: "/pflichtinformationen",
   },
-  siteMap: { cs: "/mapa-stranek", en: "/site-map", de: "/seitenuebersicht" },
+  siteMap: { cs: "/mapa-stranek", en: "/site-map" },
 } as const satisfies Record<string, Record<Lang, string>>;
 
 export type RouteId = keyof typeof ROUTES;

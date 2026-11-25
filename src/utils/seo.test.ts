@@ -222,7 +222,8 @@ test("the sitemap lists every language once, with hreflang, and leaves out the f
   assert.ok(paths.includes("/fotogalerie/koncert/"));
   assert.ok(paths.includes("/en/photo-gallery/concert/"));
   assert.ok(paths.includes("/fotogalerie/z-akci/"));
-  assert.ok(paths.includes("/de/fotogalerie/veranstaltungen/"));
+  assert.ok(paths.includes("/en/photo-gallery/events/"));
+  assert.ok(!paths.some((path) => path.startsWith("/de/")));
   assert.ok(paths.includes("/aktuality/"));
   assert.ok(!paths.includes("/en/news/"));
   assert.ok(paths.includes("/akce-a-moznosti/svatby/"));

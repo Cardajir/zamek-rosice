@@ -1,4 +1,4 @@
-import type { Lang } from "@/consts.ts";
+import { LANGS, type Lang } from "@/consts.ts";
 import { OPENING_2026 } from "@/data/opening-2026.ts";
 import { fallbackShell } from "@/data/shell.ts";
 import { pagePath } from "@/i18n/pages.ts";
@@ -617,7 +617,7 @@ const TOUR = `*[_type == "tour" && coalesce(slug[$lang].current, slug.cs.current
   ${TOUR_FIELDS},
   "body": coalesce(body[$lang], body.cs)${BODY},
   "images": images[]${IMAGE},
-  "slugs": { "cs": slug.cs.current, "en": slug.en.current, "de": slug.de.current }
+  "slugs": { "cs": slug.cs.current, "en": slug.en.current }
 }`;
 
 /** One tour by its slug in a language, or `undefined`. */
@@ -641,7 +641,7 @@ const NEWS_LANGUAGES = `array::unique(*[_type == "post"].language)`;
 /** The languages that have news items, so an empty list is kept out of search. */
 export async function getNewsLanguages(): Promise<Lang[]> {
   const langs = await query<(string | null)[]>(NEWS_LANGUAGES, {}, ["cs"]);
-  return (["cs", "en", "de"] as const).filter((lang) => langs.includes(lang));
+  return LANGS.filter((lang) => langs.includes(lang));
 }
 
 /** Slugs per language, and when the document last changed. */
@@ -668,7 +668,7 @@ export interface SitemapDocuments {
   }[];
 }
 
-const SLUGS = `{ "cs": slug.cs.current, "en": slug.en.current, "de": slug.de.current }`;
+const SLUGS = `{ "cs": slug.cs.current, "en": slug.en.current }`;
 
 const SITEMAP = `{
   "tours": *[_type == "tour" && defined(slug.cs.current)] | order(order asc){

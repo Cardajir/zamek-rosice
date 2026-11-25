@@ -210,7 +210,7 @@ const ALBUM = `*[_type == "gallery"
   eventDate,
   "images": images[]${PHOTO},
   "videos": videos[]{ url, "title": ${text("title")} },
-  "slugs": { "cs": slug.cs.current, "en": slug.en.current, "de": slug.de.current }
+  "slugs": { "cs": slug.cs.current, "en": slug.en.current }
 }`;
 
 /** One album by its slug in a language, or `undefined`. */
@@ -368,7 +368,7 @@ const STATUTORY = `{
     category,
     year,
     "file": coalesce(
-      select($lang == "en" => fileEn, $lang == "de" => fileDe),
+      select($lang == "en" => fileEn),
       file
     ).asset->{ url, size, extension }
   },

@@ -1,7 +1,7 @@
 /**
  * The opening-hours table: the rules stored in Sanity turned into the rows a
  * visitor reads. Pure functions over plain data; the words come in from the
- * dictionary, so the same code writes Czech, English and German.
+ * dictionary, so the same code writes Czech and English.
  */
 
 import type { OpeningDays, OpeningPeriod, StartRule } from "./opening.ts";

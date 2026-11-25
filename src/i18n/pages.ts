@@ -6,14 +6,13 @@ import { withLang } from "./routes.ts";
  * part of the site it belongs to gives the start of its address.
  */
 export const PAGE_PARENTS = {
-  none: { cs: "", en: "", de: "" },
-  visit: { cs: "/navstivte-nas", en: "/visit", de: "/besuch" },
-  events: { cs: "/akce-a-moznosti", en: "/events", de: "/veranstaltungen" },
-  about: { cs: "/o-zamku", en: "/about", de: "/ueber-das-schloss" },
+  none: { cs: "", en: "" },
+  visit: { cs: "/navstivte-nas", en: "/visit" },
+  events: { cs: "/akce-a-moznosti", en: "/events" },
+  about: { cs: "/o-zamku", en: "/about" },
   statutory: {
     cs: "/statutarni-a-povinne-informace",
     en: "/statutory-information",
-    de: "/pflichtinformationen",
   },
 } as const satisfies Record<string, Record<Lang, string>>;
 

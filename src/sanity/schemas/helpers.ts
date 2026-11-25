@@ -4,7 +4,6 @@ import { defineField } from "sanity";
 export const LANGUAGES = [
   { id: "cs", title: "Čeština" },
   { id: "en", title: "English" },
-  { id: "de", title: "Deutsch" },
 ] as const;
 
 export type LanguageId = (typeof LANGUAGES)[number]["id"];
@@ -25,7 +24,7 @@ const missing = (value: unknown, languages: readonly LanguageId[]) => {
 
 /** Every language filled in. */
 export const requireAll = (value: unknown) => {
-  const gaps = missing(value, ["cs", "en", "de"]);
+  const gaps = missing(value, LANGUAGES.map(({ id }) => id));
   return gaps.length === 0 || `Chybí překlad: ${gaps.join(", ")}`;
 };
 
@@ -41,7 +40,7 @@ type LocalizedType =
 
 interface LocalizedOptions {
   /**
-   * `all` blocks publishing until cs, en and de are filled. `cs` blocks on
+   * `all` blocks publishing until cs and en are filled. `cs` blocks on
    * Czech and only warns about the others. `false` leaves the field optional.
    */
   required?: "all" | "cs" | false;

@@ -25,7 +25,7 @@ export const SITE_TIME_ZONE = "Europe/Prague";
 /** The language the site is authored in. Served from the root, without a prefix. */
 export const DEFAULT_LANG = "cs" as const;
 /** Every language the site ships, in the order they appear in the language switcher. */
-export const LANGS = ["cs", "en", "de"] as const;
+export const LANGS = ["cs", "en"] as const;
 
 export type Lang = (typeof LANGS)[number];
 
@@ -33,14 +33,12 @@ export type Lang = (typeof LANGS)[number];
 export const LANG_LOCALES: Record<Lang, string> = {
   cs: "cs-CZ",
   en: "en-GB",
-  de: "de-DE",
 };
 
 /** What each language calls itself, for the language switcher. */
 export const LANG_NAMES: Record<Lang, string> = {
   cs: "Čeština",
   en: "English",
-  de: "Deutsch",
 };
 
 /**
