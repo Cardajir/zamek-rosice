@@ -12,7 +12,7 @@
  * since the export, unless `--force`. The published document is patched, and
  * its draft too when one is open, so publishing the draft keeps the new text.
  *
- * English and German alts of a changed photo are left as they were; the run
+ * The English alt of a changed photo is left as it was; the run
  * lists them, since they no longer match the Czech.
  */
 import { readFileSync } from "node:fs";
@@ -32,7 +32,7 @@ type Change = {
 type Image = {
   _type: string;
   asset?: { _ref?: string };
-  alt?: { cs?: string; en?: string; de?: string };
+  alt?: { cs?: string; en?: string };
 };
 
 const args = process.argv.slice(2);
@@ -108,7 +108,7 @@ for (const [docId, docChanges] of byDoc) {
           .set({ [`${c.path}.alt.cs`]: c.new }),
       );
     }
-    if (now.alt?.en || now.alt?.de) stale.push(c.id);
+    if (now.alt?.en) stale.push(c.id);
     any = true;
     done++;
   }
@@ -123,5 +123,5 @@ if (skipped.length)
   console.log(`Přeskočeno ${skipped.length}:\n  ${skipped.join("\n  ")}`);
 if (stale.length)
   console.log(
-    `Anglický/německý alt už neodpovídá českému, přeložit: č. ${stale.join(", ")}`,
+    `Anglický alt už neodpovídá českému, přeložit: č. ${stale.join(", ")}`,
   );

@@ -52,7 +52,7 @@ const PEOPLE = [
     _id: "person-vaverka",
     order: 10,
     name: "PhDr. Ludvík Vaverka",
-    role: { cs: "kastelán", en: "castellan", de: "Kastellan" },
+    role: { cs: "kastelán", en: "castellan" },
   },
   {
     _id: "person-durkajova",
@@ -61,7 +61,6 @@ const PEOPLE = [
     role: {
       cs: "zástupkyně kastelána a správkyně sbírkových a mobiliárních fondů",
       en: "deputy castellan and keeper of the collections and furnishings",
-      de: "stellvertretende Kastellanin und Verwalterin der Sammlungs- und Mobiliarbestände",
     },
   },
   {
@@ -71,7 +70,6 @@ const PEOPLE = [
     role: {
       cs: "administrativa, objednávky, back-office",
       en: "administration, bookings, back office",
-      de: "Verwaltung, Bestellungen, Backoffice",
     },
   },
   {
@@ -81,7 +79,6 @@ const PEOPLE = [
     role: {
       cs: "stálá průvodkyně, program Edukačního centra a školní výlety",
       en: "resident guide, Education Centre programme and school trips",
-      de: "ständige Führerin, Programm des Bildungszentrums und Schulausflüge",
     },
   },
 ];
@@ -123,7 +120,6 @@ const PARTNERS = [
     description: {
       cs: "Dárce finančních prostředků na koncertní klavír",
       en: "Donor of funds for the concert grand piano",
-      de: "Spender von Mitteln für den Konzertflügel",
     },
     url: "https://www.startech-ricany.cz",
   },
@@ -134,7 +130,6 @@ const PARTNERS = [
     description: {
       cs: "Dárce finančních prostředků a koncertní klavír",
       en: "Donor of funds and of the concert grand piano",
-      de: "Spender von Mitteln und des Konzertflügels",
     },
     url: "https://panep.cz/index.php?locale=cs",
   },

@@ -323,11 +323,11 @@ def main():
 
     # ---- what read.py needs to write the texts back
     data = wb.create_sheet("_data")
-    data.append(["id", "docId", "docType", "path", "assetRef", "altCs", "altEn", "altDe"])
+    data.append(["id", "docId", "docType", "path", "assetRef", "altCs", "altEn"])
     for r in rows:
         alt = r["img"].get("alt") or {}
         data.append([r["id"], r["doc"]["_id"], r["doc"]["_type"], r["path"], r["ref"],
-                     alt.get("cs", ""), alt.get("en", ""), alt.get("de", "")])
+                     alt.get("cs", ""), alt.get("en", "")])
     data.sheet_state = "veryHidden"
 
     xlsx = out / f"Alt texty – k doplnění {stamp}.xlsx"

@@ -17,7 +17,7 @@
  *
  * The focus point centres the crop the design shows on the square card.
  * Alternative texts are first drafts for the castellan's review, Czech with
- * English and German working translations.
+ * English working translations.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
@@ -31,11 +31,10 @@ const DRY = args.includes("--dry");
 const FOLDER =
   args.find((arg) => !arg.startsWith("--")) ?? "tmp/home-tour-photos";
 
-const L = (cs: string, en: string, de: string) => ({
+const L = (cs: string, en: string) => ({
   _type: "localizedString",
   cs,
   en,
-  de,
 });
 
 interface Card {
@@ -56,7 +55,6 @@ const CARDS: Card[] = [
     alt: L(
       "Vyřezávaná skříň a portrét v sále se štukovou klenbou",
       "A carved cabinet and a portrait in a hall with a stucco vault",
-      "Geschnitzter Schrank und Porträt in einem Saal mit Stuckgewölbe",
     ),
     focus: { x: 0.337, y: 0.5 },
   },
@@ -67,7 +65,6 @@ const CARDS: Card[] = [
     alt: L(
       "Portrét šlechtice nad vyřezávanou židlí a svícnem",
       "A nobleman's portrait above a carved chair and a candelabrum",
-      "Porträt eines Adligen über einem geschnitzten Stuhl und einem Leuchter",
     ),
   },
   {
@@ -77,7 +74,6 @@ const CARDS: Card[] = [
     alt: L(
       "Mosazný lustr pod bílým stropem",
       "A brass chandelier under a white ceiling",
-      "Messingkronleuchter unter einer weißen Decke",
     ),
   },
   {
@@ -87,7 +83,6 @@ const CARDS: Card[] = [
     alt: L(
       "Ovládací panel v krytu civilní obrany",
       "The control panel in the civil defence shelter",
-      "Schalttafel im Luftschutzbunker",
     ),
     focus: { x: 0.678, y: 0.469 },
   },
@@ -98,7 +93,6 @@ const CARDS: Card[] = [
     alt: L(
       "Žluté panely výstavy s nápisy Washington a Paříž",
       "The exhibition's yellow panels headed Washington and Paris",
-      "Die gelben Tafeln der Ausstellung mit den Aufschriften Washington und Paris",
     ),
   },
   {
@@ -108,7 +102,6 @@ const CARDS: Card[] = [
     alt: L(
       "Porcelánová panenka v krajkových šatech s medvídkem",
       "A porcelain doll in a lace dress with a teddy bear",
-      "Porzellanpuppe im Spitzenkleid mit einem Teddybären",
     ),
   },
   {
@@ -118,7 +111,6 @@ const CARDS: Card[] = [
     alt: L(
       "Zámecká zahrada s fontánou a lavičkami ve stínu stromů",
       "The castle garden with its fountain and benches in the shade of trees",
-      "Der Schlossgarten mit Brunnen und Bänken im Schatten der Bäume",
     ),
     focus: { x: 0.495, y: 0.473 },
   },

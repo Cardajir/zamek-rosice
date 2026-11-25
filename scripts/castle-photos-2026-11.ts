@@ -18,7 +18,7 @@ const write = process.argv.slice(2).includes("--apply");
 const client = getCliClient({ apiVersion: "2026-11-01" });
 const FOLDER = "tmp/email-2026-11";
 
-const L = (cs: string, en: string, de: string) => ({ _type: "localizedString", cs, en, de });
+const L = (cs: string, en: string) => ({ _type: "localizedString", cs, en });
 
 const CHANGES = [
   {
@@ -30,7 +30,6 @@ const CHANGES = [
     alt: L(
       "Rokokový salon s malovanými stěnami, lustrem a zelenou sedací soupravou",
       "A Rococo salon with painted walls, a chandelier and green upholstered furniture",
-      "Rokokosalon mit bemalten Wänden, Kronleuchter und grüner Sitzgruppe",
     ),
   },
   {
@@ -42,7 +41,6 @@ const CHANGES = [
     alt: L(
       "Malovaná ilustrace rytíře ve zbroji a hospodyňky v kroji",
       "A painted illustration of a knight in armour and a housekeeper in folk dress",
-      "Gemalte Illustration eines Ritters in Rüstung und einer Haushälterin in Tracht",
     ),
   },
 ];

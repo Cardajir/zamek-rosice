@@ -675,12 +675,10 @@ for (const [id, oldSlug] of ALBUMS) {
       title: {
         cs: "Zámecká zahrada",
         en: "Castle garden",
-        de: "Schlossgarten",
       },
       slug: {
         cs: { _type: "slug", current: "zamecka-zahrada" },
         en: { _type: "slug", current: "castle-garden" },
-        de: { _type: "slug", current: "schlossgarten" },
       },
       order: 15,
       ...set,

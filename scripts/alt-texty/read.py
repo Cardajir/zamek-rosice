@@ -46,7 +46,7 @@ def main():
         pid = int(row[c_id])
         if pid not in data:
             sys.exit(f"Řádek č. {pid} není v listu _data – workbook neodpovídá exportu.")
-        _, doc_id, doc_type, path, asset, alt_cs, alt_en, alt_de = data[pid]
+        _, doc_id, doc_type, path, asset, alt_cs, alt_en = data[pid][:7]
         new = text(row[c_new])
         if c_note is not None and text(row[c_note]):
             notes.append((pid, text(row[c_note])))
@@ -64,7 +64,7 @@ def main():
                 "assetRef": asset,
                 "old": alt_cs or "",
                 "new": new,
-                "hadTranslation": bool(alt_en or alt_de),
+                "hadTranslation": bool(alt_en),
             }
         )
 

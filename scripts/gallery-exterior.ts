@@ -17,7 +17,7 @@
  * an editor added to the album since are kept after these.
  *
  * Alternative texts are first drafts for the castellan's review, Czech with
- * English and German working translations.
+ * English working translations.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
@@ -32,11 +32,10 @@ const FOLDER =
   args.find((arg) => !arg.startsWith("--")) ?? "tmp/gallery-exterior-web";
 const ID = "gallery-exterier";
 
-const L = (cs: string, en: string, de: string) => ({
+const L = (cs: string, en: string) => ({
   _type: "localizedString",
   cs,
   en,
-  de,
 });
 
 /* In the design's order. */
@@ -46,7 +45,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Čestné nádvoří s bílými budovami předzámčí",
       "The courtyard of honour with the white buildings of the outer bailey",
-      "Ehrenhof mit den weißen Gebäuden der Vorburg",
     ),
   ],
   [
@@ -54,7 +52,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Renesanční nádvoří s praporci v oknech",
       "The Renaissance courtyard with banners at the windows",
-      "Renaissancehof mit Fahnen an den Fenstern",
     ),
   ],
   [
@@ -62,7 +59,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Arkády nádvoří z ochozu, v popředí muškáty",
       "The courtyard arcades seen from the gallery, geraniums in front",
-      "Die Arkaden des Hofes vom Umgang aus, vorn Geranien",
     ),
   ],
   [
@@ -70,7 +66,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Kvetoucí aksamitníky v zámecké zahradě",
       "Marigolds in flower in the castle garden",
-      "Blühende Studentenblumen im Schlossgarten",
     ),
   ],
   [
@@ -78,7 +73,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Vstupní průčelí zámku se schodištěm a praporci",
       "The castle's entrance front with its steps and banners",
-      "Eingangsfassade des Schlosses mit Treppe und Fahnen",
     ),
   ],
   [
@@ -86,7 +80,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Reliéf Amora s lukem v cviklu arkády",
       "A relief of Cupid with his bow in an arcade spandrel",
-      "Relief des Amor mit Bogen im Arkadenzwickel",
     ),
   ],
   [
@@ -94,7 +87,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Pohled oknem na arkády nádvoří",
       "The courtyard arcades seen through a window",
-      "Blick durch ein Fenster auf die Hofarkaden",
     ),
   ],
   [
@@ -102,7 +94,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Detail kování na dřevěných dveřích",
       "Detail of the studs on a wooden door",
-      "Detail der Beschläge an einer Holztür",
     ),
   ],
   [
@@ -110,7 +101,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Ochoz arkád s květinami nad nádvořím",
       "The arcade gallery with flowers above the courtyard",
-      "Arkadenumgang mit Blumen über dem Hof",
     ),
   ],
   [
@@ -118,7 +108,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Francouzská zahrada s fontánou",
       "The French garden with its fountain",
-      "Französischer Garten mit Springbrunnen",
     ),
   ],
   [
@@ -126,7 +115,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Lekníny na hladině zámeckého jezírka",
       "Water lilies on the castle pond",
-      "Seerosen auf dem Schlossteich",
     ),
   ],
   [
@@ -134,7 +122,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Trojpodlažní arkády renesančního nádvoří",
       "The three storeys of arcades in the Renaissance courtyard",
-      "Die dreigeschossigen Arkaden des Renaissancehofes",
     ),
   ],
   [
@@ -142,7 +129,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Sgrafitová výzdoba fasády",
       "Sgraffito decoration on the façade",
-      "Sgraffito-Schmuck an der Fassade",
     ),
   ],
   [
@@ -150,7 +136,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Hlavice sloupu arkády proti modrému nebi",
       "An arcade column capital against the blue sky",
-      "Säulenkapitell der Arkade vor blauem Himmel",
     ),
   ],
   [
@@ -158,7 +143,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Dva portály v sgrafitové stěně s květinami v kádích",
       "Two portals in a sgraffito wall, with potted plants",
-      "Zwei Portale in einer Sgraffito-Wand mit Kübelpflanzen",
     ),
   ],
   [
@@ -166,7 +150,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Cesta zámeckou zahradou mezi stromy",
       "A path between the trees of the castle garden",
-      "Weg zwischen den Bäumen des Schlossgartens",
     ),
   ],
   [
@@ -174,7 +157,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Průčelí předzámčí z čestného nádvoří",
       "The outer bailey's front from the courtyard of honour",
-      "Die Front der Vorburg vom Ehrenhof aus",
     ),
   ],
   [
@@ -182,7 +164,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Předzámčí za trávníkem čestného nádvoří",
       "The outer bailey beyond the lawn of the courtyard of honour",
-      "Die Vorburg hinter dem Rasen des Ehrenhofes",
     ),
   ],
   [
@@ -190,7 +171,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Arkády nádvoří s posezením",
       "The courtyard arcades with seating",
-      "Die Hofarkaden mit Sitzplätzen",
     ),
   ],
   [
@@ -198,7 +178,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Arkády nádvoří ve stínu",
       "The courtyard arcades in shade",
-      "Die Hofarkaden im Schatten",
     ),
   ],
   [
@@ -206,7 +185,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Klenuté arkády přízemí a patra",
       "The vaulted arcades of the ground and upper floor",
-      "Die gewölbten Arkaden von Erd- und Obergeschoss",
     ),
   ],
   [
@@ -214,7 +192,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Reliéf orla v cviklu arkády",
       "A relief of an eagle in an arcade spandrel",
-      "Relief eines Adlers im Arkadenzwickel",
     ),
   ],
   [
@@ -222,7 +199,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Arkáda s reliéfy a vstupem ke schodišti",
       "An arcade with reliefs and the way to the staircase",
-      "Arkade mit Reliefs und dem Zugang zur Treppe",
     ),
   ],
   [
@@ -230,7 +206,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Přízemní arkády s lavičkou a palmami",
       "The ground-floor arcades with a bench and palms",
-      "Die Erdgeschossarkaden mit Bank und Palmen",
     ),
   ],
   [
@@ -238,7 +213,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Sgrafito a kvetoucí oleandr",
       "Sgraffito and an oleander in flower",
-      "Sgraffito und blühender Oleander",
     ),
   ],
   [
@@ -246,7 +220,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Detail kamenného zdiva",
       "Detail of the stone masonry",
-      "Detail des Steinmauerwerks",
     ),
   ],
   [
@@ -254,7 +227,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Okna se sgrafitem a praporci",
       "Windows with sgraffito and banners",
-      "Fenster mit Sgraffito und Fahnen",
     ),
   ],
   [
@@ -262,7 +234,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Zdobená balustráda ochozu s muškáty",
       "The carved balustrade of the gallery with geraniums",
-      "Die verzierte Brüstung des Umgangs mit Geranien",
     ),
   ],
   [
@@ -270,7 +241,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Nádvoří z ochozu, v popředí muškáty",
       "The courtyard from the gallery, geraniums in front",
-      "Der Hof vom Umgang aus, vorn Geranien",
     ),
   ],
   [
@@ -278,7 +248,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Arkádový ochoz s dlážděnou podlahou",
       "The arcade gallery with its tiled floor",
-      "Der Arkadenumgang mit Fliesenboden",
     ),
   ],
   [
@@ -286,7 +255,6 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Reliéfy na balustrádě ochozu",
       "Reliefs on the gallery balustrade",
-      "Reliefs an der Brüstung des Umgangs",
     ),
   ],
   [
@@ -294,12 +262,11 @@ const PHOTOS: [file: string, alt: ReturnType<typeof L>][] = [
     L(
       "Arkády nádvoří v rámu okna",
       "The courtyard arcades framed by a window",
-      "Die Hofarkaden im Fensterrahmen",
     ),
   ],
   [
     "DSC09061.jpg",
-    L("Lekníny ve stínu", "Water lilies in the shade", "Seerosen im Schatten"),
+    L("Lekníny ve stínu", "Water lilies in the shade"),
   ],
 ];
 
@@ -357,7 +324,6 @@ transaction.createIfNotExists({
   slug: {
     cs: { _type: "slug", current: "zamecky-exterier" },
     en: { _type: "slug", current: "castle-exterior" },
-    de: { _type: "slug", current: "schloss-von-aussen" },
   },
   order: 10,
 });
@@ -370,7 +336,7 @@ for (const id of [ID, `drafts.${ID}`]) {
   transaction.patch(id, (patch) =>
     patch
       .set({
-        title: L("Zámecký exteriér", "Castle exterior", "Schlossäußeres"),
+        title: L("Zámecký exteriér", "Castle exterior"),
         images: [...images, ...kept],
         ...(others !== null && order >= others ? { order: others - 5 } : {}),
       }),
