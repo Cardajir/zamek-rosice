@@ -89,6 +89,12 @@ const content = await slotContent(Astro.slots);
       } catch {
         form.dataset.state = "failed";
         if (submit) submit.disabled = false;
+        /* A Turnstile token is good for one try: a retry needs a fresh one. */
+        const turnstile = (
+          window as { turnstile?: { reset: (el?: Element) => void } }
+        ).turnstile;
+        const widget = fields.querySelector(".cf-turnstile");
+        if (turnstile && widget) turnstile.reset(widget);
       }
     });
   }
